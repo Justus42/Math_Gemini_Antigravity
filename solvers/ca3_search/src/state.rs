@@ -520,4 +520,132 @@ impl CaState {
 
         Self::from_matrix(mat, target_n, k, v)
     }
+
+    /// Appends `add_rows` greedy-initialized repair rows focused on currently uncovered triples
+    /// to an existing `(n_base x k)` matrix, returning a new `(n_base + add_rows) x k` CaState.
+    pub fn append_greedy_rows(
+        base_mat: &[u8],
+        n_base: usize,
+        k: usize,
+        v: usize,
+        add_rows: usize,
+        rng: &mut Rng,
+    ) -> Self {
+        let target_n = n_base + add_rows;
+        if add_rows == 0 {
+            return Self::from_matrix(base_mat.to_vec(), n_base, k, v);
+        }
+        let v2 = v * v;
+        let v3 = v2 * v;
+        let num_triples = k * (k - 1) * (k - 2) / 6;
+
+        let mut triple_cols = Vec::with_capacity(num_triples);
+        let mut triples_by_col: Vec<Vec<(usize, usize, usize, usize)>> = vec![Vec::new(); k];
+        let mut ti = 0usize;
+        for c0 in 0..k {
+            for c1 in (c0 + 1)..k {
+                for c2 in (c1 + 1)..k {
+                    triple_cols.push([c0, c1, c2]);
+                    triples_by_col[c0].push((ti, c0, c1, c2));
+                    triples_by_col[c1].push((ti, c0, c1, c2));
+                    triples_by_col[c2].push((ti, c0, c1, c2));
+                    ti += 1;
+                }
+            }
+        }
+
+        let mut counts = vec![0u16; num_triples * v3];
+        let mut mat = vec![0u8; target_n * k];
+        mat[0..n_base * k].copy_from_slice(base_mat);
+
+        for r in 0..n_base {
+            let row = &mat[r * k..(r + 1) * k];
+            for (t_idx, &[c0, c1, c2]) in triple_cols.iter().enumerate() {
+                let idx = t_idx * v3
+                    + (row[c0] as usize * v + row[c1] as usize) * v
+                    + row[c2] as usize;
+                counts[idx] += 1;
+            }
+        }
+
+        let mut uncov: Vec<usize> = counts
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, &c)| if c == 0 { Some(idx) } else { None })
+            .collect();
+
+        for r in n_base..target_n {
+            uncov.retain(|&idx| counts[idx] == 0);
+            let mut assigned = vec![false; k];
+            let mut row_vals = vec![0u8; k];
+
+            if !uncov.is_empty() {
+                let pick = uncov[rng.gen_usize(uncov.len())];
+                let t_idx = pick / v3;
+                let tup = pick % v3;
+                let v0 = (tup / v2) as u8;
+                let v1 = ((tup / v) % v) as u8;
+                let v2_val = (tup % v) as u8;
+                let [c0, c1, c2] = triple_cols[t_idx];
+                row_vals[c0] = v0;
+                row_vals[c1] = v1;
+                row_vals[c2] = v2_val;
+                assigned[c0] = true;
+                assigned[c1] = true;
+                assigned[c2] = true;
+            }
+
+            let mut rem_cols: Vec<usize> = (0..k).filter(|&c| !assigned[c]).collect();
+            for i in (1..rem_cols.len()).rev() {
+                let j = rng.gen_usize(i + 1);
+                rem_cols.swap(i, j);
+            }
+
+            for col in rem_cols {
+                let mut best_gain = 0usize;
+                let mut best_val = 0u8;
+                let mut ties = 0u64;
+                for val in 0..v {
+                    row_vals[col] = val as u8;
+                    let mut gain = 0usize;
+                    for &(t_idx, c0, c1, c2) in &triples_by_col[col] {
+                        if (c0 == col || assigned[c0])
+                            && (c1 == col || assigned[c1])
+                            && (c2 == col || assigned[c2])
+                        {
+                            let idx = t_idx * v3
+                                + (row_vals[c0] as usize * v + row_vals[c1] as usize) * v
+                                + row_vals[c2] as usize;
+                            if counts[idx] == 0 {
+                                gain += 1;
+                            }
+                        }
+                    }
+                    if gain > best_gain || ties == 0 {
+                        best_gain = gain;
+                        best_val = val as u8;
+                        ties = 1;
+                    } else if gain == best_gain {
+                        ties += 1;
+                        if rng.gen_usize(ties as usize) == 0 {
+                            best_val = val as u8;
+                        }
+                    }
+                }
+                row_vals[col] = best_val;
+                assigned[col] = true;
+            }
+
+            let row_off = r * k;
+            mat[row_off..row_off + k].copy_from_slice(&row_vals);
+            for (t_idx, &[c0, c1, c2]) in triple_cols.iter().enumerate() {
+                let idx = t_idx * v3
+                    + (row_vals[c0] as usize * v + row_vals[c1] as usize) * v
+                    + row_vals[c2] as usize;
+                counts[idx] += 1;
+            }
+        }
+
+        Self::from_matrix(mat, target_n, k, v)
+    }
 }

@@ -9,11 +9,13 @@ pub struct SearchConfig {
     pub tenure_jitter: u32,
     pub noise_prob: f64,
     pub use_weights: bool,
-    pub reheat_steps: u64,
+    pub t_start: f64,
+    pub t_end: f64,
+    pub endgame_threshold: usize,
     pub lock_rows: usize,
     pub lock_cols: usize,
-    /// Optional stop if no improvement for this many accepted moves (0 = disabled)
-    pub max_stagnation: u64,
+    pub log_interval_secs: f64,
+    pub label: String,
 }
 
 impl Default for SearchConfig {
@@ -21,12 +23,15 @@ impl Default for SearchConfig {
         Self {
             tenure_base: 8,
             tenure_jitter: 7,
-            noise_prob: 0.01,
-            use_weights: false,
-            reheat_steps: 250_000,
+            noise_prob: 0.008,
+            use_weights: true,
+            t_start: 1.8,
+            t_end: 0.05,
+            endgame_threshold: 25,
             lock_rows: 0,
             lock_cols: 0,
-            max_stagnation: 0,
+            log_interval_secs: 30.0,
+            label: "ca".to_string(),
         }
     }
 }
@@ -34,7 +39,6 @@ impl Default for SearchConfig {
 pub struct SearchResult {
     pub best_uncovered: usize,
     pub best_mat: Vec<u8>,
-    /// Total candidate-step iterations (or accepted moves + evaluated steps)
     pub moves: u64,
     #[allow(dead_code)]
     pub accepted_moves: u64,
@@ -46,12 +50,83 @@ fn is_editable(r: usize, c: usize, lock_rows: usize, lock_cols: usize) -> bool {
     r >= lock_rows || c >= lock_cols
 }
 
-/// Focused WalkSAT + Tabu + Adaptive-Thermostat Metropolis (SA) Hybrid for CaState.
-/// - Picks an uncovered triple and evaluates all matching-2 (fallback matching-1) focused moves.
-/// - Uses Metropolis acceptance on uphill moves (delta > 0) instead of forcing large +5..+10 jumps.
-/// - Mixes in lightweight random-cell Metropolis moves to reshape count==1 bottlenecks at delta<=0.
-/// - Self-tuning adaptive temperature (cooling during descent, warming to melt rigid local minima)
-///   plus periodic exact full-focused polish when uncovered <= 24.
+#[inline]
+fn gather_ca_candidates_for_triple(
+    state: &CaState,
+    u_idx: usize,
+    lock_r: usize,
+    lock_c: usize,
+    cands: &mut Vec<(usize, usize, u8)>,
+    fallback: &mut Vec<(usize, usize, u8)>,
+    collect_fallback: bool,
+) {
+    let n = state.n;
+    let k = state.k;
+    let v = state.v;
+    let v2 = state.v2;
+    let v3 = state.v3;
+    let t_idx = u_idx / v3;
+    let tup = u_idx % v3;
+    let v0 = (tup / v2) as u8;
+    let v1 = ((tup / v) % v) as u8;
+    let v2_val = (tup % v) as u8;
+    let [c0, c1, c2] = state.triple_cols[t_idx];
+    let (c0, c1, c2) = (c0 as usize, c1 as usize, c2 as usize);
+
+    // If all cols of rows 0..lock_r are locked (lock_c == k), scan only lock_r..n!
+    let r_start = if lock_c == k { lock_r } else { 0 };
+    let mat = &state.mat;
+
+    for r in r_start..n {
+        let off = r * k;
+        let a0 = unsafe { *mat.get_unchecked(off + c0) };
+        let a1 = unsafe { *mat.get_unchecked(off + c1) };
+        let a2 = unsafe { *mat.get_unchecked(off + c2) };
+        let m0 = a0 == v0;
+        let m1 = a1 == v1;
+        let m2 = a2 == v2_val;
+
+        if m1 && m2 {
+            if is_editable(r, c0, lock_r, lock_c) {
+                cands.push((r, c0, v0));
+            }
+        } else if m0 && m2 {
+            if is_editable(r, c1, lock_r, lock_c) {
+                cands.push((r, c1, v1));
+            }
+        } else if m0 && m1 {
+            if is_editable(r, c2, lock_r, lock_c) {
+                cands.push((r, c2, v2_val));
+            }
+        } else if collect_fallback && cands.is_empty() && fallback.len() < 48 {
+            if m0 {
+                if is_editable(r, c1, lock_r, lock_c) {
+                    fallback.push((r, c1, v1));
+                }
+                if is_editable(r, c2, lock_r, lock_c) {
+                    fallback.push((r, c2, v2_val));
+                }
+            } else if m1 {
+                if is_editable(r, c0, lock_r, lock_c) {
+                    fallback.push((r, c0, v0));
+                }
+                if is_editable(r, c2, lock_r, lock_c) {
+                    fallback.push((r, c2, v2_val));
+                }
+            } else if m2 {
+                if is_editable(r, c0, lock_r, lock_c) {
+                    fallback.push((r, c0, v0));
+                }
+                if is_editable(r, c1, lock_r, lock_c) {
+                    fallback.push((r, c1, v1));
+                }
+            }
+        }
+    }
+}
+
+/// Time-based Geometric SA (T_start -> T_end over full budget, max 1 late reheat)
+/// + Endgame Exact Full-Focused-Neighborhood Tabu (when uncovered <= 25, with clause weighting).
 pub fn search_ca<F>(
     state: &mut CaState,
     rng: &mut Rng,
@@ -72,6 +147,15 @@ where
     let lock_r = cfg.lock_rows;
     let lock_c = cfg.lock_cols;
 
+    let t_start_time = Instant::now();
+    let total_secs = deadline
+        .saturating_duration_since(t_start_time)
+        .as_secs_f64()
+        .max(1e-3);
+    let mut sched_t0 = cfg.t_start;
+    let mut sched_start = t_start_time;
+    let mut sched_dur = total_secs;
+
     let mut tabu = vec![0u32; n * k * v];
     let mut best_unc = state.uncovered();
     let mut best_mat = state.mat.clone();
@@ -79,21 +163,14 @@ where
     let mut iters: u64 = 0;
     let mut accepted: u64 = 0;
     let mut step_u32: u32 = 1;
-    let mut no_improve_iters: u64 = 0;
-    let mut no_improve_since_best: u64 = 0;
+    let mut last_improve_time = t_start_time;
+    let mut last_log_time = t_start_time;
     let mut reheats: u64 = 0;
     let mut max_weight: u32 = 1;
+    let mut temp = sched_t0;
 
-    // Adaptive SA temperature thermostat
-    let mut temp: f64 = 0.85;
-    let temp_min: f64 = 0.22;
-    let temp_max: f64 = 2.80;
-    let mut window_accepts: u32 = 0;
-    let mut window_uphill_trials: u32 = 0;
-    let mut consec_rejects: u32 = 0;
-
-    let mut cands: Vec<(usize, usize, u8)> = Vec::with_capacity(64);
-    let mut fallback: Vec<(usize, usize, u8)> = Vec::with_capacity(48);
+    let mut cands: Vec<(usize, usize, u8)> = Vec::with_capacity(640);
+    let mut fallback: Vec<(usize, usize, u8)> = Vec::with_capacity(64);
 
     while state.uncovered() > 0 {
         if let Some(lim) = max_moves {
@@ -102,21 +179,191 @@ where
             }
         }
         if (iters & 4095) == 0 {
-            if stop.load(Ordering::Relaxed) || Instant::now() >= deadline {
+            let now = Instant::now();
+            if stop.load(Ordering::Relaxed) || now >= deadline {
                 break;
             }
+            let prog = (now.saturating_duration_since(sched_start).as_secs_f64() / sched_dur)
+                .clamp(0.0, 1.0);
+            temp = sched_t0 * (cfg.t_end / sched_t0).powf(prog);
+
+            // At most ONE gentle late reheat if completely stagnant for >= 28% of budget
+            let overall_prog =
+                now.saturating_duration_since(t_start_time).as_secs_f64() / total_secs;
+            let stag_secs = now.saturating_duration_since(last_improve_time).as_secs_f64();
+            if reheats == 0
+                && overall_prog >= 0.45
+                && overall_prog <= 0.80
+                && stag_secs >= total_secs * 0.28
+                && total_secs >= 20.0
+            {
+                reheats += 1;
+                state.mat.copy_from_slice(&best_mat);
+                state.recompute_counts();
+                state.reset_weights();
+                tabu.fill(0);
+                step_u32 = 1;
+                max_weight = 1;
+                sched_t0 = (cfg.t_start * 0.35).max(0.45);
+                sched_start = now;
+                sched_dur = deadline
+                    .saturating_duration_since(now)
+                    .as_secs_f64()
+                    .max(1e-3);
+                temp = sched_t0;
+                last_improve_time = now;
+                if cfg.log_interval_secs > 0.0 {
+                    println!(
+                        "    [{}] late-reheat #1 at {:.1}s -> T={:.3}, best_unc={}",
+                        cfg.label,
+                        now.saturating_duration_since(t_start_time).as_secs_f64(),
+                        temp,
+                        best_unc
+                    );
+                }
+            }
+
+            if cfg.log_interval_secs > 0.0
+                && now.saturating_duration_since(last_log_time).as_secs_f64()
+                    >= cfg.log_interval_secs
+            {
+                let el = now.saturating_duration_since(t_start_time).as_secs_f64();
+                println!(
+                    "    [{}] t={:5.1}s | T={:.4} | cur_unc={:4} | best_unc={:4} | {:.0} it/s",
+                    cfg.label,
+                    el,
+                    temp,
+                    state.uncovered(),
+                    best_unc,
+                    iters as f64 / el.max(1e-9)
+                );
+                last_log_time = now;
+            }
         }
-        if cfg.max_stagnation > 0 && no_improve_since_best >= cfg.max_stagnation {
-            break;
-        }
+
         if step_u32 > 4_000_000_000 {
             tabu.fill(0);
             step_u32 = 1;
         }
 
         iters += 1;
+        let ulen = state.uncovered_list.len();
 
-        // 15% of steps: fast random editable cell move (1 eval_move) to melt count==1 structure
+        // ENDGAME MODE (unc <= endgame_threshold): Exact Full-Focused-Neighborhood Tabu + Clause Weighting
+        if ulen <= cfg.endgame_threshold && (temp <= 0.45 || rng.chance(0.75)) {
+            cands.clear();
+            fallback.clear();
+            for si in 0..ulen {
+                let u_idx = state.uncovered_list[si] as usize;
+                gather_ca_candidates_for_triple(
+                    state,
+                    u_idx,
+                    lock_r,
+                    lock_c,
+                    &mut cands,
+                    &mut fallback,
+                    si == 0,
+                );
+            }
+            let active: &[(usize, usize, u8)] = if !cands.is_empty() {
+                &cands
+            } else {
+                &fallback
+            };
+
+            if !active.is_empty() {
+                let cur_unc = ulen as i32;
+                let chosen = if rng.chance(cfg.noise_prob * 0.5) {
+                    active[rng.gen_usize(active.len())]
+                } else {
+                    let mut best_nt_score = (i64::MAX, i32::MAX);
+                    let mut best_nt_move = active[0];
+                    let mut nt_ties = 0u64;
+
+                    let mut best_all_score = (i64::MAX, i32::MAX);
+                    let mut best_all_move = active[0];
+                    let mut all_ties = 0u64;
+
+                    for &(r, c, nv) in active {
+                        let (du, dw) = state.eval_move(r, c, nv, cfg.use_weights);
+                        let score = if du < 0 {
+                            (i64::MIN / 2 + du as i64, du)
+                        } else {
+                            (dw, du)
+                        };
+                        let asp = (cur_unc + du) < (best_unc as i32);
+                        let is_tabu = !asp && tabu[(r * k + c) * v + nv as usize] > step_u32;
+
+                        if score < best_all_score {
+                            best_all_score = score;
+                            best_all_move = (r, c, nv);
+                            all_ties = 1;
+                        } else if score == best_all_score {
+                            all_ties += 1;
+                            if rng.gen_usize(all_ties as usize) == 0 {
+                                best_all_move = (r, c, nv);
+                            }
+                        }
+
+                        if !is_tabu {
+                            if score < best_nt_score {
+                                best_nt_score = score;
+                                best_nt_move = (r, c, nv);
+                                nt_ties = 1;
+                            } else if score == best_nt_score {
+                                nt_ties += 1;
+                                if rng.gen_usize(nt_ties as usize) == 0 {
+                                    best_nt_move = (r, c, nv);
+                                }
+                            }
+                        }
+                    }
+
+                    if nt_ties > 0 {
+                        if cfg.use_weights && best_nt_score.1 > 0 {
+                            for &ui in &state.uncovered_list {
+                                let w = &mut state.weights[ui as usize];
+                                *w += 1;
+                                if *w > max_weight {
+                                    max_weight = *w;
+                                }
+                            }
+                            if max_weight > 200 {
+                                for wv in &mut state.weights {
+                                    *wv = (*wv >> 1).max(1);
+                                }
+                                max_weight >>= 1;
+                            }
+                        }
+                        best_nt_move
+                    } else {
+                        best_all_move
+                    }
+                };
+
+                let (r, c, nv) = chosen;
+                let old_v = state.apply_move(r, c, nv);
+                let tenure =
+                    cfg.tenure_base + rng.gen_usize(cfg.tenure_jitter as usize + 1) as u32;
+                tabu[(r * k + c) * v + old_v as usize] = step_u32 + tenure;
+                accepted += 1;
+                step_u32 += 1;
+
+                let new_unc = state.uncovered();
+                if new_unc < best_unc {
+                    best_unc = new_unc;
+                    best_mat.copy_from_slice(&state.mat);
+                    last_improve_time = Instant::now();
+                    on_improve(best_unc, &best_mat, iters);
+                    if new_unc == 0 {
+                        break;
+                    }
+                }
+                continue;
+            }
+        }
+
+        // SA MODE: 15% fast random editable cell Metropolis move
         if rng.chance(0.15) {
             let r = if lock_r < n && lock_c == k {
                 lock_r + rng.gen_usize(n - lock_r)
@@ -131,39 +378,28 @@ where
             if is_editable(r, c, lock_r, lock_c) {
                 let old_v = state.mat[r * k + c];
                 let nv = ((old_v as usize + 1 + rng.gen_usize(v - 1)) % v) as u8;
-                let (du, _dw) = state.eval_move(r, c, nv, false);
-                let cur_unc = state.uncovered() as i32;
-                let asp = (cur_unc + du) < (best_unc as i32);
-                let is_tabu = !asp && tabu[(r * k + c) * v + nv as usize] > step_u32;
-                if !is_tabu {
-                    let accept = if du <= 0 {
-                        true
-                    } else {
-                        window_uphill_trials += 1;
-                        rng.gen_f64() < (-(du as f64) / temp).exp()
-                    };
-                    if accept {
-                        if du > 0 {
-                            window_accepts += 1;
-                        }
-                        consec_rejects = 0;
-                        let ov = state.apply_move(r, c, nv);
-                        let tenure =
-                            cfg.tenure_base + rng.gen_usize(cfg.tenure_jitter as usize + 1) as u32;
-                        tabu[(r * k + c) * v + ov as usize] = step_u32 + tenure;
-                        accepted += 1;
-                        step_u32 += 1;
+                let (du, _) = state.eval_move(r, c, nv, false);
+                let accept = if du <= 0 {
+                    true
+                } else {
+                    rng.gen_f64() < (-(du as f64) / temp).exp()
+                };
+                if accept {
+                    let ov = state.apply_move(r, c, nv);
+                    let tenure =
+                        cfg.tenure_base + rng.gen_usize(cfg.tenure_jitter as usize + 1) as u32;
+                    tabu[(r * k + c) * v + ov as usize] = step_u32 + tenure;
+                    accepted += 1;
+                    step_u32 += 1;
 
-                        let new_unc = state.uncovered();
-                        if new_unc < best_unc {
-                            best_unc = new_unc;
-                            best_mat.copy_from_slice(&state.mat);
-                            no_improve_iters = 0;
-                            no_improve_since_best = 0;
-                            on_improve(best_unc, &best_mat, iters);
-                            if new_unc == 0 {
-                                break;
-                            }
+                    let new_unc = state.uncovered();
+                    if new_unc < best_unc {
+                        best_unc = new_unc;
+                        best_mat.copy_from_slice(&state.mat);
+                        last_improve_time = Instant::now();
+                        on_improve(best_unc, &best_mat, iters);
+                        if new_unc == 0 {
+                            break;
                         }
                     }
                 }
@@ -171,76 +407,27 @@ where
             continue;
         }
 
-        // Focused WalkSAT step: pick 1 uncovered interaction uniformly at random
-        let ulen = state.uncovered_list.len();
+        // SA Focused step: pick 1 uncovered interaction uniformly at random
         let u_idx = state.uncovered_list[rng.gen_usize(ulen)] as usize;
-        let t_idx = u_idx / v3;
-        let tup = u_idx % v3;
-        let v0 = (tup / v2) as u8;
-        let v1 = ((tup / v) % v) as u8;
-        let v2_val = (tup % v) as u8;
-        let [c0, c1, c2] = state.triple_cols[t_idx];
-        let (c0, c1, c2) = (c0 as usize, c1 as usize, c2 as usize);
-
         cands.clear();
         fallback.clear();
-
-        let mat = &state.mat;
-        for r in 0..n {
-            let off = r * k;
-            let a0 = unsafe { *mat.get_unchecked(off + c0) };
-            let a1 = unsafe { *mat.get_unchecked(off + c1) };
-            let a2 = unsafe { *mat.get_unchecked(off + c2) };
-            let m0 = a0 == v0;
-            let m1 = a1 == v1;
-            let m2 = a2 == v2_val;
-
-            if m1 && m2 {
-                if is_editable(r, c0, lock_r, lock_c) {
-                    cands.push((r, c0, v0));
-                }
-            } else if m0 && m2 {
-                if is_editable(r, c1, lock_r, lock_c) {
-                    cands.push((r, c1, v1));
-                }
-            } else if m0 && m1 {
-                if is_editable(r, c2, lock_r, lock_c) {
-                    cands.push((r, c2, v2_val));
-                }
-            } else if cands.is_empty() && fallback.len() < 40 {
-                if m0 {
-                    if is_editable(r, c1, lock_r, lock_c) {
-                        fallback.push((r, c1, v1));
-                    }
-                    if is_editable(r, c2, lock_r, lock_c) {
-                        fallback.push((r, c2, v2_val));
-                    }
-                } else if m1 {
-                    if is_editable(r, c0, lock_r, lock_c) {
-                        fallback.push((r, c0, v0));
-                    }
-                    if is_editable(r, c2, lock_r, lock_c) {
-                        fallback.push((r, c2, v2_val));
-                    }
-                } else if m2 {
-                    if is_editable(r, c0, lock_r, lock_c) {
-                        fallback.push((r, c0, v0));
-                    }
-                    if is_editable(r, c1, lock_r, lock_c) {
-                        fallback.push((r, c1, v1));
-                    }
-                }
-            }
-        }
+        gather_ca_candidates_for_triple(state, u_idx, lock_r, lock_c, &mut cands, &mut fallback, true);
 
         let active_cands: &[(usize, usize, u8)] = if !cands.is_empty() {
             &cands
         } else if !fallback.is_empty() {
             &fallback
         } else {
-            let cols = [(c0, v0), (c1, v1), (c2, v2_val)];
+            let t_idx = u_idx / v3;
+            let tup = u_idx % v3;
+            let v0 = (tup / v2) as u8;
+            let v1 = ((tup / v) % v) as u8;
+            let v2_val = (tup % v) as u8;
+            let [c0, c1, c2] = state.triple_cols[t_idx];
+            let cols = [(c0 as usize, v0), (c1 as usize, v1), (c2 as usize, v2_val)];
+            let r_lo = if lock_c == k { lock_r } else { 0 };
             for _ in 0..12 {
-                let r = rng.gen_usize(n);
+                let r = r_lo + rng.gen_usize(n - r_lo);
                 let (c, tv) = cols[rng.gen_usize(3)];
                 if is_editable(r, c, lock_r, lock_c) && state.mat[r * k + c] != tv {
                     fallback.push((r, c, tv));
@@ -252,28 +439,25 @@ where
             &fallback
         };
 
-        let cur_unc = state.uncovered() as i32;
-
-        // Evaluate all candidates for this uncovered triple and select best non-tabu
-        let mut best_nt_score = (i64::MAX, i32::MAX);
+        let cur_unc = ulen as i32;
+        let mut best_nt_du = i32::MAX;
         let mut best_nt_move = active_cands[0];
         let mut nt_ties = 0u64;
 
-        let mut best_all_score = (i64::MAX, i32::MAX);
+        let mut best_all_du = i32::MAX;
         let mut best_all_move = active_cands[0];
         let mut all_ties = 0u64;
 
         for &(r, c, nv) in active_cands {
-            let (du, dw) = state.eval_move(r, c, nv, cfg.use_weights);
-            let score = (dw, du);
+            let (du, _) = state.eval_move(r, c, nv, false);
             let asp = (cur_unc + du) < (best_unc as i32);
             let is_tabu = !asp && tabu[(r * k + c) * v + nv as usize] > step_u32;
 
-            if score < best_all_score {
-                best_all_score = score;
+            if du < best_all_du {
+                best_all_du = du;
                 best_all_move = (r, c, nv);
                 all_ties = 1;
-            } else if score == best_all_score {
+            } else if du == best_all_du {
                 all_ties += 1;
                 if rng.gen_usize(all_ties as usize) == 0 {
                     best_all_move = (r, c, nv);
@@ -281,11 +465,11 @@ where
             }
 
             if !is_tabu {
-                if score < best_nt_score {
-                    best_nt_score = score;
+                if du < best_nt_du {
+                    best_nt_du = du;
                     best_nt_move = (r, c, nv);
                     nt_ties = 1;
-                } else if score == best_nt_score {
+                } else if du == best_nt_du {
                     nt_ties += 1;
                     if rng.gen_usize(nt_ties as usize) == 0 {
                         best_nt_move = (r, c, nv);
@@ -294,35 +478,19 @@ where
             }
         }
 
-        let (chosen, chosen_du, chosen_dw) = if nt_ties > 0 {
-            (best_nt_move, best_nt_score.1, best_nt_score.0)
+        let (chosen, chosen_du) = if nt_ties > 0 {
+            (best_nt_move, best_nt_du)
         } else {
-            (best_all_move, best_all_score.1, best_all_score.0)
+            (best_all_move, best_all_du)
         };
 
-        // Metropolis acceptance gate:
-        // Always accept improving or neutral moves (chosen_du <= 0).
-        // For uphill moves (chosen_du > 0), accept with exp(-chosen_du / eff_temp),
-        // giving a modest effective temperature boost when clause weights favor the move (chosen_dw <= 0).
         let accept = if chosen_du <= 0 {
             true
         } else {
-            window_uphill_trials += 1;
-            let eff_temp = if cfg.use_weights && chosen_dw <= 0 {
-                (temp * 1.35).min(temp_max)
-            } else {
-                temp
-            };
-            let prob = (-(chosen_du as f64) / eff_temp).exp();
-            rng.gen_f64() < prob || rng.chance(cfg.noise_prob * 0.25)
+            rng.gen_f64() < (-(chosen_du as f64) / temp).exp()
         };
 
         if accept {
-            if chosen_du > 0 {
-                window_accepts += 1;
-            }
-            consec_rejects = 0;
-
             let (r, c, nv) = chosen;
             let old_v = state.apply_move(r, c, nv);
             let tenure = cfg.tenure_base + rng.gen_usize(cfg.tenure_jitter as usize + 1) as u32;
@@ -334,78 +502,11 @@ where
             if new_unc < best_unc {
                 best_unc = new_unc;
                 best_mat.copy_from_slice(&state.mat);
-                no_improve_iters = 0;
-                no_improve_since_best = 0;
-                // Cool gently on improvement to exploit basin
-                temp = (temp * 0.96).max(temp_min);
+                last_improve_time = Instant::now();
                 on_improve(best_unc, &best_mat, iters);
                 if new_unc == 0 {
                     break;
                 }
-            } else {
-                no_improve_iters += 1;
-                no_improve_since_best += 1;
-            }
-        } else {
-            consec_rejects += 1;
-            no_improve_iters += 1;
-            no_improve_since_best += 1;
-
-            // Optional lightweight clause weighting on rejected stubborn triple
-            if cfg.use_weights && consec_rejects % 4 == 0 {
-                let w = &mut state.weights[u_idx];
-                *w += 1;
-                if *w > max_weight {
-                    max_weight = *w;
-                }
-                if max_weight > 128 {
-                    for wv in &mut state.weights {
-                        *wv = (*wv >> 1).max(1);
-                    }
-                    max_weight >>= 1;
-                }
-            }
-
-            // If rejecting many moves in a row (rigid crystal!), warm up temperature rapidly!
-            if consec_rejects >= 32 {
-                temp = (temp * 1.06).min(temp_max);
-                consec_rejects = 0;
-            }
-        }
-
-        // Self-tuning thermostat every 256 uphill trials:
-        // Target uphill acceptance rate ~ 12%..22% (keeps unc near floor while allowing basin crossing)
-        if window_uphill_trials >= 256 {
-            let rate = window_accepts as f64 / window_uphill_trials as f64;
-            let cur_u = state.uncovered();
-            if cur_u > best_unc + 25 || rate > 0.25 {
-                // Drifting too high -> cool down to pull back to floor
-                temp = (temp * 0.92).max(temp_min);
-            } else if rate < 0.08 {
-                // Frozen -> warm up slightly
-                temp = (temp * 1.08).min(temp_max);
-            }
-            window_accepts = 0;
-            window_uphill_trials = 0;
-        }
-
-        // Periodic reheat / cyclic temperature wave when stagnant
-        if cfg.reheat_steps > 0 && no_improve_iters >= cfg.reheat_steps {
-            reheats += 1;
-            no_improve_iters = 0;
-
-            if reheats % 3 == 0 {
-                // Return to best_mat and heat up to explore a fresh trajectory out of best basin
-                state.mat.copy_from_slice(&best_mat);
-                state.recompute_counts();
-                state.reset_weights();
-                max_weight = 1;
-                tabu.fill(0);
-                step_u32 = 1;
-                temp = 1.65;
-            } else {
-                // Thermal pulse without destroying current basin
-                temp = (temp * 1.5).clamp(1.2, temp_max);
             }
         }
     }
@@ -435,12 +536,15 @@ pub fn ca_sanity_test(
     let cfg = SearchConfig {
         tenure_base: 8,
         tenure_jitter: 6,
-        noise_prob: 0.01,
+        noise_prob: 0.008,
         use_weights: true,
-        reheat_steps: 50_000,
+        t_start: 1.5,
+        t_end: 0.1,
+        endgame_threshold: 25,
         lock_rows: 0,
         lock_cols: 0,
-        max_stagnation: 0,
+        log_interval_secs: 0.0,
+        label: "sanity".to_string(),
     };
     let t0 = Instant::now();
     let stop = AtomicBool::new(false);
@@ -455,7 +559,6 @@ pub fn ca_sanity_test(
     );
     let dt = t0.elapsed().as_secs_f64().max(1e-9);
 
-    // 10,000 raw incremental moves without recompute_counts verifying exact delta & final counts
     let mut state2 = CaState::from_matrix(res.best_mat.clone(), n, k, v);
     let mut rng2 = Rng::from_seed(0x12345678_9ABC);
     for _ in 0..10_000 {
