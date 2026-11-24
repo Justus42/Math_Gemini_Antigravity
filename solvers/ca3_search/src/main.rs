@@ -8,7 +8,7 @@ use io::{
     delete_row, project_drop_col, read_matrix, write_matrix_atomic, write_meta_atomic,
     CheckpointMeta,
 };
-use orbit::{orbit_sanity_test, search_orbit, OrbitGroup, OrbitSearchConfig, OrbitState};
+use orbit::{orbit_sanity_test, search_orbit, OrbitGroup, OrbitSearchConfig, OrbitState, SearchAlgo};
 use rng::Rng;
 use search::{ca_sanity_test, search_ca, SearchConfig};
 use state::CaState;
@@ -22,6 +22,8 @@ use std::time::{Duration, Instant};
 
 struct Args {
     mode: String,
+    algo: SearchAlgo,
+    stage2_algo: Option<SearchAlgo>,
     input: Option<PathBuf>,
     resume: Option<PathBuf>,
     v: usize,
@@ -35,10 +37,9 @@ struct Args {
     prefix: Option<String>,
     use_weights: bool,
     noise: f64,
-    tenure: u32,
     t_start: f64,
     t_end: f64,
-    endgame: usize,
+    full_scan_thresh: Option<usize>,
     log_interval: f64,
     drop_col: Option<String>,
     probe_secs: f64,
@@ -52,26 +53,41 @@ struct Args {
     unfreeze_frac: f64,
 }
 
+fn parse_algo(s: &str) -> Result<SearchAlgo, String> {
+    match s.to_lowercase().as_str() {
+        "tabu-cw" | "tabu_cw" | "tabucw" => Ok(SearchAlgo::TabuCw),
+        "sa" => Ok(SearchAlgo::Sa),
+        "hybrid-sa-cw" | "hybrid_sa_cw" => Ok(SearchAlgo::HybridSaCw),
+        other => Err(format!(
+            "unknown algo '{}', expected tabu-cw, sa, or hybrid-sa-cw",
+            other
+        )),
+    }
+}
+
 fn parse_args() -> Result<Args, String> {
     let raw: Vec<String> = env::args().collect();
     if raw.len() < 2 || raw[1] == "-h" || raw[1] == "--help" {
         return Err(
             "Usage: ca3_search <sanity|reduce|extend|orbit|hybrid> [options]\n\
-             Common: --v <5> --k <9> --n <N> --min-n <N> --threads <2> --seed <42> \
+             Common: --algo <tabu-cw|sa|hybrid-sa-cw> --stage2-algo <algo> \
+             --v <5> --k <9> --n <N> --min-n <N> --threads <2> --seed <42> \
              --time-limit-secs <60> --checkpoint-dir <dir> --prefix <name> \
-             --no-weights --noise <0.008> --tenure <8> --t-start <1.8> --t-end <0.05> \
-             --endgame <25> --log-interval <30>\n\
+             --no-weights --noise <0.002> --t-start <0.55> --t-end <0.16> \
+             --full-scan-thresh <N> --log-interval <30>\n\
              reduce: --input <file> [--drop-col <idx|all>] [--probe-secs <1.5>] [--resume <file>]\n\
-             extend: --input <file> --n <target_n> [--stage1-frac <0.25>]\n\
+             extend: --input <file> --n <target_n> [--stage1-secs <90>] [--min-n <N>]\n\
              orbit:  --group <z5|g10> --n <orbit_n> --k <k> --v <v> [--const-rows <0|v>] \
-                     [--orbit-secs <f64>] [--free-rows <0>] [--free-stage1-secs <f64>] [--unfreeze-frac <0.0>]\n\
-             hybrid: --input <expanded_or_base_file> --v <5> --free-rows <R> [--stage1-secs <60>] [--min-n <N>]"
+                     [--orbit-secs <f64>] [--free-rows <0>] [--free-stage1-secs <f64>]\n\
+             hybrid: --input <file> --v <5> --free-rows <R> [--stage1-secs <60>] [--min-n <N>]"
                 .to_string(),
         );
     }
 
     let mut args = Args {
         mode: raw[1].clone(),
+        algo: SearchAlgo::TabuCw,
+        stage2_algo: None,
         input: None,
         resume: None,
         v: 5,
@@ -84,11 +100,10 @@ fn parse_args() -> Result<Args, String> {
         checkpoint_dir: PathBuf::from("/tmp/ca3_checkpoints"),
         prefix: None,
         use_weights: true,
-        noise: 0.008,
-        tenure: 8,
-        t_start: 1.8,
-        t_end: 0.05,
-        endgame: 25,
+        noise: 0.002,
+        t_start: 0.55,
+        t_end: 0.16,
+        full_scan_thresh: None,
         log_interval: 30.0,
         drop_col: None,
         probe_secs: 1.5,
@@ -114,6 +129,8 @@ fn parse_args() -> Result<Args, String> {
             }
         };
         match flag {
+            "--algo" => args.algo = parse_algo(&next_val(&mut i)?)?,
+            "--stage2-algo" => args.stage2_algo = Some(parse_algo(&next_val(&mut i)?)?),
             "--input" => args.input = Some(PathBuf::from(next_val(&mut i)?)),
             "--resume" => args.resume = Some(PathBuf::from(next_val(&mut i)?)),
             "--v" => args.v = next_val(&mut i)?.parse().map_err(|e| format!("--v: {}", e))?,
@@ -149,11 +166,6 @@ fn parse_args() -> Result<Args, String> {
                     .parse()
                     .map_err(|e| format!("--noise: {}", e))?
             }
-            "--tenure" => {
-                args.tenure = next_val(&mut i)?
-                    .parse()
-                    .map_err(|e| format!("--tenure: {}", e))?
-            }
             "--t-start" => {
                 args.t_start = next_val(&mut i)?
                     .parse()
@@ -164,10 +176,12 @@ fn parse_args() -> Result<Args, String> {
                     .parse()
                     .map_err(|e| format!("--t-end: {}", e))?
             }
-            "--endgame" => {
-                args.endgame = next_val(&mut i)?
-                    .parse()
-                    .map_err(|e| format!("--endgame: {}", e))?
+            "--full-scan-thresh" | "--endgame" => {
+                args.full_scan_thresh = Some(
+                    next_val(&mut i)?
+                        .parse()
+                        .map_err(|e| format!("--full-scan-thresh: {}", e))?,
+                )
             }
             "--log-interval" => {
                 args.log_interval = next_val(&mut i)?
@@ -197,7 +211,9 @@ fn parse_args() -> Result<Args, String> {
                 args.group = match g.as_str() {
                     "z5" | "zv" => OrbitGroup::Zv,
                     "g10" | "g2v" => OrbitGroup::G2v,
-                    other => return Err(format!("unknown --group '{}', expected z5 or g10", other)),
+                    other => {
+                        return Err(format!("unknown --group '{}', expected z5 or g10", other))
+                    }
                 };
             }
             "--const-rows" => {
@@ -244,6 +260,27 @@ fn parse_args() -> Result<Args, String> {
 
 fn thread_seed(base_seed: u64, tid: usize) -> u64 {
     base_seed ^ ((tid as u64).wrapping_add(1).wrapping_mul(0x9e3779b97f4a7c15))
+}
+
+fn thread_tenure_range(tid: usize) -> (u32, u32) {
+    if tid % 2 == 0 {
+        (7, 10)
+    } else {
+        (12, 16)
+    }
+}
+
+fn thread_algo(algo: SearchAlgo, tid: usize) -> SearchAlgo {
+    match algo {
+        SearchAlgo::HybridSaCw => {
+            if tid % 2 == 0 {
+                SearchAlgo::TabuCw
+            } else {
+                SearchAlgo::Sa
+            }
+        }
+        other => other,
+    }
 }
 
 fn pick_min_excl_row(state: &CaState, rng: &mut Rng) -> (usize, usize) {
@@ -319,7 +356,7 @@ fn save_checkpoint(
 }
 
 fn run_sanity(args: &Args) -> Result<(), String> {
-    println!("=== SANITY CHECK (t=3, k={}, v={}) ===", args.k, args.v);
+    println!("=== SANITY CHECK (t=3, k={}, v={}, algo=tabu-cw) ===", args.k, args.v);
     let (mat, n, k, v) = if let Some(ref path) = args.input {
         let lm = read_matrix(path)?;
         let (m, k_use) = if lm.k == args.k + 1 {
@@ -351,28 +388,26 @@ fn run_sanity(args: &Args) -> Result<(), String> {
 
     let (ca_mps, start_unc, end_unc) = ca_sanity_test(mat, n, k, v)?;
     println!(
-        "[PASS] CaState 10,000-move incremental check: 0 discrepancies | throughput = {:.0} moves/sec | unc: {} -> {}",
+        "[PASS] CaState(tabu-cw) 10,000-move incremental check: 0 discrepancies | throughput = {:.0} moves/sec | unc: {} -> {}",
         ca_mps, start_unc, end_unc
     );
 
     let (z5_mps, z5_unc, z5_n) = orbit_sanity_test(OrbitGroup::Zv, k, v, 35, true)?;
     println!(
-        "[PASS] OrbitState(Z5, 35+5 -> N={}) 10,000-move incremental + exact expansion (5x) check: 0 discrepancies | throughput = {:.0} moves/sec | best_unc_orbits = {}",
+        "[PASS] OrbitState(Z5/tabu-cw, 35+5 -> N={}) 10,000-move incremental + 5x expansion check: 0 discrepancies | throughput = {:.0} moves/sec | best_unc_orbits = {}",
         z5_n, z5_mps, z5_unc
     );
 
     if v % 2 == 1 && v >= 3 {
         let (g10_mps, g10_unc, g10_n) = orbit_sanity_test(OrbitGroup::G2v, k, v, 17, true)?;
         println!(
-            "[PASS] OrbitState(G10, 17+5 -> N={}) 10,000-move incremental + exact expansion (10x) check: 0 discrepancies | throughput = {:.0} moves/sec | best_unc_orbits = {}",
+            "[PASS] OrbitState(G10/tabu-cw, 17+5 -> N={}) 10,000-move incremental + 10x expansion check: 0 discrepancies | throughput = {:.0} moves/sec | best_unc_orbits = {}",
             g10_n, g10_mps, g10_unc
         );
     }
     Ok(())
 }
 
-/// Multi-thread reduce loop: runs at current N until uncovered==0 or deadline.
-/// If uncovered==0 is achieved and current_n > min_n, deletes min-exclusivity row and continues to current_n - 1.
 fn run_reduce_multithread(
     initial_mat: Vec<u8>,
     mut cur_n: usize,
@@ -387,6 +422,7 @@ fn run_reduce_multithread(
 ) -> Result<(), String> {
     let mut cur_mat = initial_mat;
     let total_moves_all = Arc::new(AtomicU64::new(0));
+    let full_thresh = args.full_scan_thresh.unwrap_or(80);
 
     loop {
         if Instant::now() >= deadline {
@@ -440,15 +476,18 @@ fn run_reduce_multithread(
                 let ext = extra_label.to_string();
                 let seed_t = thread_seed(args.seed ^ (cur_n as u64 * 1009), tid);
                 let base_seed = args.seed;
+                let (tmin, tmax) = thread_tenure_range(tid);
+                let algo_t = thread_algo(args.algo, tid);
 
                 let cfg = SearchConfig {
-                    tenure_base: args.tenure + (tid as u32) * 2,
-                    tenure_jitter: 7 + (tid as u32) * 2,
+                    algo: algo_t,
+                    tenure_min: tmin,
+                    tenure_max: tmax,
                     noise_prob: args.noise,
                     use_weights: args.use_weights,
-                    t_start: args.t_start * if tid == 0 { 1.0 } else { 0.85 },
-                    t_end: args.t_end * if tid == 0 { 1.0 } else { 0.75 },
-                    endgame_threshold: args.endgame,
+                    t_start: args.t_start,
+                    t_end: args.t_end,
+                    full_scan_thresh: full_thresh,
                     lock_rows: 0,
                     lock_cols: 0,
                     log_interval_secs: args.log_interval,
@@ -604,6 +643,7 @@ fn run_reduce(args: &Args) -> Result<(), String> {
         let k_proj = lm.k - 1;
         let target_n = args.n.unwrap_or(lm.n - 1);
         let min_n = args.min_n.unwrap_or(target_n.saturating_sub(4));
+        let full_thresh = args.full_scan_thresh.unwrap_or(80);
         println!(
             "[reduce] Probing all {} column projections of {} ({}x{} -> {}x{}), {:.2}s/proj across {} threads...",
             lm.k,
@@ -639,14 +679,16 @@ fn run_reduce(args: &Args) -> Result<(), String> {
             let bm_c = Arc::clone(&base_mat);
             let probe_dur = Duration::from_secs_f64(args.probe_secs);
             let seed_base = args.seed;
+            let (tmin, tmax) = thread_tenure_range(tid);
             let cfg = SearchConfig {
-                tenure_base: args.tenure,
-                tenure_jitter: 7,
+                algo: SearchAlgo::TabuCw,
+                tenure_min: tmin,
+                tenure_max: tmax,
                 noise_prob: args.noise,
                 use_weights: args.use_weights,
                 t_start: args.t_start,
                 t_end: args.t_end,
-                endgame_threshold: args.endgame,
+                full_scan_thresh: full_thresh,
                 lock_rows: 0,
                 lock_cols: 0,
                 log_interval_secs: 0.0,
@@ -796,9 +838,11 @@ fn run_extend(args: &Args) -> Result<(), String> {
         .stage1_secs
         .unwrap_or(args.time_limit_secs * args.stage1_frac.clamp(0.0, 0.9));
     let stage1_deadline = (t_start + Duration::from_secs_f64(stage1_secs)).min(deadline);
+    let full_thresh = args.full_scan_thresh.unwrap_or(80);
+    let stage2_algo = args.stage2_algo.unwrap_or(args.algo);
 
     println!(
-        "[extend] Base {} ({}x{}, v={}) -> target CA({}; 3, {}, {}) (+{} repair rows), stage1={:.1}s, total={:.1}s, threads={}",
+        "[extend] Base {} ({}x{}, v={}) -> target CA({}; 3, {}, {}) (+{} repair rows) | s1={:.1}s ({:?}), s2={:.1}s ({:?}, full_scan<={}), T_sa: {:.2}->{:.2}, threads={}",
         input_path.display(),
         n_base,
         k_base,
@@ -808,7 +852,12 @@ fn run_extend(args: &Args) -> Result<(), String> {
         v,
         repair_rows,
         stage1_secs,
-        args.time_limit_secs,
+        args.algo,
+        (args.time_limit_secs - stage1_secs).max(0.0),
+        stage2_algo,
+        full_thresh,
+        args.t_start,
+        args.t_end,
         args.threads
     );
 
@@ -826,8 +875,9 @@ fn run_extend(args: &Args) -> Result<(), String> {
     }));
 
     let base_mat = Arc::new(lm.mat);
-    let mut handles = Vec::with_capacity(args.threads);
 
+    // Phase 1: Stage 1 (locked base n_base x k_base; optimize col k-1 of base rows + all cols of repair rows)
+    let mut s1_handles = Vec::with_capacity(args.threads);
     for tid in 0..args.threads {
         let bm_c = Arc::clone(&base_mat);
         let solved_c = Arc::clone(&solved_flag);
@@ -838,21 +888,21 @@ fn run_extend(args: &Args) -> Result<(), String> {
         let seed_t = thread_seed(args.seed, tid);
         let base_seed = args.seed;
         let use_weights = args.use_weights;
-        let tenure = args.tenure + (tid as u32) * 2;
+        let (tmin, tmax) = thread_tenure_range(tid);
         let noise = args.noise;
-        let t_s = args.t_start * if tid == 0 { 1.0 } else { 0.85 };
-        let t_e = args.t_end * if tid == 0 { 1.0 } else { 0.75 };
-        let endgame = args.endgame;
+        let algo1 = thread_algo(args.algo, tid);
+        let t_s = args.t_start;
+        let t_e = args.t_end;
         let log_int = args.log_interval;
 
-        handles.push(thread::spawn(move || {
+        s1_handles.push(thread::spawn(move || {
             let mut rng = Rng::from_seed(seed_t);
             let mut state =
                 CaState::build_extended_greedy(&bm_c, n_base, k_base, target_n, v, &mut rng);
             let init_unc = state.uncovered();
             println!(
-                "  [extend t={}] Greedy init uncovered={} (seed={})",
-                tid, init_unc, seed_t
+                "  [extend-s1:t={}] Greedy init uncovered={} (seed={}, tenure={}..{})",
+                tid, init_unc, seed_t, tmin, tmax
             );
 
             {
@@ -880,13 +930,14 @@ fn run_extend(args: &Args) -> Result<(), String> {
 
             if !solved_c.load(Ordering::Relaxed) && Instant::now() < stage1_deadline {
                 let cfg1 = SearchConfig {
-                    tenure_base: tenure,
-                    tenure_jitter: 7,
+                    algo: algo1,
+                    tenure_min: tmin,
+                    tenure_max: tmax,
                     noise_prob: noise,
                     use_weights,
                     t_start: t_s,
                     t_end: t_e,
-                    endgame_threshold: endgame,
+                    full_scan_thresh: full_thresh,
                     lock_rows: n_base,
                     lock_cols: k_base,
                     log_interval_secs: log_int,
@@ -932,25 +983,86 @@ fn run_extend(args: &Args) -> Result<(), String> {
                 );
                 tm_c.fetch_add(res1.moves - last_m, Ordering::Relaxed);
                 println!(
-                    "  [extend t={}] Stage 1 done: best_unc={}, moves={} -> unfreezing full array",
-                    tid, res1.best_uncovered, res1.moves
+                    "  [extend-s1:t={}] Done: best_unc={} (60s={}, last@{:.1}s), moves={}, smoothings={}",
+                    tid,
+                    res1.best_uncovered,
+                    res1.best_at_60s,
+                    res1.last_improve_sec,
+                    res1.moves,
+                    res1.reheats
                 );
             }
+        }));
+    }
+    for h in s1_handles {
+        let _ = h.join();
+    }
 
-            if !solved_c.load(Ordering::Relaxed) && Instant::now() < deadline {
-                state.reset_weights();
+    let (s1_best_unc, s1_best_mat) = {
+        let guard = gb.lock().unwrap();
+        (guard.uncovered, guard.mat.clone())
+    };
+    println!(
+        "[extend] Stage 1 SUMMARY: best_unc={} at {:.1}s -> unfreezing full {}x{} array!",
+        s1_best_unc,
+        t_start.elapsed().as_secs_f64(),
+        target_n,
+        k
+    );
+
+    // Phase 2: Stage 2 (unfreeze entire target_n x k array, starting from best Stage 1 matrix!)
+    if !solved_flag.load(Ordering::Relaxed) && Instant::now() < deadline {
+        let s1_arc = Arc::new(s1_best_mat);
+        let mut s2_handles = Vec::with_capacity(args.threads);
+
+        for tid in 0..args.threads {
+            let s1_c = Arc::clone(&s1_arc);
+            let solved_c = Arc::clone(&solved_flag);
+            let gb_c = Arc::clone(&gb);
+            let tm_c = Arc::clone(&total_moves);
+            let ckpt_dir = args.checkpoint_dir.clone();
+            let pfx = prefix.to_string();
+            let seed_t = thread_seed(args.seed ^ 0x5A5A_1234, tid);
+            let base_seed = args.seed;
+            let use_weights = args.use_weights;
+            let (tmin, tmax) = thread_tenure_range(tid);
+            let noise = args.noise;
+            let algo2 = thread_algo(stage2_algo, tid);
+            let t_s = args.t_start;
+            let t_e = args.t_end;
+            let log_int = args.log_interval;
+
+            s2_handles.push(thread::spawn(move || {
+                let mut rng = Rng::from_seed(seed_t);
+                let mut state = CaState::from_matrix((*s1_c).clone(), target_n, k, v);
+                let algo_tag = match algo2 {
+                    SearchAlgo::TabuCw => "tabu-cw",
+                    SearchAlgo::Sa | SearchAlgo::HybridSaCw => "sa->tabu-cw",
+                };
+                println!(
+                    "  [extend-s2:t={}] Starting unfrozen {}x{} (algo={}, tenure={}..{}, start_unc={})",
+                    tid,
+                    target_n,
+                    k,
+                    algo_tag,
+                    tmin,
+                    tmax,
+                    state.uncovered()
+                );
+
                 let cfg2 = SearchConfig {
-                    tenure_base: tenure,
-                    tenure_jitter: 8,
+                    algo: algo2,
+                    tenure_min: tmin,
+                    tenure_max: tmax,
                     noise_prob: noise,
                     use_weights,
-                    t_start: t_s * 0.85,
+                    t_start: t_s,
                     t_end: t_e,
-                    endgame_threshold: endgame,
+                    full_scan_thresh: full_thresh,
                     lock_rows: 0,
                     lock_cols: 0,
                     log_interval_secs: log_int,
-                    label: format!("extend-s2:t={}", tid),
+                    label: format!("extend-s2({}):t={}", algo_tag, tid),
                 };
                 let mut last_m = 0u64;
                 let res2 = search_ca(
@@ -984,7 +1096,7 @@ fn run_extend(args: &Args) -> Result<(), String> {
                                     tm_c.load(Ordering::Relaxed),
                                     t_start.elapsed().as_secs_f64(),
                                     base_seed,
-                                    "stage=2_free",
+                                    &format!("stage=2_free_algo={}", algo_tag),
                                 );
                             }
                         }
@@ -992,45 +1104,77 @@ fn run_extend(args: &Args) -> Result<(), String> {
                 );
                 tm_c.fetch_add(res2.moves - last_m, Ordering::Relaxed);
                 println!(
-                    "  [extend t={}] Stage 2 done: best_unc={}, moves={}, reheats={}",
-                    tid, res2.best_uncovered, res2.moves, res2.reheats
+                    "  [extend-s2({}):t={}] Done: best_unc={} (s2@60s={}, s2@120s={}, last@{:.1}s), moves={}, smoothings={}",
+                    algo_tag,
+                    tid,
+                    res2.best_uncovered,
+                    res2.best_at_60s,
+                    res2.best_at_120s,
+                    res2.last_improve_sec,
+                    res2.moves,
+                    res2.reheats
                 );
-            }
-        }));
+            }));
+        }
+        for h in s2_handles {
+            let _ = h.join();
+        }
     }
 
-    for h in handles {
-        let _ = h.join();
-    }
+    let (final_unc, final_mat) = {
+        let guard = gb.lock().unwrap();
+        let elapsed = t_start.elapsed().as_secs_f64();
+        let tot = total_moves.load(Ordering::Relaxed);
+        save_checkpoint(
+            &args.checkpoint_dir,
+            prefix,
+            "extend",
+            &guard,
+            tot,
+            elapsed,
+            args.seed,
+            &format!("base={}_r={}_s1unc={}", n_base, repair_rows, s1_best_unc),
+        );
+        println!(
+            "[extend] SUMMARY N={}: best_uncovered={} (after s1={}), total_moves={} ({:.0} moves/sec), elapsed={:.2}s",
+            target_n,
+            guard.uncovered,
+            s1_best_unc,
+            tot,
+            tot as f64 / elapsed.max(1e-9),
+            elapsed
+        );
+        (guard.uncovered, guard.mat.clone())
+    };
 
-    let guard = gb.lock().unwrap();
-    let elapsed = t_start.elapsed().as_secs_f64();
-    let tot = total_moves.load(Ordering::Relaxed);
-    save_checkpoint(
-        &args.checkpoint_dir,
-        prefix,
-        "extend",
-        &guard,
-        tot,
-        elapsed,
-        args.seed,
-        &format!("base={}_r={}", n_base, repair_rows),
-    );
-    println!(
-        "[extend] SUMMARY N={}: best_uncovered={}, total_moves={} ({:.0} moves/sec), elapsed={:.2}s",
-        target_n,
-        guard.uncovered,
-        tot,
-        tot as f64 / elapsed.max(1e-9),
-        elapsed
-    );
+    // If solved and min_n < target_n and time remains, automatically reduce toward min_n!
+    let min_n = args.min_n.unwrap_or(target_n);
+    if final_unc == 0 && target_n > min_n && Instant::now() < deadline {
+        let st = CaState::from_matrix(final_mat.clone(), target_n, k, v);
+        let mut rng = Rng::from_seed(args.seed ^ 0xBEEF_9999);
+        let (del_r, min_e) = pick_min_excl_row(&st, &mut rng);
+        println!(
+            "[extend] SOLVED N={}! Deleting row {} (min_excl={}) and reducing toward min_n={}...",
+            target_n, del_r, min_e, min_n
+        );
+        let next_mat = delete_row(&final_mat, target_n, k, del_r);
+        let next_prefix = format!("{}_reduced", prefix);
+        run_reduce_multithread(
+            next_mat,
+            target_n - 1,
+            k,
+            v,
+            min_n,
+            args,
+            t_start,
+            deadline,
+            &next_prefix,
+            &format!("from_extend_N{}", target_n),
+        )?;
+    }
     Ok(())
 }
 
-/// Shared 2-stage Hybrid polishing engine:
-/// Given a base `(n_base x k)` matrix (e.g. expanded from G10 or Z5), appends `free_rows` greedy repair rows,
-/// optimizes ONLY those `free_rows` in Stage 1 (`stage1_secs`), then unfreezes the full `(n_base + free_rows) x k`
-/// matrix in Stage 2 until `deadline`. If `unc == 0` is hit and `target_n > min_n`, automatically attempts `reduce`!
 fn run_hybrid_from_matrix(
     base_mat: Vec<u8>,
     n_base: usize,
@@ -1051,6 +1195,7 @@ fn run_hybrid_from_matrix(
     let stage1_deadline = (now + Duration::from_secs_f64(stage1_secs.max(0.0))).min(deadline);
     let base_check = CaState::from_matrix(base_mat.clone(), n_base, k, v);
     let base_unc = base_check.uncovered();
+    let full_thresh = args.full_scan_thresh.unwrap_or(80);
 
     println!(
         "[{}] Starting Hybrid {}x{} (unc={}) + {} greedy free rows -> N={} | stage1={:.1}s, remaining={:.1}s, threads={}",
@@ -1093,11 +1238,11 @@ fn run_hybrid_from_matrix(
         let seed_t = thread_seed(args.seed ^ 0x517C_C1B7, tid);
         let base_seed = args.seed;
         let use_weights = args.use_weights;
-        let tenure = args.tenure + (tid as u32) * 2;
+        let (tmin, tmax) = thread_tenure_range(tid);
+        let algo_t = thread_algo(args.algo, tid);
         let noise = args.noise;
-        let t_s = args.t_start * if tid == 0 { 1.0 } else { 0.80 };
-        let t_e = args.t_end * if tid == 0 { 1.0 } else { 0.70 };
-        let endgame = args.endgame;
+        let t_s = args.t_start;
+        let t_e = args.t_end;
         let log_int = args.log_interval;
 
         handles.push(thread::spawn(move || {
@@ -1105,8 +1250,8 @@ fn run_hybrid_from_matrix(
             let mut state = CaState::append_greedy_rows(&bm_c, n_base, k, v, free_rows, &mut rng);
             let init_unc = state.uncovered();
             println!(
-                "  [{}:t={}] After appending {} greedy free rows: unc={} -> {} (seed={})",
-                mtag, tid, free_rows, base_unc, init_unc, seed_t
+                "  [{}:t={}] After appending {} greedy free rows: unc={} -> {}",
+                mtag, tid, free_rows, base_unc, init_unc
             );
 
             {
@@ -1132,21 +1277,21 @@ fn run_hybrid_from_matrix(
                 }
             }
 
-            // Stage 1: optimize ONLY the `free_rows` repair rows (lock_rows = n_base, lock_cols = k)
             if free_rows > 0 && !solved_c.load(Ordering::Relaxed) && Instant::now() < stage1_deadline
             {
                 let cfg1 = SearchConfig {
-                    tenure_base: tenure,
-                    tenure_jitter: 7,
+                    algo: algo_t,
+                    tenure_min: tmin,
+                    tenure_max: tmax,
                     noise_prob: noise,
                     use_weights,
-                    t_start: t_s * 0.9,
+                    t_start: t_s,
                     t_end: t_e,
-                    endgame_threshold: endgame,
+                    full_scan_thresh: full_thresh,
                     lock_rows: n_base,
                     lock_cols: k,
                     log_interval_secs: log_int,
-                    label: format!("{}-s1(free{}):t={}", mtag, free_rows, tid),
+                    label: format!("{}-s1:t={}", mtag, tid),
                 };
                 let mut last_m = 0u64;
                 let res1 = search_ca(
@@ -1187,15 +1332,9 @@ fn run_hybrid_from_matrix(
                     },
                 );
                 hm_c.fetch_add(res1.moves - last_m, Ordering::Relaxed);
-                println!(
-                    "  [{}:t={}] Stage 1 (free rows only) done: best_unc={}, moves={} -> unfreezing full N={}",
-                    mtag, tid, res1.best_uncovered, res1.moves, target_n
-                );
             }
 
-            // Stage 2: Unfreeze ENTIRE array (all target_n rows x k cols)
             if !solved_c.load(Ordering::Relaxed) && Instant::now() < deadline {
-                // Start Stage 2 from global best found in Stage 1 (with tiny perturbation on tid>0 if identical)
                 {
                     let guard = gb_c.lock().unwrap();
                     if guard.uncovered < state.uncovered() {
@@ -1205,17 +1344,18 @@ fn run_hybrid_from_matrix(
                 }
                 state.reset_weights();
                 let cfg2 = SearchConfig {
-                    tenure_base: tenure,
-                    tenure_jitter: 8,
+                    algo: algo_t,
+                    tenure_min: tmin,
+                    tenure_max: tmax,
                     noise_prob: noise,
                     use_weights,
-                    t_start: t_s * 0.85,
+                    t_start: t_s,
                     t_end: t_e,
-                    endgame_threshold: endgame,
+                    full_scan_thresh: full_thresh,
                     lock_rows: 0,
                     lock_cols: 0,
                     log_interval_secs: log_int,
-                    label: format!("{}-s2(full{}):t={}", mtag, target_n, tid),
+                    label: format!("{}-s2:t={}", mtag, tid),
                 };
                 let mut last_m = 0u64;
                 let res2 = search_ca(
@@ -1256,10 +1396,6 @@ fn run_hybrid_from_matrix(
                     },
                 );
                 hm_c.fetch_add(res2.moves - last_m, Ordering::Relaxed);
-                println!(
-                    "  [{}:t={}] Stage 2 (full array) done: best_unc={}, moves={}, reheats={}",
-                    mtag, tid, res2.best_uncovered, res2.moves, res2.reheats
-                );
             }
         }));
     }
@@ -1286,14 +1422,13 @@ fn run_hybrid_from_matrix(
     };
     let hm = hybrid_moves.load(Ordering::Relaxed);
 
-    // If solved and min_n < target_n and time remains, immediately try reducing to target_n - 1!
     let min_n = args.min_n.unwrap_or(target_n);
     if best_unc == 0 && target_n > min_n && Instant::now() < deadline {
         let st = CaState::from_matrix(best_mat.clone(), target_n, k, v);
         let mut rng = Rng::from_seed(args.seed ^ 0xBEEF_9999);
         let (del_r, min_e) = pick_min_excl_row(&st, &mut rng);
         println!(
-            "[{}] SOLVED N={}! Deleting row {} (min_excl={}) and reducing toward min_n={}...",
+            "[{}] SOLVED N={}! Deleting row {} (min_excl={}) -> reducing toward min_n={}...",
             mode_tag, target_n, del_r, min_e, min_n
         );
         let next_mat = delete_row(&best_mat, target_n, k, del_r);
@@ -1381,6 +1516,11 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         ));
     }
     let num_starters = (orbit_n - const_rows) / orb_sz;
+    let full_thresh = args.full_scan_thresh.unwrap_or(if group == OrbitGroup::G2v {
+        35
+    } else {
+        45
+    });
 
     let orbit_secs = if let Some(os) = args.orbit_secs {
         os.min(args.time_limit_secs)
@@ -1397,7 +1537,7 @@ fn run_orbit(args: &Args) -> Result<(), String> {
     let orbit_deadline = (t_start + Duration::from_secs_f64(orbit_secs)).min(deadline);
 
     println!(
-        "[orbit:{}] Orbit-target CA({}; 3, {}, {}): {} starters (orb_sz={}) + {} const rows | orbit={:.1}s, total={:.1}s, free_rows={}, T: {:.2}->{:.3}, threads={}",
+        "[orbit:{}] Target CA({}; 3, {}, {}): {} starters (orb_sz={}) + {} const rows | algo={:?}, full_scan<={}, orbit={:.1}s, threads={}",
         group.name(),
         orbit_n,
         k,
@@ -1405,23 +1545,26 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         num_starters,
         orb_sz,
         const_rows,
+        args.algo,
+        full_thresh,
         orbit_secs,
-        args.time_limit_secs,
-        args.free_rows,
-        args.t_start,
-        args.t_end,
         args.threads
     );
 
     let solved_flag = Arc::new(AtomicBool::new(false));
     let total_orbit_moves = Arc::new(AtomicU64::new(0));
 
-    let best_orbit: Arc<Mutex<(usize, Vec<u8>, usize, u64)>> = Arc::new(Mutex::new((
-        usize::MAX,
-        vec![0u8; num_starters * k],
-        0,
-        args.seed,
-    )));
+    let best_orbit: Arc<Mutex<(usize, Vec<u8>, usize, u64, usize, usize, f64)>> = Arc::new(
+        Mutex::new((
+            usize::MAX,
+            vec![0u8; num_starters * k],
+            0,
+            args.seed,
+            usize::MAX,
+            usize::MAX,
+            0.0,
+        )),
+    );
 
     let mut handles = Vec::with_capacity(args.threads);
     for tid in 0..args.threads {
@@ -1429,14 +1572,18 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         let bo_c = Arc::clone(&best_orbit);
         let om_c = Arc::clone(&total_orbit_moves);
         let seed_t = thread_seed(args.seed, tid);
+        let (tmin, tmax) = thread_tenure_range(tid);
+        let algo_t = thread_algo(args.algo, tid);
+
         let cfg = OrbitSearchConfig {
-            tenure_base: args.tenure + (tid as u32) * 2,
-            tenure_jitter: 7 + (tid as u32) * 2,
+            algo: algo_t,
+            tenure_min: tmin,
+            tenure_max: tmax,
             noise_prob: args.noise,
             use_weights: args.use_weights,
-            t_start: args.t_start * if tid == 0 { 1.0 } else { 0.85 },
-            t_end: args.t_end * if tid == 0 { 1.0 } else { 0.70 },
-            endgame_threshold: args.endgame,
+            t_start: args.t_start,
+            t_end: args.t_end,
+            full_scan_thresh: full_thresh,
             log_interval_secs: args.log_interval,
             thread_id: tid,
         };
@@ -1447,20 +1594,32 @@ fn run_orbit(args: &Args) -> Result<(), String> {
             let res = search_orbit(&mut st, &mut rng, &cfg, orbit_deadline, &solved_c, None);
             om_c.fetch_add(res.moves, Ordering::Relaxed);
             println!(
-                "  [orbit-{}:t={}] Done: best_unc_orbits={} (expanded_unc={}), moves={}, reheats={}",
+                "  [orbit-{}:t={}] Done (tenure={}..{}): best_orb={} (60s={}, 120s={}, last@{:.1}s, exp_unc={}), moves={}, smoothings={}",
                 group.name(),
                 tid,
+                tmin,
+                tmax,
                 res.best_uncovered_orbits,
+                res.best_at_60s,
+                res.best_at_120s,
+                res.last_improve_sec,
                 res.best_uncovered_orbits * orb_sz,
                 res.moves,
                 res.reheats
             );
             let mut guard = bo_c.lock().unwrap();
+            if res.best_at_60s < guard.4 {
+                guard.4 = res.best_at_60s;
+            }
+            if res.best_at_120s < guard.5 {
+                guard.5 = res.best_at_120s;
+            }
             if res.best_uncovered_orbits < guard.0 {
                 guard.0 = res.best_uncovered_orbits;
                 guard.1 = res.best_starters;
                 guard.2 = tid;
                 guard.3 = seed_t;
+                guard.6 = res.last_improve_sec;
                 if res.best_uncovered_orbits == 0 {
                     solved_c.store(true, Ordering::Relaxed);
                 }
@@ -1471,27 +1630,29 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         let _ = h.join();
     }
 
-    let (best_orb_unc, best_starters, best_tid, best_seed_orb) = best_orbit.lock().unwrap().clone();
+    let (best_orb_unc, best_starters, best_tid, best_seed_orb, best_60, best_120, last_imp) =
+        best_orbit.lock().unwrap().clone();
     let orb_elapsed = t_start.elapsed().as_secs_f64();
     let orb_moves = total_orbit_moves.load(Ordering::Relaxed);
 
-    // Expand best orbit solution into full CaState (size orbit_n)
     let orb_state = OrbitState::from_starters(group, best_starters, num_starters, k, v, has_const);
     let expanded_ca = orb_state.expand_exact_to_ca();
     let exp_unc = expanded_ca.uncovered();
 
     println!(
-        "[orbit:{}] ORBIT PHASE SUMMARY N={}: best_unc_orbits={} (expanded_unc={}), moves={} ({:.0} moves/sec), elapsed={:.2}s",
+        "[orbit:{}] ORBIT SUMMARY N={}: best_orb={} (60s={}, 120s={}, last@{:.1}s, exp_unc={}), moves={} ({:.0} moves/sec), elapsed={:.2}s",
         group.name(),
         orbit_n,
         best_orb_unc,
+        best_60,
+        best_120,
+        last_imp,
         exp_unc,
         orb_moves,
         orb_moves as f64 / orb_elapsed.max(1e-9),
         orb_elapsed
     );
 
-    // Always checkpoint the expanded orbit-phase result
     let gb_orb = GlobalBest {
         n: orbit_n,
         k,
@@ -1511,20 +1672,22 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         orb_elapsed,
         args.seed,
         &format!(
-            "group={}_starters={}_const={}_orb_unc={}",
+            "group={}_algo={:?}_starters={}_const={}_orb_unc={}_60s={}_120s={}_last={:.1}s",
             group.name(),
+            args.algo,
             num_starters,
             const_rows,
-            best_orb_unc
+            best_orb_unc,
+            best_60,
+            best_120,
+            last_imp
         ),
     );
 
-    // If orbit phase already achieved uncovered == 0, we are done (record-breaking exact orbit CA)!
     if exp_unc == 0 {
         return Ok(());
     }
 
-    // Optional Phase 2: Hybrid transition (+ free_rows greedy repair rows + Stage 1/2 polishing)
     let rem_secs = deadline
         .saturating_duration_since(Instant::now())
         .as_secs_f64();
@@ -1555,13 +1718,10 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         let tot_elapsed = t_start.elapsed().as_secs_f64();
         let tot_moves = orb_moves + hyb_moves;
         println!(
-            "[orbit:{}] FINAL HYBRID SUMMARY N={} (orbit_N={} + {} free): orbit_unc={} ({} orbits) -> final_unc={}, total_moves={} ({:.0} moves/sec), elapsed={:.2}s",
+            "[orbit:{}] FINAL HYBRID SUMMARY N={}: orbit_unc={} -> final_unc={}, total_moves={} ({:.0} moves/sec), elapsed={:.2}s",
             group.name(),
             orbit_n + args.free_rows,
-            orbit_n,
-            args.free_rows,
             exp_unc,
-            best_orb_unc,
             final_unc,
             tot_moves,
             tot_moves as f64 / tot_elapsed.max(1e-9),
