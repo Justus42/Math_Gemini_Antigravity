@@ -11,7 +11,9 @@ use io::{
 };
 use orbit::{orbit_sanity_test, search_orbit, OrbitGroup, OrbitSearchConfig, OrbitState, SearchAlgo};
 use proj_orbit::{
-    proj_sanity_test, search_proj_tabu_cw, ProjGroup, ProjOrbitState, ProjSearchConfig,
+    decoupled_psl_sanity_test, proj_sanity_test, search_proj_tabu_cw, search_stage15_preserve_d,
+    search_stage1_d_only, search_stage2_bin_s2, DecoupledPslState, ProjGroup, ProjOrbitState,
+    ProjSearchConfig,
 };
 use rng::Rng;
 use search::{ca_sanity_test, search_ca, SearchConfig};
@@ -53,6 +55,11 @@ struct Args {
     proj_group: Option<ProjGroup>,
     gen_starters: Option<usize>,
     bin_starters: Option<usize>,
+    bin_list: Vec<usize>,
+    stage15_secs: f64,
+    stage2_secs_list: Vec<f64>,
+    max_rounds: usize,
+    stage2_restart_stag: u64,
     restart_stag: u64,
     const_rows: Option<usize>,
     free_rows: usize,
@@ -77,24 +84,27 @@ fn parse_args() -> Result<Args, String> {
     let raw: Vec<String> = env::args().collect();
     if raw.len() < 2 || raw[1] == "-h" || raw[1] == "--help" {
         return Err(
-            "Usage: ca3_search <sanity|reduce|extend|orbit|hybrid> [options]\n\
-             Common: --algo <tabu-cw|sa|hybrid-sa-cw> --stage2-algo <algo> \
+            "Usage: ca3_search <sanity|reduce|extend|orbit|hybrid|decoupled-psl25> [options]\n\
+             Common: --mode <mode> --algo <tabu-cw|sa|hybrid-sa-cw> --stage2-algo <algo> \
              --v <5> --k <9> --n <N> --min-n <N> --threads <2> --seed <42> \
              --time-limit-secs <60> --checkpoint-dir <dir> --prefix <name> \
              --no-weights --noise <0.002> --t-start <0.55> --t-end <0.16> \
              --full-scan-thresh <N> --log-interval <30>\n\
-             reduce: --input <file> [--drop-col <idx|all>] [--probe-secs <1.5>] [--resume <file>]\n\
-             extend: --input <file> --n <target_n> [--stage1-secs <90>] [--min-n <N>]\n\
-             orbit:  --group <z5|g10|agl5|pgl25|psl25> --n <orbit_n> --k <k> --v <v> [--const-rows <0|v>] \
-                     [--gen-starters <A>] [--bin-starters <B>] [--restart-stag <1000000>] \
-                     [--orbit-secs <f64>] [--free-rows <0>] [--free-stage1-secs <f64>]\n\
-             hybrid: --input <file> --v <5> --free-rows <R> [--stage1-secs <60>] [--min-n <N>]"
+             decoupled-psl25: --k <13> --gen-starters <5> [--bin-starters <6> | --bin-list <6,5>] \
+             [--stage15-secs <0.0>] [--stage2-secs-list <15,45>] [--max-rounds <3>] \
+             [--restart-stag <20000>] [--stage2-restart-stag <10000>]"
                 .to_string(),
         );
     }
 
+    let (init_mode, start_idx) = if raw[1].starts_with("--") {
+        (String::new(), 1usize)
+    } else {
+        (raw[1].clone(), 2usize)
+    };
+
     let mut args = Args {
-        mode: raw[1].clone(),
+        mode: init_mode,
         algo: SearchAlgo::TabuCw,
         stage2_algo: None,
         input: None,
@@ -122,6 +132,11 @@ fn parse_args() -> Result<Args, String> {
         proj_group: None,
         gen_starters: None,
         bin_starters: None,
+        bin_list: Vec::new(),
+        stage15_secs: 0.0,
+        stage2_secs_list: Vec::new(),
+        max_rounds: 3,
+        stage2_restart_stag: 10_000,
         restart_stag: 1_000_000,
         const_rows: None,
         free_rows: 0,
@@ -130,7 +145,7 @@ fn parse_args() -> Result<Args, String> {
         unfreeze_frac: 0.0,
     };
 
-    let mut i = 2;
+    let mut i = start_idx;
     while i < raw.len() {
         let flag = raw[i].as_str();
         let next_val = |idx: &mut usize| -> Result<String, String> {
@@ -294,6 +309,46 @@ fn parse_args() -> Result<Args, String> {
                         .parse()
                         .map_err(|e| format!("--free-stage1-secs: {}", e))?,
                 )
+            }
+            "--mode" => args.mode = next_val(&mut i)?,
+            "--bin-list" => {
+                let s = next_val(&mut i)?;
+                args.bin_list = s
+                    .split(',')
+                    .filter(|p| !p.trim().is_empty())
+                    .map(|p| p.trim().parse::<usize>())
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(|e| format!("--bin-list: {}", e))?;
+            }
+            "--stage15-secs" => {
+                args.stage15_secs = next_val(&mut i)?
+                    .parse()
+                    .map_err(|e| format!("--stage15-secs: {}", e))?
+            }
+            "--stage2-secs" => {
+                let v: f64 = next_val(&mut i)?
+                    .parse()
+                    .map_err(|e| format!("--stage2-secs: {}", e))?;
+                args.stage2_secs_list = vec![v];
+            }
+            "--stage2-secs-list" => {
+                let s = next_val(&mut i)?;
+                args.stage2_secs_list = s
+                    .split(',')
+                    .filter(|p| !p.trim().is_empty())
+                    .map(|p| p.trim().parse::<f64>())
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(|e| format!("--stage2-secs-list: {}", e))?;
+            }
+            "--max-rounds" => {
+                args.max_rounds = next_val(&mut i)?
+                    .parse()
+                    .map_err(|e| format!("--max-rounds: {}", e))?
+            }
+            "--stage2-restart-stag" => {
+                args.stage2_restart_stag = next_val(&mut i)?
+                    .parse()
+                    .map_err(|e| format!("--stage2-restart-stag: {}", e))?
             }
             "--unfreeze-frac" => {
                 args.unfreeze_frac = next_val(&mut i)?
@@ -476,6 +531,12 @@ fn run_sanity(args: &Args) -> Result<(), String> {
     println!(
         "[PASS] ProjOrbit(PSL25/tabu-cw, k=9, A=4 B=3 +6 -> N={}) 10,000-move incremental + weighted expansion (60*(D1+D2)+30*2sym) check: 0 discrepancies | throughput = {:.0} moves/sec | best_orb={} (exp={})",
         psl_n, psl_mps, psl_unc, psl_exp
+    );
+
+    let (dec_mps, dec_d, dec_s2, dec_n) = decoupled_psl_sanity_test()?;
+    println!(
+        "[PASS] DecoupledPSL25(k=10, A=4 B=5 +6 -> N={}) 2x10,000-move incremental (S1+S1.5+S2) + weighted expansion check: 0 discrepancies | S1 raw throughput = {:.0} moves/sec | solved d={} s2={}",
+        dec_n, dec_mps, dec_d, dec_s2
     );
     Ok(())
 }
@@ -2001,6 +2062,417 @@ fn run_orbit(args: &Args) -> Result<(), String> {
     Ok(())
 }
 
+fn run_decoupled_psl25(args: &Args) -> Result<(), String> {
+    let t_start = Instant::now();
+    let deadline = t_start + Duration::from_secs_f64(args.time_limit_secs);
+    let prefix = args.prefix.as_deref().unwrap_or("dec_psl25");
+    let k = args.k;
+    let num_gen = args.gen_starters.unwrap_or(5);
+    let bin_list: Vec<usize> = if !args.bin_list.is_empty() {
+        args.bin_list.clone()
+    } else {
+        vec![args.bin_starters.unwrap_or(6)]
+    };
+    let mut s2_secs_list: Vec<f64> = Vec::with_capacity(bin_list.len());
+    for idx in 0..bin_list.len() {
+        let secs = if idx < args.stage2_secs_list.len() {
+            args.stage2_secs_list[idx]
+        } else if let Some(&last) = args.stage2_secs_list.last() {
+            last
+        } else {
+            15.0
+        };
+        s2_secs_list.push(secs);
+    }
+    let s1_rst = if args.restart_stag == 1_000_000 {
+        20_000
+    } else {
+        args.restart_stag
+    };
+    let s2_rst = args.stage2_restart_stag;
+    let max_rounds = args.max_rounds.max(1);
+
+    println!(
+        "[dec-psl25] Target k={} v=6: A={} gen (S1 D1/D2-only, rst={}) -> S1.5={:.1}s -> B={:?} (S2 secs={:?}, rst={}) | max_rounds={}, time={:.1}s, threads={}",
+        k,
+        num_gen,
+        s1_rst,
+        args.stage15_secs,
+        bin_list,
+        s2_secs_list,
+        s2_rst,
+        max_rounds,
+        args.time_limit_secs,
+        args.threads
+    );
+
+    let mut solved_bins = vec![false; bin_list.len()];
+    let mut best_s2_per_bin = vec![usize::MAX; bin_list.len()];
+    let mut best_d_overall = usize::MAX;
+    let mut best_gen_overall = vec![0u8; num_gen * k];
+    let mut total_s1_moves = 0u64;
+    let mut total_s15_moves = 0u64;
+    let mut total_s2_moves = 0u64;
+    let mut total_s1_restarts = 0u64;
+    let mut s1_solutions_found = 0usize;
+
+    let min_bin_idx = bin_list
+        .iter()
+        .enumerate()
+        .min_by_key(|&(_, &b)| b)
+        .map(|(i, _)| i)
+        .unwrap_or(0);
+
+    for round in 0..max_rounds {
+        if Instant::now() >= deadline || solved_bins[min_bin_idx] {
+            break;
+        }
+        let round_seed = args
+            .seed
+            .wrapping_add((round as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15));
+
+        // ---- Stage 1: Pure D1/D2 search on A general starters (parallel across threads) ----
+        let stop_s1 = Arc::new(AtomicBool::new(false));
+        let s1_moves_round = Arc::new(AtomicU64::new(0));
+        let s1_restarts_round = Arc::new(AtomicU64::new(0));
+        let best_s1: Arc<Mutex<(usize, Vec<u8>, usize, u64, f64)>> =
+            Arc::new(Mutex::new((usize::MAX, vec![0u8; num_gen * k], 0, round_seed, 0.0)));
+
+        let mut s1_handles = Vec::with_capacity(args.threads);
+        for tid in 0..args.threads {
+            let stop_c = Arc::clone(&stop_s1);
+            let mv_c = Arc::clone(&s1_moves_round);
+            let rst_c = Arc::clone(&s1_restarts_round);
+            let best_c = Arc::clone(&best_s1);
+            let seed_t = thread_seed(round_seed, tid);
+            let (tmin, tmax) = if tid % 2 == 0 { (3, 6) } else { (5, 8) };
+            let noise = args.noise;
+            let log_int = args.log_interval;
+
+            s1_handles.push(thread::spawn(move || {
+                let mut rng = Rng::from_seed(seed_t);
+                let mut st = DecoupledPslState::new_random(k, num_gen, 0, &mut rng);
+                let res = search_stage1_d_only(
+                    &mut st,
+                    &mut rng,
+                    tmin,
+                    tmax,
+                    noise,
+                    s1_rst,
+                    seed_t,
+                    log_int,
+                    tid,
+                    deadline,
+                    &stop_c,
+                    None,
+                );
+                mv_c.fetch_add(res.moves, Ordering::Relaxed);
+                rst_c.fetch_add(res.restarts, Ordering::Relaxed);
+                let mut g = best_c.lock().unwrap();
+                if res.best_d_unc < g.0 {
+                    g.0 = res.best_d_unc;
+                    g.1 = res.best_gen_starters;
+                    g.2 = tid;
+                    g.3 = seed_t;
+                    g.4 = res.elapsed_secs;
+                    if res.best_d_unc == 0 {
+                        stop_c.store(true, Ordering::Relaxed);
+                    }
+                }
+            }));
+        }
+        for h in s1_handles {
+            let _ = h.join();
+        }
+
+        let (s1_d, mut gen_starters, s1_tid, s1_seed, s1_el) = best_s1.lock().unwrap().clone();
+        let r_s1_mv = s1_moves_round.load(Ordering::Relaxed);
+        let r_s1_rst = s1_restarts_round.load(Ordering::Relaxed);
+        total_s1_moves += r_s1_mv;
+        total_s1_restarts += r_s1_rst;
+        if s1_d < best_d_overall {
+            best_d_overall = s1_d;
+            best_gen_overall = gen_starters.clone();
+        }
+
+        println!(
+            "  [dec-psl25 R{}] Stage 1 (A={}): best_D={} (t={:.2}s, tid={}, moves={}, rst={}, {:.0} mv/s)",
+            round + 1,
+            num_gen,
+            s1_d,
+            s1_el,
+            s1_tid,
+            r_s1_mv,
+            r_s1_rst,
+            r_s1_mv as f64 / s1_el.max(1e-9)
+        );
+
+        if s1_d > 0 {
+            break; // Stage 1 timed out without hitting d_unc == 0
+        }
+        s1_solutions_found += 1;
+
+        // ---- Optional Stage 1.5: D-preserving 2-sym minimization on A ----
+        if args.stage15_secs > 0.0 && Instant::now() < deadline {
+            let s15_deadline =
+                (Instant::now() + Duration::from_secs_f64(args.stage15_secs)).min(deadline);
+            let stop_s15 = Arc::new(AtomicBool::new(false));
+            let s15_mv = Arc::new(AtomicU64::new(0));
+            let gen_arc = Arc::new(gen_starters.clone());
+            let best_s15: Arc<Mutex<(usize, usize, Vec<u8>)>> =
+                Arc::new(Mutex::new((usize::MAX, usize::MAX, gen_starters.clone())));
+
+            let mut s15_handles = Vec::with_capacity(args.threads);
+            for tid in 0..args.threads {
+                let stop_c = Arc::clone(&stop_s15);
+                let mv_c = Arc::clone(&s15_mv);
+                let best_c = Arc::clone(&best_s15);
+                let g_arc = Arc::clone(&gen_arc);
+                let seed_t = thread_seed(round_seed ^ 0x1515_1515, tid);
+                let (tmin, tmax) = if tid % 2 == 0 { (3, 6) } else { (4, 7) };
+
+                s15_handles.push(thread::spawn(move || {
+                    let mut rng = Rng::from_seed(seed_t);
+                    let mut st = DecoupledPslState::from_parts(
+                        k,
+                        num_gen,
+                        (*g_arc).clone(),
+                        0,
+                        Vec::new(),
+                        false,
+                    );
+                    let (init_s2, best_s2, mvs) = search_stage15_preserve_d(
+                        &mut st,
+                        &mut rng,
+                        tmin,
+                        tmax,
+                        s15_deadline,
+                        &stop_c,
+                        None,
+                    );
+                    mv_c.fetch_add(mvs, Ordering::Relaxed);
+                    let mut guard = best_c.lock().unwrap();
+                    if best_s2 < guard.1 {
+                        guard.0 = init_s2;
+                        guard.1 = best_s2;
+                        guard.2 = st.gen_starters;
+                    }
+                }));
+            }
+            for h in s15_handles {
+                let _ = h.join();
+            }
+            let (init_s2, after_s2, refined_gen) = best_s15.lock().unwrap().clone();
+            let mv15 = s15_mv.load(Ordering::Relaxed);
+            total_s15_moves += mv15;
+            gen_starters = refined_gen;
+            println!(
+                "  [dec-psl25 R{}] Stage 1.5 (D=0 invariant): 2-sym {} -> {} (moves={})",
+                round + 1,
+                init_s2,
+                after_s2,
+                mv15
+            );
+        }
+
+        // ---- Stage 2: Frozen A general starters, optimize B binary starters on remaining 2-sym ----
+        let gen_frozen = Arc::new(gen_starters.clone());
+        for (bi, &num_bin) in bin_list.iter().enumerate() {
+            if solved_bins[bi] || Instant::now() >= deadline {
+                continue;
+            }
+            let target_n = num_gen * 60 + num_bin * 30 + 6;
+            let s2_deadline =
+                (Instant::now() + Duration::from_secs_f64(s2_secs_list[bi])).min(deadline);
+            let stop_s2 = Arc::new(AtomicBool::new(false));
+            let s2_mv = Arc::new(AtomicU64::new(0));
+            let s2_rst_tot = Arc::new(AtomicU64::new(0));
+            let best_s2: Arc<Mutex<(usize, Vec<u8>, usize, u64, f64)>> = Arc::new(Mutex::new((
+                usize::MAX,
+                vec![0u8; num_bin * k],
+                0,
+                round_seed,
+                0.0,
+            )));
+
+            let mut s2_handles = Vec::with_capacity(args.threads);
+            for tid in 0..args.threads {
+                let stop_c = Arc::clone(&stop_s2);
+                let mv_c = Arc::clone(&s2_mv);
+                let rst_c = Arc::clone(&s2_rst_tot);
+                let best_c = Arc::clone(&best_s2);
+                let gf = Arc::clone(&gen_frozen);
+                let seed_t = thread_seed(round_seed ^ ((num_bin as u64) << 40), tid);
+                let (tmin, tmax) = if tid % 2 == 0 { (3, 6) } else { (4, 7) };
+                let noise = args.noise;
+
+                s2_handles.push(thread::spawn(move || {
+                    let mut rng = Rng::from_seed(seed_t);
+                    let mut bins = vec![0u8; num_bin * k];
+                    for x in &mut bins {
+                        *x = if rng.gen_usize(2) == 0 { 0 } else { 5 };
+                    }
+                    let mut st = DecoupledPslState::from_parts(
+                        k,
+                        num_gen,
+                        (*gf).clone(),
+                        num_bin,
+                        bins,
+                        true,
+                    );
+                    let res = search_stage2_bin_s2(
+                        &mut st,
+                        &mut rng,
+                        tmin,
+                        tmax,
+                        noise,
+                        s2_rst,
+                        seed_t,
+                        s2_deadline,
+                        &stop_c,
+                        None,
+                    );
+                    mv_c.fetch_add(res.moves, Ordering::Relaxed);
+                    rst_c.fetch_add(res.restarts, Ordering::Relaxed);
+                    let mut guard = best_c.lock().unwrap();
+                    if res.best_s2_unc < guard.0 {
+                        guard.0 = res.best_s2_unc;
+                        guard.1 = res.best_bin_starters;
+                        guard.2 = tid;
+                        guard.3 = seed_t;
+                        guard.4 = res.elapsed_secs;
+                        if res.best_s2_unc == 0 {
+                            stop_c.store(true, Ordering::Relaxed);
+                        }
+                    }
+                }));
+            }
+            for h in s2_handles {
+                let _ = h.join();
+            }
+
+            let (s2_unc, best_bins, s2_tid, s2_seed, s2_el) = best_s2.lock().unwrap().clone();
+            let mv2 = s2_mv.load(Ordering::Relaxed);
+            let rst2 = s2_rst_tot.load(Ordering::Relaxed);
+            total_s2_moves += mv2;
+            if s2_unc < best_s2_per_bin[bi] {
+                best_s2_per_bin[bi] = s2_unc;
+            }
+
+            println!(
+                "  [dec-psl25 R{}] Stage 2 (A={} B={} -> N={}): best_2sym={} (exp_unc={}, t={:.2}s, moves={}, rst={}, {:.0} mv/s)",
+                round + 1,
+                num_gen,
+                num_bin,
+                target_n,
+                s2_unc,
+                s2_unc * 30,
+                s2_el,
+                mv2,
+                rst2,
+                mv2 as f64 / s2_el.max(1e-9)
+            );
+
+            if s2_unc == 0 {
+                let final_dec = DecoupledPslState::from_parts(
+                    k,
+                    num_gen,
+                    (*gen_frozen).clone(),
+                    num_bin,
+                    best_bins,
+                    true,
+                );
+                let expanded_ca = final_dec.to_proj_state().expand_exact_to_ca();
+                let exp_unc = expanded_ca.uncovered();
+                assert_eq!(exp_unc, 0, "decoupled expanded CA must have unc == 0");
+                let gb = GlobalBest {
+                    n: target_n,
+                    k,
+                    v: 6,
+                    uncovered: exp_unc,
+                    mat: expanded_ca.mat,
+                    best_thread: s2_tid,
+                    best_seed: s2_seed,
+                    last_write: Instant::now(),
+                };
+                let pfx_b = format!("{}_A{}_B{}_N{}", prefix, num_gen, num_bin, target_n);
+                save_checkpoint(
+                    &args.checkpoint_dir,
+                    &pfx_b,
+                    "decoupled_psl25",
+                    &gb,
+                    total_s1_moves + total_s15_moves + total_s2_moves,
+                    t_start.elapsed().as_secs_f64(),
+                    args.seed,
+                    &format!(
+                        "round={}_A={}_B={}_s1_seed={}_s2_seed={}",
+                        round + 1,
+                        num_gen,
+                        num_bin,
+                        s1_seed,
+                        s2_seed
+                    ),
+                );
+                solved_bins[bi] = true;
+            }
+        }
+    }
+
+    let elapsed = t_start.elapsed().as_secs_f64();
+    let tot_moves = total_s1_moves + total_s15_moves + total_s2_moves;
+    println!(
+        "[dec-psl25] SUMMARY k={} A={} B={:?}: best_D={} (s1_sols={}, s1_rst={}) | best_2sym={:?} | solved={:?} | moves={} (S1={}, S1.5={}, S2={}, {:.0} mv/s) | elapsed={:.2}s",
+        k,
+        num_gen,
+        bin_list,
+        best_d_overall,
+        s1_solutions_found,
+        total_s1_restarts,
+        best_s2_per_bin,
+        solved_bins,
+        tot_moves,
+        total_s1_moves,
+        total_s15_moves,
+        total_s2_moves,
+        tot_moves as f64 / elapsed.max(1e-9),
+        elapsed
+    );
+
+    if s1_solutions_found == 0 {
+        let mut st_fallback = DecoupledPslState::from_parts(
+            k,
+            num_gen,
+            best_gen_overall,
+            bin_list[0],
+            vec![0u8; bin_list[0] * k],
+            true,
+        );
+        st_fallback.recompute_all(true);
+        let expanded_ca = st_fallback.to_proj_state().expand_exact_to_ca();
+        let gb = GlobalBest {
+            n: expanded_ca.n,
+            k,
+            v: 6,
+            uncovered: expanded_ca.uncovered(),
+            mat: expanded_ca.mat,
+            best_thread: 0,
+            best_seed: args.seed,
+            last_write: Instant::now(),
+        };
+        save_checkpoint(
+            &args.checkpoint_dir,
+            prefix,
+            "decoupled_psl25",
+            &gb,
+            tot_moves,
+            elapsed,
+            args.seed,
+            &format!("best_D={}_s1_rst={}", best_d_overall, total_s1_restarts),
+        );
+    }
+    Ok(())
+}
+
 fn main() {
     let args = match parse_args() {
         Ok(a) => a,
@@ -2016,6 +2488,7 @@ fn main() {
         "extend" => run_extend(&args),
         "orbit" => run_orbit(&args),
         "hybrid" => run_hybrid(&args),
+        "decoupled-psl25" | "decoupled_psl25" => run_decoupled_psl25(&args),
         other => Err(format!("unknown mode '{}'", other)),
     };
 
