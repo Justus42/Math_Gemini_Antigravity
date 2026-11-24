@@ -19,7 +19,7 @@ Verifies exact incremental counts & delta evaluation over 10,000 moves against f
 
 ## Modes
 
-- **`orbit`**: Searches starter rows under `--group z5` (orbit size 5), `--group g10` (orbit size 10, 12 non-constant orbits/triple), or `--group agl5` ($\mathrm{AGL}(1,5)$, orbit size 20, 6 non-constant orbits/triple) with `--algo tabu-cw | sa`.
+- **`orbit`**: Searches starter rows under `--group z5` (orbit size 5), `--group g10` (orbit size 10), `--group agl5` (orbit size 20), or mixed projective starters on $\mathbb{P}^1(\mathbb{F}_5)$ (`v=6`): `--group pgl25` (order 120) / `--group psl25` (order 60) with `--gen-starters A --bin-starters B --const-rows 6` ($N = |G|\cdot A + 30\cdot B + 6$, orbit-size-proportional fractional SWT).
 - **`extend`**: Extends a `(k-1)`-column baseline (e.g. `baselines/CA_165_3_8_5.txt`) via greedy column + repair-row initialization, locked Stage 1, and unfrozen Stage 2 (`--stage2-algo`).
 - **`reduce`**: Drops minimum-exclusivity row(s) from an existing CA (or `k`-column projection via `--drop-col <idx|all>`) and repairs; supports `--resume <checkpoint_matrix>`.
 - **`hybrid`**: Loads an existing matrix (`--input`), appends `--free-rows R` greedy repair rows, runs locked Stage 1 + unfrozen Stage 2.

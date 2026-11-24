@@ -1,5 +1,6 @@
 mod io;
 mod orbit;
+mod proj_orbit;
 mod rng;
 mod search;
 mod state;
@@ -9,6 +10,9 @@ use io::{
     CheckpointMeta,
 };
 use orbit::{orbit_sanity_test, search_orbit, OrbitGroup, OrbitSearchConfig, OrbitState, SearchAlgo};
+use proj_orbit::{
+    proj_sanity_test, search_proj_tabu_cw, ProjGroup, ProjOrbitState, ProjSearchConfig,
+};
 use rng::Rng;
 use search::{ca_sanity_test, search_ca, SearchConfig};
 use state::CaState;
@@ -46,6 +50,10 @@ struct Args {
     stage1_frac: f64,
     stage1_secs: Option<f64>,
     group: OrbitGroup,
+    proj_group: Option<ProjGroup>,
+    gen_starters: Option<usize>,
+    bin_starters: Option<usize>,
+    restart_stag: u64,
     const_rows: Option<usize>,
     free_rows: usize,
     orbit_secs: Option<f64>,
@@ -77,7 +85,8 @@ fn parse_args() -> Result<Args, String> {
              --full-scan-thresh <N> --log-interval <30>\n\
              reduce: --input <file> [--drop-col <idx|all>] [--probe-secs <1.5>] [--resume <file>]\n\
              extend: --input <file> --n <target_n> [--stage1-secs <90>] [--min-n <N>]\n\
-             orbit:  --group <z5|g10> --n <orbit_n> --k <k> --v <v> [--const-rows <0|v>] \
+             orbit:  --group <z5|g10|agl5|pgl25|psl25> --n <orbit_n> --k <k> --v <v> [--const-rows <0|v>] \
+                     [--gen-starters <A>] [--bin-starters <B>] [--restart-stag <1000000>] \
                      [--orbit-secs <f64>] [--free-rows <0>] [--free-stage1-secs <f64>]\n\
              hybrid: --input <file> --v <5> --free-rows <R> [--stage1-secs <60>] [--min-n <N>]"
                 .to_string(),
@@ -110,6 +119,10 @@ fn parse_args() -> Result<Args, String> {
         stage1_frac: 0.25,
         stage1_secs: None,
         group: OrbitGroup::Zv,
+        proj_group: None,
+        gen_starters: None,
+        bin_starters: None,
+        restart_stag: 1_000_000,
         const_rows: None,
         free_rows: 0,
         orbit_secs: None,
@@ -208,17 +221,53 @@ fn parse_args() -> Result<Args, String> {
             }
             "--group" => {
                 let g = next_val(&mut i)?.to_lowercase();
-                args.group = match g.as_str() {
-                    "z5" | "zv" => OrbitGroup::Zv,
-                    "g10" | "g2v" => OrbitGroup::G2v,
-                    "agl5" | "agl" => OrbitGroup::Agl,
+                match g.as_str() {
+                    "z5" | "zv" => {
+                        args.group = OrbitGroup::Zv;
+                        args.proj_group = None;
+                    }
+                    "g10" | "g2v" => {
+                        args.group = OrbitGroup::G2v;
+                        args.proj_group = None;
+                    }
+                    "agl5" | "agl" => {
+                        args.group = OrbitGroup::Agl;
+                        args.proj_group = None;
+                    }
+                    "pgl25" | "pgl" => {
+                        args.proj_group = Some(ProjGroup::Pgl25);
+                        args.v = 6;
+                    }
+                    "psl25" | "psl" => {
+                        args.proj_group = Some(ProjGroup::Psl25);
+                        args.v = 6;
+                    }
                     other => {
                         return Err(format!(
-                            "unknown --group '{}', expected z5, g10, or agl5",
+                            "unknown --group '{}', expected z5, g10, agl5, pgl25, or psl25",
                             other
                         ))
                     }
-                };
+                }
+            }
+            "--gen-starters" => {
+                args.gen_starters = Some(
+                    next_val(&mut i)?
+                        .parse()
+                        .map_err(|e| format!("--gen-starters: {}", e))?,
+                )
+            }
+            "--bin-starters" => {
+                args.bin_starters = Some(
+                    next_val(&mut i)?
+                        .parse()
+                        .map_err(|e| format!("--bin-starters: {}", e))?,
+                )
+            }
+            "--restart-stag" => {
+                args.restart_stag = next_val(&mut i)?
+                    .parse()
+                    .map_err(|e| format!("--restart-stag: {}", e))?
             }
             "--const-rows" => {
                 args.const_rows = Some(
@@ -416,6 +465,18 @@ fn run_sanity(args: &Args) -> Result<(), String> {
             agl_n, agl_mps, agl_unc
         );
     }
+
+    let (pgl_mps, pgl_unc, pgl_exp, pgl_n) = proj_sanity_test(ProjGroup::Pgl25, 2, 3, 9, true)?;
+    println!(
+        "[PASS] ProjOrbit(PGL25/tabu-cw, k=9, A=2 B=3 +6 -> N={}) 10,000-move incremental + weighted expansion (120*D+30*2sym) check: 0 discrepancies | throughput = {:.0} moves/sec | best_orb={} (exp={})",
+        pgl_n, pgl_mps, pgl_unc, pgl_exp
+    );
+
+    let (psl_mps, psl_unc, psl_exp, psl_n) = proj_sanity_test(ProjGroup::Psl25, 4, 3, 9, true)?;
+    println!(
+        "[PASS] ProjOrbit(PSL25/tabu-cw, k=9, A=4 B=3 +6 -> N={}) 10,000-move incremental + weighted expansion (60*(D1+D2)+30*2sym) check: 0 discrepancies | throughput = {:.0} moves/sec | best_orb={} (exp={})",
+        psl_n, psl_mps, psl_unc, psl_exp
+    );
     Ok(())
 }
 
@@ -1501,7 +1562,200 @@ fn run_hybrid(args: &Args) -> Result<(), String> {
     Ok(())
 }
 
+fn run_proj_orbit(args: &Args, group: ProjGroup) -> Result<(), String> {
+    let t_start = Instant::now();
+    let deadline = t_start + Duration::from_secs_f64(args.time_limit_secs);
+    let prefix = args.prefix.as_deref().unwrap_or(group.name());
+    let k = args.k;
+    let const_rows = args.const_rows.unwrap_or(6);
+    if const_rows != 0 && const_rows != 6 {
+        return Err(format!("--const-rows must be 0 or 6 for {}", group.name()));
+    }
+    let has_const = const_rows == 6;
+    let num_gen = args.gen_starters.unwrap_or(match group {
+        ProjGroup::Pgl25 => 2,
+        ProjGroup::Psl25 => 4,
+    });
+    let num_bin = args.bin_starters.unwrap_or(3);
+    let target_n = num_gen * group.order() + num_bin * 30 + const_rows;
+    if let Some(req_n) = args.n {
+        if req_n != target_n {
+            return Err(format!(
+                "mismatch: --n {} != |{}|*A({}) + 30*B({}) + const({}) = {}",
+                req_n,
+                group.name(),
+                num_gen,
+                num_bin,
+                const_rows,
+                target_n
+            ));
+        }
+    }
+    let full_thresh = args.full_scan_thresh.unwrap_or(500);
+    let num_vars = (num_gen + num_bin) * k;
+
+    println!(
+        "[proj:{}] Target CA({}; 3, {}, 6): A={} gen (|G|={}) + B={} bin (30) + {} const ({} vars) | algo=TabuCw(BASE_W=16..26), full_scan<={}, restart_stag={}, time={:.1}s, threads={}",
+        group.name(),
+        target_n,
+        k,
+        num_gen,
+        group.order(),
+        num_bin,
+        const_rows,
+        num_vars,
+        full_thresh,
+        args.restart_stag,
+        args.time_limit_secs,
+        args.threads
+    );
+
+    let solved_flag = Arc::new(AtomicBool::new(false));
+    let total_moves = Arc::new(AtomicU64::new(0));
+    let num_s = num_gen + num_bin;
+
+    let best_proj: Arc<Mutex<(usize, usize, Vec<u8>, usize, u64, usize, usize, f64)>> = Arc::new(
+        Mutex::new((
+            usize::MAX,
+            usize::MAX,
+            vec![0u8; num_s * k],
+            0,
+            args.seed,
+            usize::MAX,
+            usize::MAX,
+            0.0,
+        )),
+    );
+
+    let mut handles = Vec::with_capacity(args.threads);
+    for tid in 0..args.threads {
+        let solved_c = Arc::clone(&solved_flag);
+        let bp_c = Arc::clone(&best_proj);
+        let tm_c = Arc::clone(&total_moves);
+        let seed_t = thread_seed(args.seed, tid);
+        let (tmin, tmax) = thread_tenure_range(tid);
+        let cfg = ProjSearchConfig {
+            tenure_min: tmin,
+            tenure_max: tmax,
+            noise_prob: args.noise,
+            full_scan_thresh: full_thresh,
+            restart_stagnation: args.restart_stag,
+            log_interval_secs: args.log_interval,
+            thread_id: tid,
+        };
+
+        handles.push(thread::spawn(move || {
+            let mut rng = Rng::from_seed(seed_t);
+            let mut st = ProjOrbitState::new_random(group, num_gen, num_bin, k, has_const, &mut rng);
+            let res = search_proj_tabu_cw(&mut st, &mut rng, &cfg, deadline, &solved_c, None);
+            tm_c.fetch_add(res.moves, Ordering::Relaxed);
+            println!(
+                "  [proj-{}:t={}] Done (tenure={}..{}): best_orb={} (60s={}, 120s={}, last@{:.1}s, exp_unc={}), moves={}, smoothings={}, restarts={}",
+                group.name(),
+                tid,
+                tmin,
+                tmax,
+                res.best_uncovered_orbits,
+                res.best_at_60s,
+                res.best_at_120s,
+                res.last_improve_sec,
+                res.best_expanded_uncovered,
+                res.moves,
+                res.smoothings,
+                res.restarts
+            );
+            let mut guard = bp_c.lock().unwrap();
+            if res.best_at_60s < guard.5 {
+                guard.5 = res.best_at_60s;
+            }
+            if res.best_at_120s < guard.6 {
+                guard.6 = res.best_at_120s;
+            }
+            if res.best_uncovered_orbits < guard.0
+                || (res.best_uncovered_orbits == guard.0
+                    && res.best_expanded_uncovered < guard.1)
+            {
+                guard.0 = res.best_uncovered_orbits;
+                guard.1 = res.best_expanded_uncovered;
+                guard.2 = res.best_starters;
+                guard.3 = tid;
+                guard.4 = seed_t;
+                guard.7 = res.last_improve_sec;
+                if res.best_uncovered_orbits == 0 {
+                    solved_c.store(true, Ordering::Relaxed);
+                }
+            }
+        }));
+    }
+    for h in handles {
+        let _ = h.join();
+    }
+
+    let (best_orb, best_exp_pred, best_starters, best_tid, best_seed_t, best_60, best_120, last_imp) =
+        best_proj.lock().unwrap().clone();
+    let elapsed = t_start.elapsed().as_secs_f64();
+    let tot_moves = total_moves.load(Ordering::Relaxed);
+
+    let final_st = ProjOrbitState::from_starters(group, best_starters, num_gen, num_bin, k, has_const);
+    let expanded_ca = final_st.expand_exact_to_ca();
+    let exp_unc = expanded_ca.uncovered();
+    debug_assert_eq!(exp_unc, best_exp_pred);
+
+    println!(
+        "[proj:{}] SUMMARY CA({}; 3, {}, 6) [A={} B={} +{}]: best_orb={} (60s={}, 120s={}, last@{:.1}s, exp_unc={}), moves={} ({:.0} moves/sec), elapsed={:.2}s",
+        group.name(),
+        target_n,
+        k,
+        num_gen,
+        num_bin,
+        const_rows,
+        best_orb,
+        best_60,
+        best_120,
+        last_imp,
+        exp_unc,
+        tot_moves,
+        tot_moves as f64 / elapsed.max(1e-9),
+        elapsed
+    );
+
+    let gb = GlobalBest {
+        n: target_n,
+        k,
+        v: 6,
+        uncovered: exp_unc,
+        mat: expanded_ca.mat,
+        best_thread: best_tid,
+        best_seed: best_seed_t,
+        last_write: Instant::now(),
+    };
+    save_checkpoint(
+        &args.checkpoint_dir,
+        prefix,
+        &format!("proj_{}", group.name()),
+        &gb,
+        tot_moves,
+        elapsed,
+        args.seed,
+        &format!(
+            "group={}_A={}_B={}_const={}_orb={}_60s={}_120s={}_last={:.1}s",
+            group.name(),
+            num_gen,
+            num_bin,
+            const_rows,
+            best_orb,
+            best_60,
+            best_120,
+            last_imp
+        ),
+    );
+    Ok(())
+}
+
 fn run_orbit(args: &Args) -> Result<(), String> {
+    if let Some(pg) = args.proj_group {
+        return run_proj_orbit(args, pg);
+    }
     let t_start = Instant::now();
     let deadline = t_start + Duration::from_secs_f64(args.time_limit_secs);
     let prefix = args.prefix.as_deref().unwrap_or("orbit");
