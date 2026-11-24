@@ -745,10 +745,13 @@ pub struct OrbitSearchConfig {
     pub tenure_min: u32,
     pub tenure_max: u32,
     pub noise_prob: f64,
+    #[allow(dead_code)]
     pub use_weights: bool,
     pub t_start: f64,
     pub t_end: f64,
     pub full_scan_thresh: usize,
+    pub restart_stagnation: u64,
+    pub base_seed: u64,
     pub log_interval_secs: f64,
     pub thread_id: usize,
 }
@@ -764,6 +767,8 @@ impl Default for OrbitSearchConfig {
             t_start: 1.8,
             t_end: 0.05,
             full_scan_thresh: 35,
+            restart_stagnation: 0,
+            base_seed: 42,
             log_interval_secs: 30.0,
             thread_id: 0,
         }
@@ -806,6 +811,7 @@ fn search_orbit_tabu_cw(
 
     let mut best_unc = state.uncovered_orbits();
     let mut best_starters = state.starters.clone();
+    let mut best_in_restart = best_unc;
     let mut best_at_60s = best_unc;
     let mut best_at_120s = best_unc;
     let mut recorded_60 = false;
@@ -813,11 +819,13 @@ fn search_orbit_tabu_cw(
     let mut last_improve_sec = 0.0f64;
 
     let mut moves: u64 = 0;
+    let mut stag_moves: u64 = 0;
     let mut step_u32: u32 = 1;
     let mut plateau_steps: u32 = 0;
     let mut max_weight: u32 = BASE_W;
     let mut last_log = t0;
     let mut smoothings: u64 = 0;
+    let mut restarts: u64 = 0;
 
     let tenure_span = (cfg.tenure_max.saturating_sub(cfg.tenure_min) + 1) as usize;
     let mut cands: Vec<(usize, usize, u8)> = Vec::with_capacity(num_s * k * v);
@@ -846,7 +854,7 @@ fn search_orbit_tabu_cw(
                 && now.saturating_duration_since(last_log).as_secs_f64() >= cfg.log_interval_secs
             {
                 println!(
-                    "    [tabu-cw-{}:t={}] t={:5.1}s | cur_orb={:3} | best_orb={:3} (last@{:5.1}s) | max_w={:2} sm={} | {:.0} mv/s",
+                    "    [tabu-cw-{}:t={}] t={:5.1}s | cur_orb={:3} | best_orb={:3} (last@{:5.1}s) | max_w={:2} sm={} rst={} | {:.0} mv/s",
                     state.group.name(),
                     cfg.thread_id,
                     el,
@@ -855,6 +863,7 @@ fn search_orbit_tabu_cw(
                     last_improve_sec,
                     max_weight,
                     smoothings,
+                    restarts,
                     moves as f64 / el.max(1e-9)
                 );
                 last_log = now;
@@ -939,7 +948,7 @@ fn search_orbit_tabu_cw(
 
             for &(s, c, nv) in &cands {
                 let (du, dw) = state.eval_move(s, c, nv, true);
-                let asp = (cur_unc + du) < (best_unc as i32);
+                let asp = (cur_unc + du) < (best_in_restart as i32) || (cur_unc + du) == 0;
                 if asp {
                     let ascore = (du, dw);
                     if ascore < best_asp_score {
@@ -1024,15 +1033,46 @@ fn search_orbit_tabu_cw(
         let tenure = cfg.tenure_min + rng.gen_usize(tenure_span) as u32;
         tabu[(s * k + c) * v + old_v as usize] = step_u32 + tenure;
         moves += 1;
+        stag_moves += 1;
         step_u32 += 1;
 
         let new_unc = state.uncovered_orbits();
-        if new_unc < best_unc {
-            best_unc = new_unc;
-            best_starters.copy_from_slice(&state.starters);
-            last_improve_sec = t0.elapsed().as_secs_f64();
-            if new_unc == 0 {
-                break;
+        if new_unc < best_in_restart {
+            best_in_restart = new_unc;
+            stag_moves = 0;
+            if new_unc < best_unc {
+                best_unc = new_unc;
+                best_starters.copy_from_slice(&state.starters);
+                last_improve_sec = t0.elapsed().as_secs_f64();
+                if new_unc == 0 {
+                    break;
+                }
+            }
+        } else if cfg.restart_stagnation > 0 && stag_moves >= cfg.restart_stagnation {
+            restarts += 1;
+            let rst_seed = cfg
+                .base_seed
+                .wrapping_add(restarts.wrapping_mul(0x9e37_79b9_7f4a_7c15))
+                ^ (restarts << 32);
+            *rng = Rng::from_seed(rst_seed);
+            for x in &mut state.starters {
+                *x = rng.gen_usize(v) as u8;
+            }
+            state.recompute_counts();
+            state.weights.fill(BASE_W);
+            tabu.fill(0);
+            step_u32 = 1;
+            max_weight = BASE_W;
+            plateau_steps = 0;
+            best_in_restart = state.uncovered_orbits();
+            stag_moves = 0;
+            if best_in_restart < best_unc {
+                best_unc = best_in_restart;
+                best_starters.copy_from_slice(&state.starters);
+                last_improve_sec = t0.elapsed().as_secs_f64();
+                if best_in_restart == 0 {
+                    break;
+                }
             }
         }
     }
@@ -1386,7 +1426,8 @@ pub fn orbit_sanity_test(
     num_starters: usize,
     has_const: bool,
 ) -> Result<(f64, usize, usize), String> {
-    let mut rng = Rng::from_seed(0xC0FFEE_1234 ^ (group.orbit_size(v) as u64));
+    let seed = 0xC0FFEE_1234 ^ (group.orbit_size(v) as u64);
+    let mut rng = Rng::from_seed(seed);
     let mut st = OrbitState::new_random(group, num_starters, k, v, has_const, &mut rng);
     st.verify_incremental()?;
 
@@ -1399,6 +1440,8 @@ pub fn orbit_sanity_test(
         t_start: 1.5,
         t_end: 0.1,
         full_scan_thresh: if group == OrbitGroup::G2v { 35 } else { 45 },
+        restart_stagnation: 4000,
+        base_seed: seed,
         log_interval_secs: 0.0,
         thread_id: 0,
     };

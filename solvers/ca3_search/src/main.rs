@@ -1640,6 +1640,7 @@ fn run_proj_orbit(args: &Args, group: ProjGroup) -> Result<(), String> {
             noise_prob: args.noise,
             full_scan_thresh: full_thresh,
             restart_stagnation: args.restart_stag,
+            base_seed: seed_t,
             log_interval_secs: args.log_interval,
             thread_id: tid,
         };
@@ -1803,7 +1804,7 @@ fn run_orbit(args: &Args) -> Result<(), String> {
     let orbit_deadline = (t_start + Duration::from_secs_f64(orbit_secs)).min(deadline);
 
     println!(
-        "[orbit:{}] Target CA({}; 3, {}, {}): {} starters (orb_sz={}) + {} const rows | algo={:?}, full_scan<={}, orbit={:.1}s, threads={}",
+        "[orbit:{}] Target CA({}; 3, {}, {}): {} starters (orb_sz={}) + {} const rows | algo={:?}, full_scan<={}, restart_stag={}, orbit={:.1}s, threads={}",
         group.name(),
         orbit_n,
         k,
@@ -1813,6 +1814,7 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         const_rows,
         args.algo,
         full_thresh,
+        args.restart_stag,
         orbit_secs,
         args.threads
     );
@@ -1850,6 +1852,8 @@ fn run_orbit(args: &Args) -> Result<(), String> {
             t_start: args.t_start,
             t_end: args.t_end,
             full_scan_thresh: full_thresh,
+            restart_stagnation: args.restart_stag,
+            base_seed: seed_t,
             log_interval_secs: args.log_interval,
             thread_id: tid,
         };

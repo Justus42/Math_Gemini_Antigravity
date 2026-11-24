@@ -687,6 +687,7 @@ pub struct ProjSearchConfig {
     pub full_scan_thresh: usize,
     /// Optional restart after this many moves without improving current-restart best (0 = off)
     pub restart_stagnation: u64,
+    pub base_seed: u64,
     pub log_interval_secs: f64,
     pub thread_id: usize,
 }
@@ -969,6 +970,11 @@ pub fn search_proj_tabu_cw(
             }
         } else if cfg.restart_stagnation > 0 && stag_moves >= cfg.restart_stagnation {
             restarts += 1;
+            let rst_seed = cfg
+                .base_seed
+                .wrapping_add(restarts.wrapping_mul(0x9e37_79b9_7f4a_7c15))
+                ^ (restarts << 32);
+            *rng = Rng::from_seed(rst_seed);
             for sr in 0..state.num_gen {
                 for col in 0..k {
                     state.starters[sr * k + col] = rng.gen_usize(6) as u8;
@@ -989,6 +995,18 @@ pub fn search_proj_tabu_cw(
             plateau_steps = 0;
             best_in_restart = state.uncovered_orbits();
             stag_moves = 0;
+            if best_in_restart < best_unc
+                || (best_in_restart == best_unc
+                    && state.expected_expanded_uncovered() < best_exp_unc)
+            {
+                best_unc = best_in_restart;
+                best_exp_unc = state.expected_expanded_uncovered();
+                best_starters.copy_from_slice(&state.starters);
+                last_improve_sec = t0.elapsed().as_secs_f64();
+                if best_in_restart == 0 {
+                    break;
+                }
+            }
         }
     }
 
@@ -1023,7 +1041,8 @@ pub fn proj_sanity_test(
     k: usize,
     has_const: bool,
 ) -> Result<(f64, usize, usize, usize), String> {
-    let mut rng = Rng::from_seed(0x9E37_79B9 ^ (group.order() as u64) ^ ((k as u64) << 16));
+    let seed = 0x9E37_79B9 ^ (group.order() as u64) ^ ((k as u64) << 16);
+    let mut rng = Rng::from_seed(seed);
     let mut st = ProjOrbitState::new_random(group, num_gen, num_bin, k, has_const, &mut rng);
     st.verify_incremental()?;
 
@@ -1032,7 +1051,8 @@ pub fn proj_sanity_test(
         tenure_max: 10,
         noise_prob: 0.002,
         full_scan_thresh: 500,
-        restart_stagnation: 0,
+        restart_stagnation: 4000,
+        base_seed: seed,
         log_interval_secs: 0.0,
         thread_id: 0,
     };
