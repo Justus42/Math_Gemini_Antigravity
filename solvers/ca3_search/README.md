@@ -1,6 +1,6 @@
 # `ca3_search` — Zero-Dependency Rust Solver for Strength-3 Covering Arrays
 
-Native Rust (`std`-only, zero external crates) incremental local-search solver for covering arrays $\mathrm{CA}(N; 3, k, v)$ with L1-cache-resident flat interaction counts, time-based geometric Simulated Annealing + Endgame Exact Full-Focused-Neighborhood Tabu (`unc <= 25`), cyclic $\mathbb{Z}_v$ and order-$2v$ ($G_{10}$) orbit quotient spaces, 2-thread deterministic multi-start (`SplitMix64` + `Xoshiro256**`), and atomic checkpointing/resume.
+Native Rust (`std`-only, zero external crates) incremental local-search solver for covering arrays $\mathrm{CA}(N; 3, k, v)$ with L1-cache-resident flat interaction counts, non-freezing Focused Tabu + fractional fixed-point SWT Clause Weighting (`--algo tabu-cw`, `BASE_W=16..MAX_W=26`, $O(1)$ deduplicated full-scan), geometric Simulated Annealing (`--algo sa`, `--algo hybrid-sa-cw`), orbit quotient spaces (`--group z5 | g10 | agl5`), 2-thread deterministic multi-start (`SplitMix64` + `Xoshiro256**`), and atomic checkpointing/resume.
 
 ## Build
 
@@ -10,7 +10,7 @@ RUSTFLAGS="-C target-cpu=native" cargo build --release --manifest-path solvers/c
 
 ## Sanity Check
 
-Verifies exact incremental counts & delta evaluation over 10,000 moves against full recomputation (0 discrepancies required) for `CaState`, `OrbitState(Z5)` (5× expansion invariant), and `OrbitState(G10)` (10× expansion invariant):
+Verifies exact incremental counts & delta evaluation over 10,000 moves against full recomputation (0 discrepancies required) for `CaState`, `OrbitState(Z5)` (5× expansion), `OrbitState(G10)` (10× expansion), and `OrbitState(AGL5)` (20× expansion):
 
 ```bash
 ./solvers/ca3_search/target/release/ca3_search sanity \
@@ -19,7 +19,7 @@ Verifies exact incremental counts & delta evaluation over 10,000 moves against f
 
 ## Modes
 
-- **`orbit`**: Searches starter rows under `--group z5` ($x \mapsto x + b \pmod 5$, orbit size 5) or `--group g10` ($x \mapsto s x + b \pmod 5, s \in \{1,4\}$, orbit size 10, 12 non-constant orbits/triple) with optional `--const-rows 0|v`, time-based geometric SA (`--t-start`, `--t-end`), endgame full-focused Tabu (`--endgame`), and optional `--free-rows R` hybrid polishing.
-- **`hybrid`**: Loads an expanded orbit or baseline checkpoint (`--input`), appends `--free-rows R` greedy-initialized repair rows focused on uncovered triples, optimizes the `R` free rows in Stage 1 (`--stage1-secs`), then unfreezes the full array in Stage 2 (auto-reducing toward `--min-n` if `unc == 0`).
+- **`orbit`**: Searches starter rows under `--group z5` (orbit size 5), `--group g10` (orbit size 10, 12 non-constant orbits/triple), or `--group agl5` ($\mathrm{AGL}(1,5)$, orbit size 20, 6 non-constant orbits/triple) with `--algo tabu-cw | sa`.
+- **`extend`**: Extends a `(k-1)`-column baseline (e.g. `baselines/CA_165_3_8_5.txt`) via greedy column + repair-row initialization, locked Stage 1, and unfrozen Stage 2 (`--stage2-algo`).
 - **`reduce`**: Drops minimum-exclusivity row(s) from an existing CA (or `k`-column projection via `--drop-col <idx|all>`) and repairs; supports `--resume <checkpoint_matrix>`.
-- **`extend`**: Extends a `(k-1)`-column baseline (e.g. `baselines/CA_165_3_8_5.txt`) via greedy column + repair-row initialization, locked Stage 1, and unfrozen Stage 2.
+- **`hybrid`**: Loads an existing matrix (`--input`), appends `--free-rows R` greedy repair rows, runs locked Stage 1 + unfrozen Stage 2.

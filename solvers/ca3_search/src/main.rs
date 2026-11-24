@@ -211,8 +211,12 @@ fn parse_args() -> Result<Args, String> {
                 args.group = match g.as_str() {
                     "z5" | "zv" => OrbitGroup::Zv,
                     "g10" | "g2v" => OrbitGroup::G2v,
+                    "agl5" | "agl" => OrbitGroup::Agl,
                     other => {
-                        return Err(format!("unknown --group '{}', expected z5 or g10", other))
+                        return Err(format!(
+                            "unknown --group '{}', expected z5, g10, or agl5",
+                            other
+                        ))
                     }
                 };
             }
@@ -403,6 +407,13 @@ fn run_sanity(args: &Args) -> Result<(), String> {
         println!(
             "[PASS] OrbitState(G10/tabu-cw, 17+5 -> N={}) 10,000-move incremental + 10x expansion check: 0 discrepancies | throughput = {:.0} moves/sec | best_unc_orbits = {}",
             g10_n, g10_mps, g10_unc
+        );
+    }
+    if v == 5 {
+        let (agl_mps, agl_unc, agl_n) = orbit_sanity_test(OrbitGroup::Agl, 8, v, 8, true)?;
+        println!(
+            "[PASS] OrbitState(AGL5/tabu-cw, k=8, 8+5 -> N={}) 10,000-move incremental + 20x expansion check: 0 discrepancies | throughput = {:.0} moves/sec | best_unc_orbits = {}",
+            agl_n, agl_mps, agl_unc
         );
     }
     Ok(())
@@ -1503,9 +1514,11 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         return Err(format!("--const-rows must be 0 or v={}", v));
     }
     let has_const = const_rows == v;
-    let orbit_n = args
-        .n
-        .unwrap_or(if group == OrbitGroup::G2v { 175 } else { 180 });
+    let orbit_n = args.n.unwrap_or(match group {
+        OrbitGroup::Agl => 165,
+        OrbitGroup::G2v => 175,
+        OrbitGroup::Zv => 180,
+    });
     if orbit_n < const_rows || (orbit_n - const_rows) % orb_sz != 0 {
         return Err(format!(
             "orbit_n={} must equal num_starters * {} + const_rows({}) for group {}",
@@ -1516,10 +1529,9 @@ fn run_orbit(args: &Args) -> Result<(), String> {
         ));
     }
     let num_starters = (orbit_n - const_rows) / orb_sz;
-    let full_thresh = args.full_scan_thresh.unwrap_or(if group == OrbitGroup::G2v {
-        35
-    } else {
-        45
+    let full_thresh = args.full_scan_thresh.unwrap_or(match group {
+        OrbitGroup::Agl | OrbitGroup::G2v => 35,
+        OrbitGroup::Zv => 45,
     });
 
     let orbit_secs = if let Some(os) = args.orbit_secs {

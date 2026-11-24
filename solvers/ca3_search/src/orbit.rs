@@ -31,12 +31,28 @@ fn neg_mod(a: u32, v: u32) -> u32 {
     }
 }
 
+fn is_prime(n: usize) -> bool {
+    if n < 2 {
+        return false;
+    }
+    let mut d = 2;
+    while d * d <= n {
+        if n % d == 0 {
+            return false;
+        }
+        d += 1;
+    }
+    true
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum OrbitGroup {
     /// Cyclic group Z_v: x -> x + b (mod v), orbit size v (for v=5: 5)
     Zv,
     /// Dihedral-affine group G_{2v}: x -> s*x + b (mod v), s in {1, v-1}, b in Z_v (odd v >= 3; for v=5: G10, orbit size 10)
     G2v,
+    /// Full affine group AGL(1, v): x -> s*x + b (mod v), s in {1..v-1}, b in Z_v (prime v >= 3; for v=5: agl5, orbit size 20)
+    Agl,
 }
 
 impl OrbitGroup {
@@ -44,6 +60,7 @@ impl OrbitGroup {
         match self {
             OrbitGroup::Zv => "z5",
             OrbitGroup::G2v => "g10",
+            OrbitGroup::Agl => "agl5",
         }
     }
 
@@ -54,6 +71,10 @@ impl OrbitGroup {
                 assert!(v % 2 == 1 && v >= 3, "G2v requires odd v >= 3");
                 2 * v
             }
+            OrbitGroup::Agl => {
+                assert!(is_prime(v) && v >= 3, "AGL(1, v) requires prime v >= 3");
+                v * (v - 1)
+            }
         }
     }
 
@@ -63,6 +84,11 @@ impl OrbitGroup {
             OrbitGroup::G2v => {
                 assert!(v % 2 == 1 && v >= 3, "G2v requires odd v >= 3");
                 (v * v + 1) / 2
+            }
+            OrbitGroup::Agl => {
+                assert!(is_prime(v) && v >= 3, "AGL(1, v) requires prime v >= 3");
+                // (0,0) constant orbit + (v^2 - 1)/(v - 1) = v + 1 non-constant projective orbits
+                v + 2
             }
         }
     }
@@ -85,7 +111,7 @@ struct OrbitColTriple {
     pos: u8,
 }
 
-/// Quotient orbit state for Z_v (order v) or G_{2v} (order 2v, e.g. G10 for v=5).
+/// Quotient orbit state for Z_v (order v), G_{2v} (order 2v, e.g. G10), or AGL(1,v) (order v(v-1), e.g. agl5).
 #[derive(Clone)]
 pub struct OrbitState {
     pub group: OrbitGroup,
@@ -147,6 +173,40 @@ fn build_orbit_tables(group: OrbitGroup, v: usize) -> (Vec<u32>, Vec<(u32, u32)>
                 }
             }
             debug_assert_eq!(orb_reps.len(), (v * v + 1) / 2);
+        }
+        OrbitGroup::Agl => {
+            assert!(is_prime(v) && v >= 3, "AGL(1, v) requires prime v >= 3");
+            orb_map[0] = 0;
+            orb_reps.push((0, 0));
+            let mut next_id = 1u32;
+            for d1 in 0..v_u32 {
+                for d2 in 0..v_u32 {
+                    if d1 == 0 && d2 == 0 {
+                        continue;
+                    }
+                    // Check if (d1, d2) is the lexicographical minimum of {(s*d1, s*d2) mod v | s in 1..v}
+                    let mut is_min = true;
+                    for s in 2..v_u32 {
+                        let sd1 = (s * d1) % v_u32;
+                        let sd2 = (s * d2) % v_u32;
+                        if (sd1, sd2) < (d1, d2) {
+                            is_min = false;
+                            break;
+                        }
+                    }
+                    if is_min {
+                        let id = next_id;
+                        next_id += 1;
+                        for s in 1..v_u32 {
+                            let sd1 = (s * d1) % v_u32;
+                            let sd2 = (s * d2) % v_u32;
+                            orb_map[(sd1 * v_u32 + sd2) as usize] = id;
+                        }
+                        orb_reps.push((d1, d2));
+                    }
+                }
+            }
+            debug_assert_eq!(orb_reps.len(), v + 2);
         }
     }
     (orb_map, orb_reps)
@@ -475,6 +535,18 @@ impl OrbitState {
                     }
                 }
             }
+            OrbitGroup::Agl => {
+                for s in 0..self.num_starters {
+                    let row = &self.starters[s * self.k..(s + 1) * self.k];
+                    for s_mult in 1..self.v {
+                        for b in 0..self.v {
+                            for &val in row {
+                                mat.push(((s_mult * (val as usize) + b) % self.v) as u8);
+                            }
+                        }
+                    }
+                }
+            }
         }
         CaState::from_matrix(mat, n, self.k, self.v)
     }
@@ -605,11 +677,23 @@ impl OrbitState {
         let [c0, c1, c2] = self.triple_cols[t_idx];
         let (c0, c1, c2) = (c0 as usize, c1 as usize, c2 as usize);
         self.push_focused_dedup(c0, c1, c2, d1, d2, seen, stamp, cands);
-        if self.group == OrbitGroup::G2v && (d1 != 0 || d2 != 0) {
+        if d1 != 0 || d2 != 0 {
             let v_u32 = self.v as u32;
-            let nd1 = neg_mod(d1, v_u32);
-            let nd2 = neg_mod(d2, v_u32);
-            self.push_focused_dedup(c0, c1, c2, nd1, nd2, seen, stamp, cands);
+            match self.group {
+                OrbitGroup::Zv => {}
+                OrbitGroup::G2v => {
+                    let nd1 = neg_mod(d1, v_u32);
+                    let nd2 = neg_mod(d2, v_u32);
+                    self.push_focused_dedup(c0, c1, c2, nd1, nd2, seen, stamp, cands);
+                }
+                OrbitGroup::Agl => {
+                    for s_mult in 2..v_u32 {
+                        let sd1 = (s_mult * d1) % v_u32;
+                        let sd2 = (s_mult * d2) % v_u32;
+                        self.push_focused_dedup(c0, c1, c2, sd1, sd2, seen, stamp, cands);
+                    }
+                }
+            }
         }
     }
 
