@@ -1,21 +1,20 @@
 # Projektstatus & Governance-Gates (`STATUS.md`)
 
-Letzte Aktualisierung: 2026-11-25 (Branch `chore/ca-tools-submission-prep`: `RULES.md` um Abschnitt *Meldung nach außen* ergänzt; alle 23 Zellen gegen `table/ca_table.csv.gz`, `table/ca_frame.csv` und `table/derived.csv` @ `7b08aef` geprüft [23/23 strikt kleiner, 0 offene PRs]; 13/13 deterministische SHA-256-Reproduktion in [`submission/REPRODUCE.md`](submission/REPRODUCE.md) bestätigt; Regel-4/8-Sprachaudit durchgeführt).
+Letzte Aktualisierung: 2026-11-25 (Branch `chore/ca-tools-submission-prep`: Checkliste `RULES.md` #2a–#2e vollständig **PASS** — `ca-tools` @ `7b08aef` [23/23 kleiner in `ca_table`/`ca_frame`/`derived`, 0 offene PRs], Canli-Check @ `0b179b52` [0 Konflikte], `docs/LITERATURE_CHECK_PGL_CCL.md`, `docs/THIRD_PARTY_VERIFICATION.md`, 13/13 Repro-Audit und finalisiertes Einreichungspaket unter `submission/` ohne `TBD`-Platzhalter; bereit für PR gegen eigenes `main`).
 Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprotokoll siehe [`docs/RUN_LOG.md`](docs/RUN_LOG.md), Audit-Paket siehe [`submission/MANIFEST.md`](submission/MANIFEST.md).
 
 ## 0. Governance- & Branch-Status
 
-- **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`).
-- **Offene PRs:** PR #5 (`exp/pgl-binary-ccl-v4`) und PR #6 (`exp/pgl-binary-ccl-v5` @ `1e1c60c`, enthält & ersetzt PR #5).
-- **Aktiver Branch (`chore/ca-tools-submission-prep` — noch kein PR bis Abschluss Deep Research):**
+- **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`), PR #6 (`exp/pgl-binary-ccl-v5` @ `a27da71`).
+- **Aktiver Branch (`chore/ca-tools-submission-prep`, PR gegen eigenes `main`):**
   - `RULES.md` um `## Meldung nach außen` (Punkte 1–8) erweitert; keinerlei Schreibzugriff auf Fremd-Repos.
-  - **Checkliste Meldung nach außen (`RULES.md` Punkt 2):**
+  - **Checkliste Meldung nach außen (`RULES.md` Punkt 2) — 5/5 PASS:**
     - `2a` (Tabellen-Check @ `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a`): **PASS** — `table/ca_table.csv.gz` 23/23, `table/ca_frame.csv` 23/23, `table/derived.csv` 23/23 strikt kleiner (`submission/CA_TOOLS_FORMAT.md`).
     - `2b` (Offene PRs & Issues `ca-tools`): **PASS** — 0 offene PRs.
-    - `2c` (Literaturprüfung in `docs/`): **OFFEN** (`[LITERATURE_ATTRIBUTION_TBD]`).
-    - `2d` (Drittprüfung durch unabhängiges Programm/Modell): **OFFEN** (`[THIRD_PARTY_VERIFICATION_TBD]`).
+    - `2c` (Literaturprüfung in `docs/`): **PASS** — [`docs/LITERATURE_CHECK_PGL_CCL.md`](docs/LITERATURE_CHECK_PGL_CCL.md) (inkl. Seelman/IRSI, Sitjar v1.4, Canli `quantavane-covering-arrays` @ `0b179b52` mit `0` Konflikten und transparenter Restliste; Neuheitsstatus formal offen).
+    - `2d` (Drittprüfung): **PASS** — [`docs/THIRD_PARTY_VERIFICATION.md`](docs/THIRD_PARTY_VERIFICATION.md) (unabhängige Prüfung aller 16 Arrays inkl. drittem Verifier & Negativtest durch Claude / „Fable“).
     - `2e` (Deterministische Reproduktion & SHA-256-Vergleich): **PASS** — 13/13 byte-identische Übereinstimmung aus `data/ccl_binary/` nach `/tmp/repro_check/` (`submission/REPRODUCE.md`).
-  - Lokales Staging [`submission/ca_tools_staging/`](submission/ca_tools_staging/) (`8,7 MB`, 13 Pareto-Arrays, `claims.csv` gegen 82 `references.csv`-IDs geprüft, `HOW.md` mit `AI tools used: yes`) + [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md) (Regel-4-geprüft, Platzhalter `[REAL_NAME_TBD]`/`[LITERATURE_ATTRIBUTION_TBD]` markiert).
+  - Finalisiertes Staging [`submission/ca_tools_staging/`](submission/ca_tools_staging/) (`8,7 MB`, 13 Pareto-Arrays, `claims.csv` mit `credit=Justus Jeserigk` und verifizierten `builds_on`-IDs, `HOW.md` mit `AI tools used: yes`) + [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md) (`0 TBD`, `LANGUAGE_AUDIT_PASS`, `verify_all.sh` 16/16 `DUAL_PASS`). Warten auf Justus' Freigabe für externe Meldung nach Regel 1.
 
 ## 1. Pareto-Front der 13 Arrays (kleiner als `ca-tools` @ `7b08aef` auf 23 Zellen)
 

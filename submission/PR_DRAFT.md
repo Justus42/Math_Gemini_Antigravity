@@ -1,40 +1,47 @@
 # Pull Request Draft for `chrispbsmolen/ca-tools`
 
-> **BEFORE OPENING THE PR:**
-> 1. Replace all `[REAL_NAME_TBD]`, `[AFFILIATION_TBD]`, `[EMAIL_TBD]`, `[FINAL_MAIN_COMMIT_TBD]`, and `[LITERATURE_ATTRIBUTION_TBD]` placeholders in `HOW.md`, `claims.csv`, and this PR text.
-> 2. Copy `submission/ca_tools_staging/` as `submissions/<slug>/` into your own fork of `chrispbsmolen/ca-tools` (touching **no** files outside `submissions/<slug>/`, per Rule 7).
-> 3. Run `python3 tools/check_submission.py submissions/<slug>` locally in your `ca-tools` clone before pushing.
+> **Release Checklist (for Justus before opening a PR on a fork of `chrispbsmolen/ca-tools`):**
+> 1. Re-verify `chrispbsmolen/ca-tools` `main` commit and open PRs immediately prior to submission (`RULES.md` #2a/#2b).
+> 2. Copy `submission/ca_tools_staging/` as `submissions/jeserigk-pgl-ccl-2026-11/` into your fork (changing **no** files outside that directory, Rule 7).
+> 3. Run `python3 tools/check_submission.py submissions/jeserigk-pgl-ccl-2026-11` locally in your `ca-tools` clone before pushing.
 
 ---
 
 ## Suggested PR Title
 
-`Submission <slug>: 13 strength-3 covering arrays smaller than ca-tools @ 7b08aef (v=10, 12, 14, 20; 23 entries)`
+`Submission jeserigk-pgl-ccl-2026-11: 13 strength-3 covering arrays smaller than ca-tools @ 7b08aef (v=10, 12, 14, 20; 23 entries)`
 
 ## Suggested PR Body
 
-Adds `submissions/<slug>/` containing **13 Pareto-front strength-3 covering arrays**, `claims.csv`, and `HOW.md`. Under stair-step semantics, these 13 arrays are strictly smaller than `chrispbsmolen/ca-tools` at commit `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a` (checked across `table/ca_table.csv.gz`, `table/ca_frame.csv`, and `table/derived.csv`) on **23 entries** across four alphabet sizes (`v = 10, 12, 14, 20`), reducing `N` by **44 to 607 rows** relative to that snapshot.
+Adds `submissions/jeserigk-pgl-ccl-2026-11/` containing **13 Pareto-front strength-3 covering arrays**, `claims.csv`, and `HOW.md`. Under stair-step semantics, these 13 arrays are strictly smaller than `chrispbsmolen/ca-tools` at commit `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a` (checked across `table/ca_table.csv.gz`, `table/ca_frame.csv`, and `table/derived.csv`, 0 open PRs at check time) on **23 entries** across four alphabet sizes (`v = 10, 12, 14, 20`), reducing `N` by **44 to 607 rows** relative to that snapshot.
 
 ### Prior Work & Construction
 
-Building on group-action constructions for strength-3 covering arrays (Chateauneuf–Colbourn–Kreher 1999; Chateauneuf–Kreher 2002; Meagher–Stevens 2005), binary pair-expansion / augmented-annealing constructions (Cohen–Colbourn–Ling 2008), and tabu/clause-weighting local search (Nurmela 2004), all 13 arrays are generated from **one uniform, from-scratch construction** parameterized by a prime power `q` (`v = q + 1`, `k <= 2q`):
+This construction builds directly on prior strength-3 group-action and pair-expansion work:
+- **Chateauneuf, Colbourn and Kreher (1999, `ck-cck1999`)** and **Meagher and Stevens (2005, `group-ms2005`)**: group constructions for covering arrays.
+- **Chateauneuf and Kreher (2002, `ck-ck2002`)**: strength-3 constructions and doubling benchmarks.
+- **Cohen, Colbourn and Ling (2008, Constructions 1–3, `sa-ccl2008`)**: closest predecessor, combining a single `PGL(2, q)` orbit (`k <= q + 1`) with binary pair expansion (`TOCA`).
+- **Nurmela (2004, `tabu-n2004`)**: tabu search for covering arrays.
+*(By contrast, Maity et al. 2018 [`pgl-macc2018`] apply `PGL(2, q)` at strength `t = 4`.)*
 
-`[LITERATURE_ATTRIBUTION_TBD]`
-*(Pending written literature review in `docs/` prior to release: verify exact prior-art attribution and `builds_on` IDs against Cohen–Colbourn–Ling 2008 [`sa-ccl2008`], Chateauneuf–Kreher 2002 [`ck-ck2002`], Chateauneuf–Colbourn–Kreher 1999 [`ck-cck1999`], Meagher–Stevens 2005 [`group-ms2005`], and Nurmela 2004 [`tabu-n2004`].)*
+Extending the single-orbit CCL (2008) framework (`k <= q + 1`) to **two deterministic `PGL(2, q)` orbits with balanced column halving (`k <= 2q`)** and a **general (non-self-complementary) partition-dependent binary matrix `C`**, all 13 arrays are built from scratch over `q in {9, 11, 13, 19}` (`v = q + 1`):
 
-1. **Deterministic `PGL(2, q)` block (`2 * q(q² - 1)` rows):**
-   Partition the `k` columns into balanced halves `L` (`|L| = floor(k/2)`) and `R` (`|R| = ceil(k/2)`), both `<= q`. Expand two explicit starter rows under the sharply 3-transitive action of `PGL(2, q)` on `P¹(GF(q))`:
-   - `r1`: `0` on `L`, pairwise distinct nonzero symbols `1..|R|` on `R`.
-   - `r2`: pairwise distinct symbols `0..|L|-1` on `L`, `q` (`∞`) on `R`.
-   This deterministically covers all 3-distinct tuples on all `C(k, 3)` column triples, all constant tuples on pure triples (`L³`, `R³`), all `aab` tuples on `(L, L, R)` triples, and all `baa` tuples on `(L, R, R)` triples.
+1. **Deterministic `PGL(2, q)` block (`2 · q(q² − 1)` rows):**
+   The alphabet is `F_q ∪ {∞}`, encoded 0-based as `{0, ..., q}` with `q` representing `∞`. Partition the `k` columns into balanced halves `L` (`|L| = ⌊k/2⌋`) and `R` (`|R| = ⌈k/2⌉`), both `<= q`. Expand two starter rows under the sharply 3-transitive action of `PGL(2, q)` on `F_q ∪ {∞}`:
+   - `r1`: `0` on `L`, pairwise distinct nonzero symbols `1..|R|` on `R` (so when `|R| = q`, e.g. `k = 2q`, `r1` uses all `q` nonzero elements `(F_q \ {0}) ∪ {∞}`).
+   - `r2`: pairwise distinct symbols `0..|L|−1` on `L`, and `q` (`∞`) on `R`.
+   This deterministically covers all 3-distinct tuples on every column triple, all constant tuples on pure triples (`L³`, `R³`), all `aab` tuples on `L²R` triples, and all `baa` tuples on `LR²` triples.
 
-2. **General (non-self-complementary) binary CCL matrix `C` (`M × k`) over `v(v - 1)/2` oriented pairs:**
-   Search a binary `M × k` matrix `C` covering the remaining 6 non-constant patterns on `L³`/`R³` and the remaining 4 non-constant patterns on mixed triples (`L²R`, `LR²`). Orient all `v(v - 1)/2` unordered pairs `{u, w}` using a directed cycle `(0,1), (1,2), ..., (v-1,0)` plus the remaining pairs `u < w` so every symbol appears at least once in both the `0`-slot and the `1`-slot. Requiring `000` or `111` on every mixed triple (`--cover-const`, used in 12 of the 13 arrays) covers all constant tuples on mixed triples and eliminates all `v` constant rows (`N = 2q(q² - 1) + M · v(v - 1)/2`; for `CA(18070; 3, 35, 20)` without `--cover-const`, `+20` constant rows are appended).
-   Because `C(M, k)` is independent of `q`, the same `17 × 20` binary starter yields both `CA(3762; 3, 20, 12)` and `CA(5915; 3, 20, 14)`.
+2. **Oriented pair expansion of `K_v` and binary matrix `C` (`M × k`):**
+   Orient all `v(v − 1)/2` edges `{u, w}` of `K_v` via the directed `v`-cycle `(0,1), (1,2), ..., (v−2,v−1), (v−1,0)` plus all remaining edges with `u < w`, so every symbol `0..v−1` appears at least once in the `0`-slot and at least once in the `1`-slot. Expanding each row of `C` via `0 -> u`, `1 -> w` covers all remaining 2-symbol tuples when `C` contains all 6 non-constant patterns on `L³`/`R³`, `{010, 011, 100, 101}` on `L²R`, and `{001, 010, 101, 110}` on `LR²`. Two variants are used:
+   - **`C_const` (`cc = 1`, 12 of 13 arrays):** additionally requires `000` or `111` on every mixed triple; the directed cycle then covers all `v` constant tuples on mixed triples with `0` appended constant rows (`N = 2q(q² − 1) + M · v(v − 1)/2`).
+   - **`C_plain` (`cc = 0`, used for `CA(18070; 3, 35, 20)`):** omits the `000`/`111` requirement on mixed triples and appends `+v` constant rows (`N = 2q(q² − 1) + M · v(v − 1)/2 + v`).
 
-### Summary of the 13 Pareto-Front Arrays (23 Entries Smaller Than Table @ `7b08aef`)
+   Because mixed triples omit two non-constant patterns, `C` is strictly smaller than regular binary covering arrays (for example `M = 14 < 17 = CAN(3, 15, 2)` at `k = 15`, and `M = 16 < 18 = CAN(3, k, 2)` at `k = 18, 19`). Because `C(M, k)` is independent of `q`, the same `17 × 20` starter yields both `CA(3762; 3, 20, 12)` and `CA(5915; 3, 20, 14)`. A written literature check (including Colbourn Nov 2024, `CAs` v0.25, NIST, Seelman/IRSI 2026-10-13, Sitjar v1.4 Table 1, and Canli's `quantavane-covering-arrays` @ `0b179b52`, plus an explicit list of sources not read in full) is archived in `docs/LITERATURE_CHECK_PGL_CCL.md`.
 
-| `t` | `k` | `v` | `N_submitted` | `ca_table` (`7b08aef`) | `derived.csv` | Delta vs `ca_table` | Covered `k` range | SHA-256 |
+### Summary of the 13 Pareto-Front Arrays (23 Entries Smaller Than `ca-tools` @ `7b08aef`)
+
+| `t` | `k` | `v` | `N` | `ca_table` (`7b08aef`) | `derived.csv` | Delta vs `ca_table` | Covered `k` range | SHA-256 |
 | :-: | :-: | :-: | :---: | :---: | :---: | :---: | :---: | --- |
 | 3 | 15 | 10 | **2070** | 2205 (`VER`) | 2178 | −135 | `15` | `78b0497f2c81b0f72b9a454c7fbf42a3d66f1e31851be5f568c95d7f584c1865` |
 | 3 | 16 | 10 | **2115** | 2205 (`VER`) | 2178 | −90 | `16` | `4734fd80ffe90f11664912e113b045ba599cbeb4a0bc749729764b7f700b86b4` |
@@ -52,18 +59,17 @@ Building on group-action constructions for strength-3 covering arrays (Chateaune
 
 ### Verification & Reproducibility
 
-- Every array passed exhaustive verification with both `ca_verify.c` (exit code 0, `0.006–0.451 s`) and an independent standard-library Python verifier (`verify_independent.py`, exit code 0, `0.208–33.373 s`), plus `[THIRD_PARTY_VERIFICATION_TBD]`.
-- All 13 arrays were deterministically regenerated from the stored `data/ccl_binary/` starter matrices and verified byte-for-byte against the SHA-256 hashes above (13/13 exact matches; exact commands in `submission/REPRODUCE.md`).
-- All 13 arrays are built completely from scratch (`Built from: nothing`); no existing table arrays and no Torres-Jimenez arrays were used (Rule 6).
-- Full source code (`solvers/pgl_ccl_search`, zero-dependency Rust `std`-only) and compact `M × k` binary starter matrices (`data/ccl_binary/`, 68 KB) are published at https://github.com/Justus42/Math_Gemini_Antigravity.
+- **Triple exhaustive check:** Every array passed `ca_verify.c` (exit code 0, `0.006–0.451 s`), an independent standard-library Python verifier (`verify_independent.py`, exit code 0, `0.208–33.373 s`), and an independent third-party verifier program (including negative test on a truncated array, documented in `docs/THIRD_PARTY_VERIFICATION.md`).
+- **Bit-exact reproduction:** All 13 arrays were deterministically regenerated from `data/ccl_binary/` via `solvers/pgl_ccl_search expand` and matched all 13 SHA-256 hashes above byte-for-byte (`submission/REPRODUCE.md`).
+- **From scratch (Rule 6):** `Built from: nothing`; no existing table arrays and no Torres-Jimenez arrays were used.
+- **Repository:** https://github.com/Justus42/Math_Gemini_Antigravity (`main` @ `a27da71`; zero-dependency Rust `std`-only solver `solvers/pgl_ccl_search` + binary starters `data/ccl_binary/`).
 
 ### AI Tools Disclosure (Rule 1 & `CHANGES.md`)
 
-- `AI tools used: yes` (included explicitly in `HOW.md`).
-- Tools used: Gemini and Google Antigravity for solver implementation and local-search sweeps; independent review/cross-checking by Claude. All verification checks are deterministic and exhaustive.
+- `AI tools used: yes` (recorded explicitly in `HOW.md`).
+- Tools: Gemini and Google Antigravity for construction engineering, solver implementation, and binary CCL search sweeps; independent third-party verification and review by Claude. All coverage checks are deterministic and exhaustive.
 
 ### Submitter & Licence (Rules 4 & 5)
 
-- **Responsible person:** `[REAL_NAME_TBD]`, `[AFFILIATION_TBD]` (e.g., Independent researcher).
-- **Contact:** `[EMAIL_TBD]` *(or sent separately to `chrispbsmolen@gmail.com`)*; ORCID: `[ORCID_OPTIONAL]`.
+- **Responsible person:** Justus Jeserigk, Independent researcher (`j.jeserigk.dev@outlook.de`).
 - **Licence:** All submitted arrays are released under **CC BY 4.0**.
