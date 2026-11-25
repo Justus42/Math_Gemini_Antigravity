@@ -1,22 +1,29 @@
 mod ccl;
 mod pgl;
+mod postop;
 
 use std::env;
 use std::path::PathBuf;
 use std::process;
 use std::sync::Arc;
+use std::time::Instant;
 
 use ccl::{load_bin_matrix, run_search, save_bin_matrix, self_test_ccl, CclProblem, SearchAlgo};
-use pgl::{expand_and_write_ca, oriented_pairs, self_test_pgl2};
+use pgl::{expand_and_write_ca, expand_ca_rows, oriented_pairs, self_test_pgl2, write_ca_rows};
+use postop::{greedy_row_delete, load_ca_rows, repair_and_complete};
 
 fn usage() -> ! {
     eprintln!("Usage:");
     eprintln!("  pgl_ccl_search selftest");
-    eprintln!("  pgl_ccl_search search --k <k> --m <M> [--q <5|9|11>] [--cover-const]");
+    eprintln!("  pgl_ccl_search search --k <k> --m <M> [--q <5|9|11|13>] [--cover-const]");
     eprintln!("                        --time-limit-secs <f64> [--threads <N>] [--seed <u64>]");
     eprintln!("                        [--algo <hybrid|tabu-cw|paws>] [--out-bin <path>]");
-    eprintln!("                        [--out-ca <path>] [--checkpoint <path>] [--resume <path>]");
-    eprintln!("  pgl_ccl_search expand --q <5|9|11> --in-bin <path> [--cover-const] --out-ca <path>");
+    eprintln!("                        [--out-best-bin <path>] [--out-ca <path>]");
+    eprintln!("                        [--checkpoint <path>] [--resume <path>]");
+    eprintln!("  pgl_ccl_search expand --q <5|9|11|13> --in-bin <path> [--cover-const] --out-ca <path>");
+    eprintln!("  pgl_ccl_search reduce --v <v> --in-ca <path> --out-ca <path>");
+    eprintln!("  pgl_ccl_search complete --q <5|9|11|13> --in-bin <path> [--cover-const]");
+    eprintln!("                          --max-n <N> --time-limit-secs <f64> --out-ca <path>");
     process::exit(2);
 }
 
@@ -28,13 +35,14 @@ fn main() {
 
     match args[1].as_str() {
         "selftest" => {
-            for &q in &[5usize, 9, 11] {
+            for &q in &[5usize, 9, 11, 13] {
                 let perms = self_test_pgl2(q);
                 let pairs = oriented_pairs(q + 1);
                 println!(
-                    "PASS PGL(2,{:2}): |G|={:4}, v={:2}, pairs={:2}",
+                    "PASS PGL(2,{:2}): |G|={:4}, 2|G|={:4}, v={:2}, pairs={:2}",
                     q,
                     perms.len(),
+                    2 * perms.len(),
                     q + 1,
                     pairs.len()
                 );
@@ -52,6 +60,7 @@ fn main() {
             let mut seed: u64 = 42;
             let mut algo = SearchAlgo::Hybrid;
             let mut out_bin: Option<PathBuf> = None;
+            let mut out_best_bin: Option<PathBuf> = None;
             let mut out_ca: Option<PathBuf> = None;
             let mut checkpoint: Option<PathBuf> = None;
             let mut resume: Option<PathBuf> = None;
@@ -98,6 +107,10 @@ fn main() {
                     "--out-bin" => {
                         i += 1;
                         out_bin = Some(PathBuf::from(&args[i]));
+                    }
+                    "--out-best-bin" => {
+                        i += 1;
+                        out_best_bin = Some(PathBuf::from(&args[i]));
                     }
                     "--out-ca" => {
                         i += 1;
@@ -176,6 +189,12 @@ fn main() {
                 mv_s,
                 res.total_restarts
             );
+
+            if let Some(ref p) = out_best_bin {
+                save_bin_matrix(p, k, m, cover_const, res.best_unc, &res.best_mat)
+                    .expect("Failed to write --out-best-bin");
+                println!("WROTE_BEST_BIN {} unc={}", p.display(), res.best_unc);
+            }
 
             if res.best_unc == 0 {
                 if let Some(ref p) = out_bin {
@@ -257,6 +276,137 @@ fn main() {
                 m,
                 cover_const as u8
             );
+        }
+        "reduce" => {
+            let mut v: Option<usize> = None;
+            let mut in_ca: Option<PathBuf> = None;
+            let mut out_ca: Option<PathBuf> = None;
+
+            let mut i = 2;
+            while i < args.len() {
+                match args[i].as_str() {
+                    "--v" => {
+                        i += 1;
+                        v = Some(args[i].parse().expect("Invalid --v"));
+                    }
+                    "--in-ca" => {
+                        i += 1;
+                        in_ca = Some(PathBuf::from(&args[i]));
+                    }
+                    "--out-ca" => {
+                        i += 1;
+                        out_ca = Some(PathBuf::from(&args[i]));
+                    }
+                    other => {
+                        eprintln!("Unknown option: {}", other);
+                        usage();
+                    }
+                }
+                i += 1;
+            }
+            let v = v.expect("--v is required");
+            let in_ca = in_ca.expect("--in-ca is required");
+            let out_ca = out_ca.expect("--out-ca is required");
+
+            let t0 = Instant::now();
+            let rows = load_ca_rows(&in_ca, v).expect("Failed to load --in-ca");
+            let orig_n = rows.len();
+            let k = rows[0].len();
+            let reduced = greedy_row_delete(&rows, v);
+            let new_n = reduced.len();
+            write_ca_rows(&reduced, &out_ca).expect("Failed to write --out-ca");
+            println!(
+                "REDUCED {} -> {} (k={} v={} N: {} -> {}, saved={}, elapsed={:.3}s)",
+                in_ca.display(),
+                out_ca.display(),
+                k,
+                v,
+                orig_n,
+                new_n,
+                orig_n - new_n,
+                t0.elapsed().as_secs_f64()
+            );
+        }
+        "complete" => {
+            let mut q: Option<usize> = None;
+            let mut in_bin: Option<PathBuf> = None;
+            let mut out_ca: Option<PathBuf> = None;
+            let mut max_n: Option<usize> = None;
+            let mut time_limit_secs: Option<f64> = None;
+            let mut cover_const_override: Option<bool> = None;
+
+            let mut i = 2;
+            while i < args.len() {
+                match args[i].as_str() {
+                    "--q" => {
+                        i += 1;
+                        q = Some(args[i].parse().expect("Invalid --q"));
+                    }
+                    "--in-bin" => {
+                        i += 1;
+                        in_bin = Some(PathBuf::from(&args[i]));
+                    }
+                    "--out-ca" => {
+                        i += 1;
+                        out_ca = Some(PathBuf::from(&args[i]));
+                    }
+                    "--max-n" => {
+                        i += 1;
+                        max_n = Some(args[i].parse().expect("Invalid --max-n"));
+                    }
+                    "--time-limit-secs" => {
+                        i += 1;
+                        time_limit_secs = Some(args[i].parse().expect("Invalid --time-limit-secs"));
+                    }
+                    "--cover-const" => {
+                        cover_const_override = Some(true);
+                    }
+                    "--no-cover-const" => {
+                        cover_const_override = Some(false);
+                    }
+                    other => {
+                        eprintln!("Unknown option: {}", other);
+                        usage();
+                    }
+                }
+                i += 1;
+            }
+            let q = q.expect("--q is required");
+            let in_bin = in_bin.expect("--in-bin is required");
+            let out_ca = out_ca.expect("--out-ca is required");
+            let max_n = max_n.expect("--max-n is required");
+            let time_limit_secs = time_limit_secs.expect("--time-limit-secs is required");
+
+            let t0 = Instant::now();
+            let (k, m, header_cc, mat) = load_bin_matrix(&in_bin).expect("Failed to load --in-bin");
+            let cover_const = cover_const_override.or(header_cc).unwrap_or(true);
+            let v = q + 1;
+            let rows = expand_ca_rows(q, k, m, &mat, cover_const);
+            let base_n = rows.len();
+            let (done_rows, init_unc, repairs, final_unc) =
+                repair_and_complete(rows, v, max_n, time_limit_secs);
+            let final_n = done_rows.len();
+            println!(
+                "COMPLETE q={} v={} k={} m={} cc={} base_N={} init_unc_tuples={} zero_break_repairs={} final_N={} final_unc={} elapsed={:.3}s",
+                q,
+                v,
+                k,
+                m,
+                cover_const as u8,
+                base_n,
+                init_unc,
+                repairs,
+                final_n,
+                final_unc,
+                t0.elapsed().as_secs_f64()
+            );
+            if final_unc == 0 {
+                write_ca_rows(&done_rows, &out_ca).expect("Failed to write --out-ca");
+                println!("WROTE_CA {} N={} t=3 k={} v={}", out_ca.display(), final_n, k, v);
+                process::exit(0);
+            } else {
+                process::exit(1);
+            }
         }
         _ => usage(),
     }

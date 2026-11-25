@@ -18,7 +18,7 @@ impl FiniteField {
         let mut mul = vec![vec![0; q]; q];
 
         match q {
-            5 | 11 => {
+            5 | 11 | 13 => {
                 for a in 0..q {
                     for b in 0..q {
                         add[a][b] = (a + b) % q;
@@ -51,7 +51,7 @@ impl FiniteField {
                     }
                 }
             }
-            _ => panic!("Unsupported prime power q={} (supported: 5, 9, 11)", q),
+            _ => panic!("Unsupported prime power q={} (supported: 5, 9, 11, 13)", q),
         }
 
         let mut inv = vec![0; q];
@@ -264,16 +264,14 @@ pub fn oriented_pairs(v: usize) -> Vec<(u8, u8)> {
 }
 
 /// Expand the 2 deterministic PGL(2, q) orbits + binary CCL matrix C (M x k)
-/// (+ v constant rows if !cover_const) and write canonical CA text file.
-/// Returns total number of rows N.
-pub fn expand_and_write_ca(
+/// (+ v constant rows if !cover_const) into an in-memory Vec<Vec<u8>>.
+pub fn expand_ca_rows(
     q: usize,
     k: usize,
     m: usize,
     mat: &[u8],
     cover_const: bool,
-    out_path: &Path,
-) -> std::io::Result<usize> {
+) -> Vec<Vec<u8>> {
     let v = q + 1;
     let l_size = k / 2;
     let r_size = k - l_size;
@@ -290,7 +288,6 @@ pub fn expand_and_write_ca(
     let perms = self_test_pgl2(q);
     let pairs = oriented_pairs(v);
 
-    // Starter r1: 0 on L, 1..=r_size on R
     let mut r1 = vec![0usize; k];
     for c in 0..l_size {
         r1[c] = 0;
@@ -299,7 +296,6 @@ pub fn expand_and_write_ca(
         r1[c] = 1 + (c - l_size);
     }
 
-    // Starter r2: 0..l_size on L, q on R
     let mut r2 = vec![0usize; k];
     for c in 0..l_size {
         r2[c] = c;
@@ -308,6 +304,44 @@ pub fn expand_and_write_ca(
         r2[c] = q;
     }
 
+    let expected_n = 2 * perms.len() + m * pairs.len() + if cover_const { 0 } else { v };
+    let mut rows = Vec::with_capacity(expected_n);
+
+    for p in &perms {
+        let mut row = Vec::with_capacity(k);
+        for c in 0..k {
+            row.push(p[r1[c]]);
+        }
+        rows.push(row);
+    }
+    for p in &perms {
+        let mut row = Vec::with_capacity(k);
+        for c in 0..k {
+            row.push(p[r2[c]]);
+        }
+        rows.push(row);
+    }
+    for &(u, w) in &pairs {
+        for r in 0..m {
+            let crow = &mat[r * k..(r + 1) * k];
+            let mut row = Vec::with_capacity(k);
+            for c in 0..k {
+                row.push(if crow[c] == 0 { u } else { w });
+            }
+            rows.push(row);
+        }
+    }
+    if !cover_const {
+        for a in 0..v {
+            rows.push(vec![a as u8; k]);
+        }
+    }
+    assert_eq!(rows.len(), expected_n);
+    rows
+}
+
+/// Write canonical CA text file from rows.
+pub fn write_ca_rows(rows: &[Vec<u8>], out_path: &Path) -> std::io::Result<usize> {
     if let Some(parent) = out_path.parent() {
         if !parent.as_os_str().is_empty() {
             std::fs::create_dir_all(parent)?;
@@ -315,64 +349,30 @@ pub fn expand_and_write_ca(
     }
     let file = File::create(out_path)?;
     let mut out = BufWriter::with_capacity(1 << 20, file);
-    let mut row_count = 0usize;
-
-    // 1. PGL(2,q) orbit of r1
-    for p in &perms {
-        for c in 0..k {
+    for row in rows {
+        for (c, &sym) in row.iter().enumerate() {
             if c > 0 {
                 out.write_all(b" ")?;
             }
-            write!(out, "{}", p[r1[c]])?;
+            write!(out, "{}", sym)?;
         }
         out.write_all(b"\n")?;
-        row_count += 1;
     }
-
-    // 2. PGL(2,q) orbit of r2
-    for p in &perms {
-        for c in 0..k {
-            if c > 0 {
-                out.write_all(b" ")?;
-            }
-            write!(out, "{}", p[r2[c]])?;
-        }
-        out.write_all(b"\n")?;
-        row_count += 1;
-    }
-
-    // 3. Oriented pair expansion of binary CCL matrix C
-    for &(u, w) in &pairs {
-        for r in 0..m {
-            let row = &mat[r * k..(r + 1) * k];
-            for c in 0..k {
-                if c > 0 {
-                    out.write_all(b" ")?;
-                }
-                let sym = if row[c] == 0 { u } else { w };
-                write!(out, "{}", sym)?;
-            }
-            out.write_all(b"\n")?;
-            row_count += 1;
-        }
-    }
-
-    // 4. Optional v constant rows when !cover_const
-    if !cover_const {
-        for a in 0..v {
-            for c in 0..k {
-                if c > 0 {
-                    out.write_all(b" ")?;
-                }
-                write!(out, "{}", a)?;
-            }
-            out.write_all(b"\n")?;
-            row_count += 1;
-        }
-    }
-
     out.flush()?;
-    let expected_n = 2 * perms.len() + m * pairs.len() + if cover_const { 0 } else { v };
-    assert_eq!(row_count, expected_n);
-    Ok(row_count)
+    Ok(rows.len())
+}
+
+/// Expand the 2 deterministic PGL(2, q) orbits + binary CCL matrix C (M x k)
+/// (+ v constant rows if !cover_const) and write canonical CA text file.
+/// Returns total number of rows N.
+pub fn expand_and_write_ca(
+    q: usize,
+    k: usize,
+    m: usize,
+    mat: &[u8],
+    cover_const: bool,
+    out_path: &Path,
+) -> std::io::Result<usize> {
+    let rows = expand_ca_rows(q, k, m, mat, cover_const);
+    write_ca_rows(&rows, out_path)
 }

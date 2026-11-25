@@ -68,3 +68,63 @@ Solver: `solvers/pgl_ccl_search` (Zero-Dep Rust `std`-only, `--release -C target
 - Verifier 2 (`python3 verifiers/verify_independent.py results/CA_3762_3_20_12.txt 3 12 -n 3762 -k 20`): **rc=0** (`0.731 s`)
   > VERIFIED: CA(N=3762; t=3, k=20, v=12) - all 1140 column sets cover all 1728 tuples (1969920 total interactions) [elapsed: 0.6802s]
 
+
+---
+# Dual-Verification Log — Phase 4 v3 (`PGL(2,13)`, `v=14`, `exp/pgl-binary-ccl-v3`)
+Timestamp (UTC): 2026-11-25T08:33:15Z
+
+## `CA_5915_3_20_14.txt` (Live-Rekord: `6006`, Delta: `-91`)
+- Konstruktion: `PGL(2,13)` (`2*2184`) + Binary-CCL `M=17 x k=20` (`cover_const=1`, `91` orientierte Paare) + Post-Op (`saved=0`)
+- Suche: `algo=hybrid`, `threads=2`, `seed=6001`, Suchzeit `0.358s (reused k=20 M=17)`
+- Starter-Datei: `results/CA_5915_3_20_14.ccl.bin` (`sha256: 1ac1c31d8b6c76b152a493fd2230e5468947807fe0c4ecc9d481f02496ca7057`)
+- Array-Datei: `results/CA_5915_3_20_14.txt` (`270552` Bytes, `sha256: 051a4841f551770fd09e84ffd805edf4d3b7c13b435c9687598c14b939d29a3d`)
+- Post-Op: `REDUCED /tmp/pgl_ccl_v14/exp_3_20_14.txt -> /tmp/pgl_ccl_v14/red_3_20_14.txt (k=20 v=14 N: 5915 -> 5915, saved=0, elapsed=0.170s)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_5915_3_20_14.txt 3 14`): **rc=0** (`0.023 s`)
+  > VERIFIED: CA(N=5915; t=3, k=20, v=14) - all 1140 column sets fully cover all 2744 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_5915_3_20_14.txt 3 14 -n 5915 -k 20`): **rc=0** (`1.450 s`)
+  > VERIFIED: CA(N=5915; t=3, k=20, v=14) - all 1140 column sets cover all 2744 tuples (3128160 total interactions) [elapsed: 1.3898s]
+
+## `CA_6097_3_23_14.txt` (Live-Rekord: `6279`, Delta: `-182`)
+- Konstruktion: `PGL(2,13)` (`2*2184`) + Binary-CCL `M=19 x k=23` (`cover_const=1`, `91` orientierte Paare) + Post-Op (`saved=0`)
+- Suche: `algo=hybrid`, `threads=2`, `seed=9102`, Suchzeit `5.405s (proj k=24)`
+- Starter-Datei: `results/CA_6097_3_23_14.ccl.bin` (`sha256: 9efbb7ec5e9ac19686c72f93828ef59abcbc32e197499c1ddcdefffbeac52df9`)
+- Array-Datei: `results/CA_6097_3_23_14.txt` (`320547` Bytes, `sha256: 3927e2d354e405acb7c4750bf72bb5fe710b3f7c879f034871773080a0b2afd8`)
+- Post-Op: `REDUCED /tmp/pgl_ccl_v14/exp_3_23_14.txt -> /tmp/pgl_ccl_v14/red_3_23_14.txt (k=23 v=14 N: 6097 -> 6097, saved=0, elapsed=0.405s)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_6097_3_23_14.txt 3 14`): **rc=0** (`0.030 s`)
+  > VERIFIED: CA(N=6097; t=3, k=23, v=14) - all 1771 column sets fully cover all 2744 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_6097_3_23_14.txt 3 14 -n 6097 -k 23`): **rc=0** (`2.176 s`)
+  > VERIFIED: CA(N=6097; t=3, k=23, v=14) - all 1771 column sets cover all 2744 tuples (4859624 total interactions) [elapsed: 2.1228s]
+
+## `CA_6097_3_24_14.txt` (Live-Rekord: `6279`, Delta: `-182`)
+- Konstruktion: `PGL(2,13)` (`2*2184`) + Binary-CCL `M=19 x k=24` (`cover_const=1`, `91` orientierte Paare) + Post-Op (`saved=0`)
+- Suche: `algo=hybrid`, `threads=2`, `seed=9102`, Suchzeit `5.405s`
+- Starter-Datei: `results/CA_6097_3_24_14.ccl.bin` (`sha256: dbeb866bee291c0c6ecb0e0681f07b3610a1171fcd4ecf160d1c91fa8cc0d815`)
+- Array-Datei: `results/CA_6097_3_24_14.txt` (`334464` Bytes, `sha256: 3abb40a4dcb501e3d34512aab8c11398248f629c72e4e9bba1916919f21ffdbb`)
+- Post-Op: `REDUCED /tmp/pgl_ccl_v14/exp_3_24_14.txt -> /tmp/pgl_ccl_v14/red_3_24_14.txt (k=24 v=14 N: 6097 -> 6097, saved=0, elapsed=0.485s)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_6097_3_24_14.txt 3 14`): **rc=0** (`0.031 s`)
+  > VERIFIED: CA(N=6097; t=3, k=24, v=14) - all 2024 column sets fully cover all 2744 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_6097_3_24_14.txt 3 14 -n 6097 -k 24`): **rc=0** (`2.539 s`)
+  > VERIFIED: CA(N=6097; t=3, k=24, v=14) - all 2024 column sets cover all 2744 tuples (5553856 total interactions) [elapsed: 2.4837s]
+
+## `CA_6188_3_25_14.txt` (Live-Rekord: `6383`, Delta: `-195`)
+- Konstruktion: `PGL(2,13)` (`2*2184`) + Binary-CCL `M=20 x k=25` (`cover_const=1`, `91` orientierte Paare) + Post-Op (`saved=0`)
+- Suche: `algo=hybrid`, `threads=2`, `seed=9107`, Suchzeit `2.020s (proj k=26)`
+- Starter-Datei: `results/CA_6188_3_25_14.ccl.bin` (`sha256: 857f3b00f67800023d622920e824f7e2739b6f977a884927701c8c9047a42bcc`)
+- Array-Datei: `results/CA_6188_3_25_14.txt` (`353562` Bytes, `sha256: 41befba9ae17253cdcfbf1b5a7b17c0ca766a08819c11135dee47f4cabdd57dc`)
+- Post-Op: `REDUCED /tmp/pgl_ccl_v14/exp_3_25_14.txt -> /tmp/pgl_ccl_v14/red_3_25_14.txt (k=25 v=14 N: 6188 -> 6188, saved=0, elapsed=0.596s)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_6188_3_25_14.txt 3 14`): **rc=0** (`0.034 s`)
+  > VERIFIED: CA(N=6188; t=3, k=25, v=14) - all 2300 column sets fully cover all 2744 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_6188_3_25_14.txt 3 14 -n 6188 -k 25`): **rc=0** (`2.849 s`)
+  > VERIFIED: CA(N=6188; t=3, k=25, v=14) - all 2300 column sets cover all 2744 tuples (6311200 total interactions) [elapsed: 2.7873s]
+
+## `CA_6188_3_26_14.txt` (Live-Rekord: `6383`, Delta: `-195`)
+- Konstruktion: `PGL(2,13)` (`2*2184`) + Binary-CCL `M=20 x k=26` (`cover_const=1`, `91` orientierte Paare) + Post-Op (`saved=0`)
+- Suche: `algo=hybrid`, `threads=2`, `seed=9107`, Suchzeit `2.020s`
+- Starter-Datei: `results/CA_6188_3_26_14.ccl.bin` (`sha256: bc8d2d0718e3908a690fca00ecac38eb3610ac0b220ea8e918f024b54968d810`)
+- Array-Datei: `results/CA_6188_3_26_14.txt` (`367706` Bytes, `sha256: 2952b2efb82ae2087c6c0d560a80bdf1d64409b6b1a42e1d17418f2978396eaa`)
+- Post-Op: `REDUCED /tmp/pgl_ccl_v14/exp_3_26_14.txt -> /tmp/pgl_ccl_v14/red_3_26_14.txt (k=26 v=14 N: 6188 -> 6188, saved=0, elapsed=0.711s)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_6188_3_26_14.txt 3 14`): **rc=0** (`0.035 s`)
+  > VERIFIED: CA(N=6188; t=3, k=26, v=14) - all 2600 column sets fully cover all 2744 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_6188_3_26_14.txt 3 14 -n 6188 -k 26`): **rc=0** (`3.109 s`)
+  > VERIFIED: CA(N=6188; t=3, k=26, v=14) - all 2600 column sets cover all 2744 tuples (7134400 total interactions) [elapsed: 3.0544s]
+
