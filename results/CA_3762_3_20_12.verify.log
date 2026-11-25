@@ -1,0 +1,17 @@
+Timestamp (UTC): 2026-11-25T05:37:14Z
+Target: CA(N=3762; t=3, k=20, v=12)
+Construction: 2 deterministic PGL(2,11) orbits + M=17 general binary CCL matrix over v*(v-1)/2 oriented pairs (cover_const=true)
+Solver: solvers/pgl_ccl_search (branch exp/pgl-binary-ccl, Rust std-only, --release -C target-cpu=native)
+Repro: search --v 12 --k 20 --m 17 --cover-const --threads 2 --seed 32034 --restart-steps 30000 (solved in 1.752s)
+Expand: ./solvers/pgl_ccl_search/target/release/pgl_ccl_search expand --v 12 --k 20 --cover-const --in-matrix results/CA_3762_3_20_12.ccl_matrix.txt --out-array results/CA_3762_3_20_12.txt
+--- Verifier 1: ./verifiers/ca_verify results/CA_3762_3_20_12.txt 3 12 ---
+read 3762 rows x 20 columns over v=12 (t=3, 4 threads)
+checked 1140 column sets in 0.01 s (avx2, one-hot lanes)
+VERIFIED: CA(N=3762; t=3, k=20, v=12) - all 1140 column sets fully cover all 1728 tuples
+ca_verify exit_code=0
+--- Verifier 2: python3 verifiers/verify_independent.py results/CA_3762_3_20_12.txt 3 12 -n 3762 -k 20 ---
+VERIFIED: CA(N=3762; t=3, k=20, v=12) - all 1140 column sets cover all 1728 tuples (1969920 total interactions) [elapsed: 0.6640s]
+verify_independent.py exit_code=0
+--- SHA-256 ---
+cde99c963702767b9c22e661c6e916fb53932ff3dc4da1b1342a59e207e91de3  results/CA_3762_3_20_12.txt
+88ec004d50d8ce01664359389dded9c7bca4b3d78dcedcb1bbc3803b30b0e720  results/CA_3762_3_20_12.ccl_matrix.txt
