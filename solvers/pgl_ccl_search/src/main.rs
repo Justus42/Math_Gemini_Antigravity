@@ -15,14 +15,14 @@ use postop::{greedy_row_delete, load_ca_rows, repair_and_complete};
 fn usage() -> ! {
     eprintln!("Usage:");
     eprintln!("  pgl_ccl_search selftest");
-    eprintln!("  pgl_ccl_search search --k <k> --m <M> [--q <5|9|11|13>] [--cover-const]");
+    eprintln!("  pgl_ccl_search search --k <k> --m <M> [--q <5|9|11|13|16|17|19>] [--cover-const]");
     eprintln!("                        --time-limit-secs <f64> [--threads <N>] [--seed <u64>]");
-    eprintln!("                        [--algo <hybrid|tabu-cw|paws>] [--out-bin <path>]");
-    eprintln!("                        [--out-best-bin <path>] [--out-ca <path>]");
+    eprintln!("                        [--algo <hybrid|tabu-cw|paws>] [--cache-dir <dir>]");
+    eprintln!("                        [--out-bin <path>] [--out-best-bin <path>] [--out-ca <path>]");
     eprintln!("                        [--checkpoint <path>] [--resume <path>]");
-    eprintln!("  pgl_ccl_search expand --q <5|9|11|13> --in-bin <path> [--cover-const] --out-ca <path>");
+    eprintln!("  pgl_ccl_search expand --q <5|9|11|13|16|17|19> --in-bin <path> [--cover-const] --out-ca <path>");
     eprintln!("  pgl_ccl_search reduce --v <v> --in-ca <path> --out-ca <path>");
-    eprintln!("  pgl_ccl_search complete --q <5|9|11|13> --in-bin <path> [--cover-const]");
+    eprintln!("  pgl_ccl_search complete --q <5|9|11|13|16|17|19> --in-bin <path> [--cover-const]");
     eprintln!("                          --max-n <N> --time-limit-secs <f64> --out-ca <path>");
     process::exit(2);
 }
@@ -35,11 +35,11 @@ fn main() {
 
     match args[1].as_str() {
         "selftest" => {
-            for &q in &[5usize, 9, 11, 13] {
+            for &q in &[5usize, 9, 11, 13, 16, 17, 19] {
                 let perms = self_test_pgl2(q);
                 let pairs = oriented_pairs(q + 1);
                 println!(
-                    "PASS PGL(2,{:2}): |G|={:4}, 2|G|={:4}, v={:2}, pairs={:2}",
+                    "PASS PGL(2,{:2}): |G|={:4}, 2|G|={:5}, v={:2}, pairs={:3}",
                     q,
                     perms.len(),
                     2 * perms.len(),
@@ -59,6 +59,7 @@ fn main() {
             let mut threads: usize = 2;
             let mut seed: u64 = 42;
             let mut algo = SearchAlgo::Hybrid;
+            let mut cache_dir: Option<PathBuf> = None;
             let mut out_bin: Option<PathBuf> = None;
             let mut out_best_bin: Option<PathBuf> = None;
             let mut out_ca: Option<PathBuf> = None;
@@ -104,6 +105,10 @@ fn main() {
                             other => panic!("Unknown --algo {}", other),
                         };
                     }
+                    "--cache-dir" => {
+                        i += 1;
+                        cache_dir = Some(PathBuf::from(&args[i]));
+                    }
                     "--out-bin" => {
                         i += 1;
                         out_bin = Some(PathBuf::from(&args[i]));
@@ -142,13 +147,58 @@ fn main() {
                 let _ = self_test_pgl2(qv);
             }
 
+            let prob = Arc::new(CclProblem::new(k, m, cover_const));
+
+            // Check reusable binary CCL matrix cache before running search
+            if let Some(ref cdir) = cache_dir {
+                let mut candidates = vec![cdir.join(format!("ccl_k{}_m{}_cc{}.bin", k, m, cover_const as u8))];
+                if !cover_const {
+                    candidates.push(cdir.join(format!("ccl_k{}_m{}_cc1.bin", k, m)));
+                }
+                for cand in candidates {
+                    if cand.exists() {
+                        if let Ok((ck, cm, _, cmat)) = load_bin_matrix(&cand) {
+                            if ck == k && cm == m && prob.verify_from_scratch(&cmat) == 0 {
+                                let n_str = if let Some(qv) = q {
+                                    let v = qv + 1;
+                                    let n = 2 * qv * (qv * qv - 1) + m * v * (v - 1) / 2 + if cover_const { 0 } else { v };
+                                    format!(" q={} v={} N={}", qv, v, n)
+                                } else {
+                                    String::new()
+                                };
+                                println!(
+                                    "CACHE_HIT {} k={} m={} cover_const={}{}",
+                                    cand.display(),
+                                    k,
+                                    m,
+                                    cover_const as u8,
+                                    n_str
+                                );
+                                if let Some(ref p) = out_bin {
+                                    if p != &cand {
+                                        save_bin_matrix(p, k, m, cover_const, 0, &cmat)
+                                            .expect("Failed to write --out-bin");
+                                    }
+                                }
+                                if let Some(ref p) = out_ca {
+                                    let qv = q.unwrap();
+                                    let n = expand_and_write_ca(qv, k, m, &cmat, cover_const, p)
+                                        .expect("Failed to expand CA");
+                                    println!("WROTE_CA {} N={} t=3 k={} v={}", p.display(), n, k, qv + 1);
+                                }
+                                process::exit(0);
+                            }
+                        }
+                    }
+                }
+            }
+
             let init_resume = resume.map(|p| {
                 let (rk, rm, _, mat) = load_bin_matrix(&p).expect("Failed to load --resume");
                 assert_eq!((rk, rm), (k, m), "Resume dimensions mismatch");
                 mat
             });
 
-            let prob = Arc::new(CclProblem::new(k, m, cover_const));
             let res = run_search(
                 Arc::clone(&prob),
                 algo,
@@ -197,6 +247,12 @@ fn main() {
             }
 
             if res.best_unc == 0 {
+                if let Some(ref cdir) = cache_dir {
+                    let cpath = cdir.join(format!("ccl_k{}_m{}_cc{}.bin", k, m, cover_const as u8));
+                    save_bin_matrix(&cpath, k, m, cover_const, 0, &res.best_mat)
+                        .expect("Failed to write cache entry");
+                    println!("CACHED_BIN {}", cpath.display());
+                }
                 if let Some(ref p) = out_bin {
                     save_bin_matrix(p, k, m, cover_const, 0, &res.best_mat)
                         .expect("Failed to write --out-bin");

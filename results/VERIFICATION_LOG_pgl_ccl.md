@@ -128,3 +128,68 @@ Timestamp (UTC): 2026-11-25T08:33:15Z
 - Verifier 2 (`python3 verifiers/verify_independent.py results/CA_6188_3_26_14.txt 3 14 -n 6188 -k 26`): **rc=0** (`3.109 s`)
   > VERIFIED: CA(N=6188; t=3, k=26, v=14) - all 2600 column sets cover all 2744 tuples (7134400 total interactions) [elapsed: 3.0544s]
 
+
+---
+# Dual-Verification Log — Phase 4 v4 (`PGL(2,19)`, `v=20` Pareto-Front, `exp/pgl-binary-ccl-v4`)
+Timestamp (UTC): 2026-11-25T08:59:56Z
+
+## `CA_17670_3_29_20.txt` (Live-Rekord: `18145`, Delta: `-475`)
+- Dominierte Zellen: k=27..29 (k=27,28 live 17936 -> -266)
+- Konstruktion: `PGL(2,19)` (`2*6840`) + Binary-CCL `M=21 x k=29` (`cover_const=1`, `190` orientierte Paare)
+- Suche: `threads=2`, `seed=11003`, Suchzeit `1.503s (paws)`
+- Starter-Datei: `results/CA_17670_3_29_20.ccl.bin` (`sha256: aa318295b830408e3ef174ce0853ccbde5f038561158150ea8ad417fa8790a04`)
+- Array-Datei: `results/CA_17670_3_29_20.txt` (`1280830` Bytes, `sha256: 739bf030ad8234a83c9e3fb057b15798918881afe1a82302be5cfb8cad35e58a`)
+- Expand: `EXPANDED results/CA_17670_3_29_20.ccl.bin -> results/CA_17670_3_29_20.txt (N=17670 t=3 k=29 v=20 m=21 cover_const=1)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_17670_3_29_20.txt 3 20`): **rc=0** (`0.439 s`)
+  > VERIFIED: CA(N=17670; t=3, k=29, v=20) - all 3654 column sets fully cover all 8000 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_17670_3_29_20.txt 3 20 -n 17670 -k 29`): **rc=0** (`14.419 s`)
+  > VERIFIED: CA(N=17670; t=3, k=29, v=20) - all 3654 column sets cover all 8000 tuples (29232000 total interactions) [elapsed: 14.3138s]
+
+## `CA_17860_3_32_20.txt` (Live-Rekord: `18145`, Delta: `-285`)
+- Dominierte Zellen: k=30..32 (live 18145 -> -285)
+- Konstruktion: `PGL(2,19)` (`2*6840`) + Binary-CCL `M=22 x k=32` (`cover_const=1`, `190` orientierte Paare)
+- Suche: `threads=2`, `seed=10009`, Suchzeit `4.388s (hybrid)`
+- Starter-Datei: `results/CA_17860_3_32_20.ccl.bin` (`sha256: eb653e2e1d3c3aace44f713d21e7205354cbac083ae8734c6b85194b26113871`)
+- Array-Datei: `results/CA_17860_3_32_20.txt` (`1428800` Bytes, `sha256: 544735d32928b02dc0b423627a10aa57a4eba2c853e542df5c4dc5953098061c`)
+- Expand: `EXPANDED results/CA_17860_3_32_20.ccl.bin -> results/CA_17860_3_32_20.txt (N=17860 t=3 k=32 v=20 m=22 cover_const=1)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_17860_3_32_20.txt 3 20`): **rc=0** (`0.522 s`)
+  > VERIFIED: CA(N=17860; t=3, k=32, v=20) - all 4960 column sets fully cover all 8000 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_17860_3_32_20.txt 3 20 -n 17860 -k 32`): **rc=0** (`19.794 s`)
+  > VERIFIED: CA(N=17860; t=3, k=32, v=20) - all 4960 column sets cover all 8000 tuples (39680000 total interactions) [elapsed: 19.7319s]
+
+## `CA_18050_3_34_20.txt` (Live-Rekord: `18430`, Delta: `-380`)
+- Dominierte Zellen: k=33..34 (live 18430 -> -380)
+- Konstruktion: `PGL(2,19)` (`2*6840`) + Binary-CCL `M=23 x k=34` (`cover_const=1`, `190` orientierte Paare)
+- Suche: `threads=2`, `seed=10006`, Suchzeit `0.673s (hybrid)`
+- Starter-Datei: `results/CA_18050_3_34_20.ccl.bin` (`sha256: 016a7f0305b9ed13c63c1e3f95d8526d70fa26e66e5c83b366be0d0db915e3a3`)
+- Array-Datei: `results/CA_18050_3_34_20.txt` (`1534544` Bytes, `sha256: 9224fbac04d97afd78c001da51fe7f92f7f9c4b760317819d9dd7bb68c5ff4d0`)
+- Expand: `EXPANDED results/CA_18050_3_34_20.ccl.bin -> results/CA_18050_3_34_20.txt (N=18050 t=3 k=34 v=20 m=23 cover_const=1)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_18050_3_34_20.txt 3 20`): **rc=0** (`0.374 s`)
+  > VERIFIED: CA(N=18050; t=3, k=34, v=20) - all 5984 column sets fully cover all 8000 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_18050_3_34_20.txt 3 20 -n 18050 -k 34`): **rc=0** (`24.601 s`)
+  > VERIFIED: CA(N=18050; t=3, k=34, v=20) - all 5984 column sets cover all 8000 tuples (47872000 total interactions) [elapsed: 24.5459s]
+
+## `CA_18070_3_35_20.txt` (Live-Rekord: `18677`, Delta: `-607`)
+- Dominierte Zellen: k=35 (live 18677 -> -607)
+- Konstruktion: `PGL(2,19)` (`2*6840`) + Binary-CCL `M=23 x k=35` (`cover_const=0`, `190` orientierte Paare + 20 const)
+- Suche: `threads=2`, `seed=10020`, Suchzeit `1.882s (hybrid)`
+- Starter-Datei: `results/CA_18070_3_35_20.ccl.bin` (`sha256: 09f17abf37881d49c2897901576ba7b03dc2c8fd6331c28d32efce2a95486541`)
+- Array-Datei: `results/CA_18070_3_35_20.txt` (`1581468` Bytes, `sha256: 8751d063aed3ef33322c7252dfee57abfa9a705ab4490da2b9d9eb5300b855ad`)
+- Expand: `EXPANDED results/CA_18070_3_35_20.ccl.bin -> results/CA_18070_3_35_20.txt (N=18070 t=3 k=35 v=20 m=23 cover_const=0)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_18070_3_35_20.txt 3 20`): **rc=0** (`0.405 s`)
+  > VERIFIED: CA(N=18070; t=3, k=35, v=20) - all 6545 column sets fully cover all 8000 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_18070_3_35_20.txt 3 20 -n 18070 -k 35`): **rc=0** (`27.935 s`)
+  > VERIFIED: CA(N=18070; t=3, k=35, v=20) - all 6545 column sets cover all 8000 tuples (52360000 total interactions) [elapsed: 27.8792s]
+
+## `CA_18240_3_38_20.txt` (Live-Rekord: `18753`, Delta: `-513`)
+- Dominierte Zellen: k=36..38 (k=36 live 18677 -> -437; k=37,38 live 18753 -> -513)
+- Konstruktion: `PGL(2,19)` (`2*6840`) + Binary-CCL `M=24 x k=38` (`cover_const=1`, `190` orientierte Paare)
+- Suche: `threads=2`, `seed=10001`, Suchzeit `0.590s (hybrid)`
+- Starter-Datei: `results/CA_18240_3_38_20.ccl.bin` (`sha256: 733b432e86db12c51075ae84a7824d236f0bee54d5568be07590a00745a14695`)
+- Array-Datei: `results/CA_18240_3_38_20.txt` (`1732800` Bytes, `sha256: 68678d1c01540b943656d81908a86857ee0a1ff445b76863e072d27aef5e80cb`)
+- Expand: `EXPANDED results/CA_18240_3_38_20.ccl.bin -> results/CA_18240_3_38_20.txt (N=18240 t=3 k=38 v=20 m=24 cover_const=1)`
+- Verifier 1 (`./verifiers/ca_verify results/CA_18240_3_38_20.txt 3 20`): **rc=0** (`0.458 s`)
+  > VERIFIED: CA(N=18240; t=3, k=38, v=20) - all 8436 column sets fully cover all 8000 tuples
+- Verifier 2 (`python3 verifiers/verify_independent.py results/CA_18240_3_38_20.txt 3 20 -n 18240 -k 38`): **rc=0** (`33.304 s`)
+  > VERIFIED: CA(N=18240; t=3, k=38, v=20) - all 8436 column sets cover all 8000 tuples (67488000 total interactions) [elapsed: 33.2486s]
+
