@@ -1,16 +1,16 @@
 # Projektstatus & Governance-Gates (`STATUS.md`)
 
-Letzte Aktualisierung: 2026-11-25 (Abschluss Phase 4 v5 auf Branch `exp/pgl-binary-ccl-v5`: vollständiges Submission- & Audit-Paket unter [`submission/`](submission/) für alle **13 Pareto-Front-Rekorde** / **16 dual-verifizierte Arrays** / **23 verbesserte `t=3`-Zellen** gegen `chrispbsmolen/ca-tools` @ `7b08aef`; PR #1–#4 gemerged, PR #5 für `v4` offen).
+Letzte Aktualisierung: 2026-11-25 (Abschluss `chore/ca-tools-submission-prep`: Read-Only-Format-Audit von `chrispbsmolen/ca-tools` @ `7b08aef` [0 offene PRs, **23/23 Zellen frei**], Staging-Verzeichnis [`submission/ca_tools_staging/`](submission/ca_tools_staging/) [`8,7 MB`, 13 Pareto-Arrays], [`submission/CA_TOOLS_FORMAT.md`](submission/CA_TOOLS_FORMAT.md) und [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md); PR #6 für `v5` offen).
 Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprotokoll siehe [`docs/RUN_LOG.md`](docs/RUN_LOG.md), Audit-Paket siehe [`submission/MANIFEST.md`](submission/MANIFEST.md).
 
 ## 0. Governance- & Branch-Status
 
 - **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`).
-- **Offener PR:** PR #5 (`exp/pgl-binary-ccl-v4` @ `24d0751` → `main`).
-- **Aktiver Branch (`exp/pgl-binary-ccl-v5`, Phase 4 v5):**
-  - `cc=0`-Snipe (`P4-V5-CC0`, `100,0 s`): alle 5 Haaresbreite-Wände bestätigt (`(27,20):2`, `(21,17):2`, `(22,17):10`, `(23,18):5`, `(25,19):4`).
-  - Zero-Dep Rust-Tool [`solvers/tabu_reduce`](solvers/tabu_reduce/) (`P4-V5-TABU`, `145,0 s`): 10k-Incremental-Sanity-Check PASS (`0` Abweichungen in `0,779 s`); Pilot auf `CA_2070` (`120 s`, `min_u=26→14`, 2,63M Züge) und `CA_2115` (`25 s`, `min_u=21→16`) mit `saved=0` — bestätigt hohe Packungsdichte der `PGL(2,9)+CCL`-Arrays.
-  - Submission- & Audit-Paket [`submission/`](submission/) (`MANIFEST.md`, `records.csv`, `verify_all.sh`): **16/16 `FORMAT_OK` & `DUAL_PASS`** im frischen Komplettlauf (`P4-V5-AUDIT`).
+- **Offene PRs:** PR #5 (`exp/pgl-binary-ccl-v4`) und PR #6 (`exp/pgl-binary-ccl-v5` @ `1e1c60c`, enthält & ersetzt PR #5).
+- **Aktiver Branch (`chore/ca-tools-submission-prep`):**
+  - Read-Only-Analyse `chrispbsmolen/ca-tools` @ `7b08aef` (keinerlei Schreibzugriff auf Fremd-Repos): **alle 23/23 Zellen weiterhin frei**, 0 offene PRs, exakte `claims.csv`-/`HOW.md`-/`ai_tools`-Regeln dokumentiert in [`submission/CA_TOOLS_FORMAT.md`](submission/CA_TOOLS_FORMAT.md).
+  - Lokales Staging-Paket [`submission/ca_tools_staging/`](submission/ca_tools_staging/) (`claims.csv` gegen 82 `references.csv`-IDs geprüft, `HOW.md` inkl. `AI tools used: yes`, 13 byte-identische Pareto-Arrays = `8,7 MB`) + PR-Entwurf [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md) (mit `[LITERATURE_ATTRIBUTION_TBD]` & `[REAL_NAME_TBD]`).
+  - Frischer Komplett-Audit [`submission/verify_all.sh`](submission/verify_all.sh): **16/16 `FORMAT_OK` & `DUAL_PASS`**, `verifiers/SHA256SUMS` 3/3 OK, `test_verifiers.py` 23/23 PASS.
 
 ## 1. Pareto-Front der 13 Rekord-Arrays (23 verbesserte Zellen, `ca-tools` @ `7b08aef`)
 
