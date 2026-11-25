@@ -20,11 +20,11 @@ Alle drei Dateien erfüllen das kanonische Array-Format (`RULES.md` §2) und bes
 | `CA_7561_4_11_8.txt` | `(4, 11, 8)` | **7561** | `7680` (`CIT`, Colbourn–Lanús `k = 15`) | −119 | Deterministischer Phase-5B-1-Anker *(dominiert von `7070`; nicht einreichen)* | `821c23ea6852f7c77c55bbf5e8858c6c907a195aa2c418d20d231e00ce429fd2` |
 
 ### Herkunft & Vorarbeit (Regel 4)
-- **Vorarbeit:** Bush (1952) für das orthogonale Array `OA(q^4; 4, q + 1, q)` und das `(q + 2)`-Hyperoval `OA(q^3; 3, q + 2, q)` über `GF(2^m)`; Jamison (1977) und Brouwer–Schrijver (1978) für affine Blocking-Sets der Mindestgröße `2q - 1` in `AG(2, q)`; Nurmela (2004) für Tabu-Search-Reparatur; Bai XunDi (2026) für die `poly2`-Geradenbüschel-Zerlegung sowie Row-Deletion + Tabu-Post-Optimierung.
-- **Eigene Zusammensetzung:**
-  - `CA_7561_4_11_8.txt`: Deterministische Hyperoval-Double-`poly2`-Konstruktion (`scripts/gen_t4_q8_nearbush.py --mode k11-pencil`).
-  - `CA_5888_4_10_8.txt`: Projektion `Q(a, b, c, d) = (a ^ c ^ d, a ^ b ^ d)` entlang des irreduziblen quadratischen Polynoms `x^2 + x + 1` über `GF(8)` (jede Faser ist ein exaktes `OA(64; 2, 9, 8)`), kombiniert mit einer 4-polychromatischen Zerlegung von `AG(2, 8)` in vier disjunkte 15-Punkte-Blocking-Sets `{0..3}` plus vier Einzelpunkte `{4..7}` und Komplettierung durch `4 × 7` skalierte Hyperoval-Slices (`4096 + 4 · 448 = 5888`).
-  - `CA_7070_4_11_8.txt`: Zwei balancierte 4-polychromatische `AG(2, 8)`-Färbungen + `3072` Hyperoval-Slices + `35` deterministische Reparaturzeilen (`CA(7203; 4, 11, 8)`), gefolgt von Zero-Dep-Rust Post-Optimierung (`solvers/t4_postop`: 0-Break-Don't-Care-Absorption, Row-Deletion, Focused-HD1-Tabu + PAWS) über zwei Läufe (`7203 → 7072 → 7070`).
+- **Fremde Vorarbeit:** Bush (1952) für das orthogonale Array `OA(q^4; 4, q + 1, q)` und das `(q + 2)`-Hyperoval `OA(q^3; 3, q + 2, q)` über `GF(2^m)`; Jamison (1977) und Brouwer–Schrijver (1978) für affine Blocking-Sets der Mindestgröße `2q - 1` in `AG(2, q)`; Nurmela (2004) für Tabu-Search-Reparatur; Nayeri–Colbourn–Konjevod (2013) für Post-Optimierung; **X. Bai, „Covering arrays from line-polychromatic colourings of affine planes“ (30.10.2026, `doi:10.5281/zenodo.23787051`, `polychrome-bai2026`; Daten `doi:10.5281/zenodo.23787055`)** für den gesamten Färbungsrahmen über `AG(2, q)` (Satz 3.5), die Jamison-Obergrenze `c <= floor(q/2)` (Prop. 4.1), die `poly2`-Geradenbüschel-Zerlegung (Satz 5.1 / Prop. 5.2 / Kor. 5.3), Zwei-Zusatzspalten-Bauarten (Satz 6.2) sowie Row-Deletion + Tabu-Post-Optimierung.
+- **Eigener Beitrag (auf Basis von Bai `polychrome-bai2026`):**
+  - `CA_7561_4_11_8.txt`: Deterministische Hyperoval-Double-`poly2`-Implementierung (`scripts/gen_t4_q8_nearbush.py --mode k11-pencil`).
+  - `CA_5888_4_10_8.txt`: Konkrete Wahl der Projektion `Q(a, b, c, d) = (a ^ c ^ d, a ^ b ^ d)` entlang `x^2 + x + 1` über `GF(8)` (jede Faser ist ein exaktes `OA(64; 2, 9, 8)`), sodass die `4` freien Punkte neben `4` disjunkten 15-Punkte-Blocking-Sets direkt `4` Hyperoval-Slices im Bush-OA liefern (`4096 + 4 · 448 = 5888`, `−256` unter Bais Modellgrenze `6144` aus Prop. 5.4).
+  - `CA_7070_4_11_8.txt`: Zwei balancierte 4-polychromatische `AG(2, 8)`-Färbungen mit geteilten Hyperoval-Slices (`16` geteilte `OA(64)`-Slices) + `35` Reparaturzeilen (`CA(7203; 4, 11, 8)`, `−989` unter Bais Satz-6.2-Wert `8192`), gefolgt von Post-Optimierung mit eigenem Reduzierer `solvers/t4_postop` (`7203 → 7072 → 7070`).
 
 ---
 
@@ -87,8 +87,8 @@ Ausgeführt am `2026-11-25` auf den abgelegten Dateien in `results/t4_nearbush/`
 | `CA_9639_4_11_9.txt` | `(4, 11, 9)` | **9639** | `9801` (`VER`, Bai XunDi 2026) | **−162** | Pareto-Best (`q = 9, k = 11`) | `741f78da1eb8f91a9432bc9633e0c62be4948752077909c4fd6ebae67b03daf2` |
 
 ### Herkunft & Vorarbeit (Regel 4)
-- **Vorarbeit:** Bush (1952) für `OA(q^4; 4, q + 1, q)` und `OA(q^3; 3, q + 1, q)`; Segre (1955) für `(q + 1)`-Bögen in `PG(2, q)`; Jamison (1977) und Brouwer–Schrijver (1978) für affine Blocking-Sets der Größe `>= 2q - 1` in `AG(2, q)`; Nurmela (2004) für Tabu-Reparatur; Bai XunDi (2026) für `poly2` (`N_poly2(q) = q^4 + ((q^2 - 1)/2) q^2`) sowie Row-Deletion + Tabu-Post-Optimierung; Sitjar (2026) für `CA(3556; 4, 9, 7)`.
-- **Eigene Zusammensetzung:** Projektion `Q_cd(a, b, c, d) = (c, d)` mit exakter `AG(2, q)`-Partition in `(q - 1)/2` disjunkte `(2q - 1)`-Blocking-Sets + `q`-Punkte-Parabel `{(d^2, d)}` (Symbol `(q - 1)/2`) + `(q - 1)/2` Einzelpunkte (`scripts/gen_t4_odd_q_nearbush.py --mode poly2-disjoint`), gefolgt von Post-Optimierung mit `solvers/t4_postop` (0-Break-Don't-Care-Absorption + Row-Deletion + Focused-HD1-Tabu + PAWS).
+- **Fremde Vorarbeit:** Bush (1952) für `OA(q^4; 4, q + 1, q)` und `OA(q^3; 3, q + 1, q)`; Segre (1955) für `(q + 1)`-Bögen in `PG(2, q)`; Jamison (1977) und Brouwer–Schrijver (1978) für affine Blocking-Sets der Größe `>= 2q - 1` in `AG(2, q)`; Nurmela (2004) für Tabu-Reparatur; Nayeri–Colbourn–Konjevod (2013) für Post-Optimierung; **X. Bai, „Covering arrays from line-polychromatic colourings of affine planes“ (30.10.2026, `doi:10.5281/zenodo.23787051`, `polychrome-bai2026`; Daten `doi:10.5281/zenodo.23787055`)** für den Färbungsrahmen (Satz 3.5), die Obergrenze `c <= floor(q/2)` (Prop. 4.1), die Formel `N = q^4 + ((q^2 - 1)/2) q^2` (Satz 5.1 / Prop. 5.2 / Kor. 5.3) sowie Row-Deletion + Tabu-Post-Optimierung; Sitjar (2026) für `CA(3556; 4, 9, 7)`.
+- **Eigener Beitrag (auf Basis von Bai `polychrome-bai2026`):** Parabel-Packung (`q^2 = q` [Parabel] `+ ((q - 1)/2)*(2q - 1)` [disjunkte minimale Blocking-Sets] `+ (q - 1)/2` [Einzelpunkte]) unter Projektion `Q_cd(a, b, c, d) = (c, d)` (`scripts/gen_t4_odd_q_nearbush.py --mode poly2-disjoint`), gefolgt von Post-Optimierung mit eigenem Reduzierer `solvers/t4_postop` (0-Break-Don't-Care-Absorption + Row-Deletion + Focused-HD1-Tabu + PAWS).
 
 ## 4. Verifikations-Protokoll (`CA_3479_4_9_7.txt` & `CA_9639_4_11_9.txt`)
 
@@ -208,4 +208,65 @@ Ausgeführt am `2026-11-25` auf den abgelegten Dateien in `results/t4_nearbush/`
 - **Verifier 2 (`timeout --kill-after=10s 120 python3 verifiers/verify_independent.py results/t4_nearbush/CA_42722_4_15_13.txt 4 13 -n 42722 -k 15`):**
   - Exit-Code: `0`
   - Ausgabe: `VERIFIED: CA(N=42722; t=4, k=15, v=13) - all 1365 column sets cover all 28561 tuples (38985765 total interactions) [elapsed: 24.7447s]`
+
+---
+
+# Anhang — Phase 5B-Audit: Lokal deterministische `--target-n`-Reproduktion (`--threads 1`, 2× byte-identisch)
+
+Konsolidierter Audit-Abschnitt der Phase 5B-Audit für alle `6` Pareto-Best-Arrays in `results/t4_nearbush/`.
+
+- **Datum (UTC):** `2026-11-25` (`22:00`–`22:16Z`)
+- **Branch:** `chore/t4-nearbush-audit` (Basis `origin/main` @ `ca637a6`, nach Merge von PR `#17`)
+- **Quellstand:** `solvers/t4_postop/src/main.rs`, `scripts/gen_t4_odd_q_nearbush.py` und `scripts/gen_t4_q8_nearbush.py` zuletzt geändert in `98d7a43` (SHA-256 `48847bcb…`, `32afb669…`, `eec6adad…`); in diesem Branch unverändert.
+- **Build:** `cargo build --release` in `solvers/t4_postop` (`rustc 1.100.0`, `std`-only), `python3` `3.12.16`; `verifiers/ca_verify` lokal aus `verifiers/ca_verify.c` kompiliert.
+- **Hardware:** `Intel(R) Xeon(R) CPU @ 2.30GHz`, 2 vCPUs; alle `t4_postop`-Läufe strikt `--threads 1` und nacheinander (kein paralleler Lauf).
+- **Ausgaben:** in einem Scratch-Verzeichnis außerhalb des Repos; Vergleich gegen die abgelegten Dateien per SHA-256 und `cmp -s`. Die abgelegten Dateien in `results/t4_nearbush/` wurden **nicht** überschrieben.
+- **Laufzeiten & FAIL-Regel:** Für `t4_postop` ist `elapsed` aus der Abschlusszeile des Programms übernommen (`bc` im Container nicht installiert; Einhaltung der externen `timeout`-Grenzen durch Exit-Code `0` aller Läufe belegt). **Verbindliche Regel (`RULES.md` §4):** Wird `--target-n` innerhalb des gesetzten Zeitlimits nicht erreicht, gilt der Reproduktionslauf als **`FAIL`**.
+- **Belegart:** **lokal deterministisch (2× byte-identisch mit `--target-n`, `--threads 1`)** auf derselben Maschine (`12/12` Läufe byte-identisch zu den abgelegten Dateien, Punkt 2e der Checkliste `RULES.md`, nur lokal; keine neue Suche). Rechnerunabhängige Bestätigung auf einer zweiten Maschine siehe getrennt [`docs/THIRD_PARTY_VERIFICATION_T4_NEARBUSH.md`](../../docs/THIRD_PARTY_VERIFICATION_T4_NEARBUSH.md) (`5` Arrays bestätigt, `7056` und `42722` noch offen).
+
+## 7. Übersicht der lokal deterministischen `--target-n`-Reproduktionen
+
+| Array | Startarray (SHA-256, 2× byte-identisch erzeugt) | Befehl (fester Stopp) | Lauf 1 | Lauf 2 | Output-SHA-256 (beide Läufe) | = abgelegte Datei |
+| --- | --- | --- | :---: | :---: | --- | :---: |
+| `CA(5888; 4, 10, 8)` | — (direkter Generator) | `gen_t4_q8_nearbush.py --mode k10-polychrom` | `0,037 s` | `0,034 s` | `7d72bc894b54b7cffb388c030d1485372cde6af12afb016f19622feb8be2a802` | ja |
+| `CA(3430; 4, 9, 7)` | `CA(3577)` `bd2299130cb8058c366b919f5cf36e7bcf9cc9f75d737a71488327d58c181ae5` | `--target-n 3430` | `2,26 s` | `2,34 s` | `d5860adeeab8a438e8716abadc82c699c4f3192a658edf1e8a5046a2ac57f533` | ja |
+| `CA(7056; 4, 11, 8)` | `CA(7203)` `cb222f4828c3d843b167b58959f69c08dbd557f60f4146f57e8fbd6d67d7c68e` | `--target-n 7056` | `97,84 s` | `96,86 s` | `b18c17426dabadd7470245c3f3819e18c52bcd1ec0b060ac7ed8378d117233d7` | ja |
+| `CA(9558; 4, 11, 9)` | `CA(9801)` `3fa0850ef5730767e733002ebaeda8af33d2ffe7c7da67a248ddcc8f3b2a39e7` | `--target-n 9558` | `31,17 s` | `32,37 s` | `8ffd689d66b57fde974df670c954b1e29addb66749563d119b8b5da7383f6dd2` | ja |
+| `CA(21900; 4, 13, 11)` | `CA(21901)` `0112cdea420a59d47e68021639dbdbd0c07cb99504b52df5de3d01d2460b0dc3` | `--target-n 21900` | `3,09 s` | `3,27 s` | `cb7696e377564594b0f8d047ec1a5efdf4797e1ccba6faa79a6ab26a2222dafc` | ja |
+| `CA(42722; 4, 15, 13)` | `CA(42757)` `049978017b5cd523dec751609ed32635c84053dfe2ac502533566c8cd33f60be` | `--target-n 42722` | `202,58 s` | `202,18 s` | `1b5a6d75f4b59345850d6bee9c8aaa4bbcd06b6479e9a410688bb662eed20e73` | ja |
+
+Summe aller `t4_postop`-Reproduktionsläufe: `673,96 s` (`10` Läufe). Generatorläufe zusätzlich `< 0,4 s` je Lauf.
+
+### 7.1 Befehle im Wortlaut (`<S>` = Scratch-Verzeichnis, `BIN = ./solvers/t4_postop/target/release/t4_postop`)
+
+```bash
+# Startarrays (je 2x, cmp -s PASS)
+timeout --kill-after=10s 30 python3 scripts/gen_t4_q8_nearbush.py    --mode k10-polychrom            --out <S>/CA_5888_r{1,2}.txt    # 0,037 / 0,034 s
+timeout --kill-after=10s 30 python3 scripts/gen_t4_odd_q_nearbush.py --mode poly2-disjoint --q 7     --out <S>/start_q7_r{1,2}.txt   # 0,017 / 0,021 s
+timeout --kill-after=10s 30 python3 scripts/gen_t4_q8_nearbush.py    --mode k11-polychrom            --out <S>/start_q8k11_r{1,2}.txt # 0,096 / 0,093 s
+timeout --kill-after=10s 30 python3 scripts/gen_t4_odd_q_nearbush.py --mode poly2-disjoint --q 9     --out <S>/start_q9_r{1,2}.txt   # 0,053 / 0,051 s
+timeout --kill-after=10s 30 python3 scripts/gen_t4_odd_q_nearbush.py --mode poly2-disjoint --q 11    --out <S>/start_q11_r{1,2}.txt  # 0,129 / 0,126 s
+timeout --kill-after=10s 30 python3 scripts/gen_t4_odd_q_nearbush.py --mode poly2-disjoint --q 13    --out <S>/start_q13_r{1,2}.txt  # 0,277 / 0,314 s
+
+# t4_postop (je 2x, --threads 1, cmp -s PASS; Nicht-Erreichen von --target-n = FAIL)
+timeout --kill-after=10s 60  $BIN --input <S>/start_q7_r1.txt    --v 7  --threads 1 --seed 5302 --time-limit-secs 15  --stagnation-secs 10 --target-n 3430  --out <S>/CA_3430_r{1,2}.txt
+timeout --kill-after=10s 180 $BIN --input <S>/start_q8k11_r1.txt --v 8  --threads 1 --seed 5211 --time-limit-secs 150 --stagnation-secs 60 --target-n 7056  --out <S>/CA_7056_r{1,2}.txt
+timeout --kill-after=10s 180 $BIN --input <S>/start_q9_r1.txt    --v 9  --threads 1 --seed 5321 --time-limit-secs 115 --stagnation-secs 60 --target-n 9558  --out <S>/CA_9558_r{1,2}.txt
+timeout --kill-after=10s 90  $BIN --input <S>/start_q11_r1.txt   --v 11 --threads 1 --seed 5461 --time-limit-secs 160 --stagnation-secs 60 --target-n 21900 --out <S>/CA_21900_r{1,2}.txt
+timeout --kill-after=10s 240 $BIN --input <S>/start_q13_r1.txt   --v 13 --threads 1 --seed 5471 --time-limit-secs 260 --stagnation-secs 60 --target-n 42722 --out <S>/CA_42722_r{1,2}.txt
+```
+
+### 7.2 Abschlusszeilen (`t4_postop`) & Dual-Verifikation (Audit-Durchlauf)
+
+| Array | `init_N → final_N` | `saved` | `absorbed` | `steps` | `evals` | `evals/s` (L1 / L2) | `ca_verify` (`timeout 30`) | `verify_independent.py` (`timeout 120`) |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `CA_5888` | — (Gen.) | — | — | — | — | — | `0`, `0,02 s` | `0`, `0,3638 s` (`210 × 4096`) |
+| `CA_3430` | `3577 → 3430` | `147` | `67` | `24.297` | `1.057.430` | `468.454 / 451.483` | `0`, `0,01 s` | `0`, `0,1086 s` (`126 × 2401`) |
+| `CA_7056` | `7203 → 7056` | `147` | `61` | `685.644` | `42.024.831` | `429.540 / 433.883` | `0`, `0,01 s` | `0`, `0,5822 s` (`330 × 4096`) |
+| `CA_9558` | `9801 → 9558` | `243` | `3.898` | `68.487` | `3.835.841` | `123.045 / 118.486` | `0`, `0,01 s` | `0`, `0,9924 s` (`330 × 6561`) |
+| `CA_21900` | `21901 → 21900` | `1` | `0` | `1.665` | `126.354` | `40.850 / 38.686` | `0`, `0,04 s` | `0`, `5,0028 s` (`715 × 14641`) |
+| `CA_42722` | `42757 → 42722` | `35` | `0` | `223` | `13.910` | `69 / 69` | `0`, `0,13 s` | `0`, `22,1229 s` (`1365 × 28561`) |
+
+*(Für `CA_42722` lagen aus PR `#17` §6 bereits 2 `--target-n 42722`-Läufe mit `timeout 280` vor [`217,21 / 214,93 s`]; mit den beiden Läufen hier [`timeout 240`, `202,58 / 202,18 s`] liegen `4` byte-identische `--target-n 42722`-Läufe vor.)*
+
 

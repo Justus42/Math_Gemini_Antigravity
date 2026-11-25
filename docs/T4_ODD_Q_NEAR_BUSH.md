@@ -27,11 +27,11 @@ Gegenüber dem Phase-5B-2A-Stand (`c5f447d`) liegt `chrispbsmolen/ca-tools/main`
 
 ## 2. Herkunft & Vorarbeit (Regel 4)
 
-- **Fremde Vorarbeit:** Bush (1952) für das orthogonale Array `OA(q^4; 4, q + 1, q)` und das `(q + 2)`-Hyperoval `OA(q^3; 3, q + 2, q)` über `GF(2^m)`; Segre (1955) für die Klassifikation der `(q + 1)`-Bögen in `PG(2, q)` für ungerades `q`; Jamison (1977) und Brouwer–Schrijver (1978) für die untere Schranke `|B| >= 2q - 1` affiner Blocking-Sets in `AG(2, q)`; Nurmela (2004) für Tabu-Search-Reparatur; Bai XunDi (2026) für `poly2` mit Geradenbüschel-Zerlegung (`N_poly2(q) = q^4 + ((q^2 - 1)/2) q^2`) sowie Row-Deletion + Tabu-Post-Optimierung; Sitjar (2026) für die `Z_7`-Coset-Lösung `CA(3556; 4, 9, 7)`.
-- **Eigene Zusammensetzung in Phase 5B-2B:**
-  1. Verallgemeinerung der `GF(q)`-Implementierung auf `q in {7, 8, 9, 11, 13}` und exakter Nachweis der beiden ungeraden Obstruktionen für die wörtliche `Q_g`-Bauart (Abschnitt 3).
-  2. Adaption auf die Projektion `Q_cd(a, b, c, d) = (c, d)` mit disjunkten affinen Blocking-Sets und **Parabel-Packung** der überschüssigen freien Punkte in `AG(2, q)` (Abschnitt 4).
-  3. Post-Optimierung der parabel-gepackten Startarrays mittels bestehendem `solvers/t4_postop` auf `q = 7` und `q = 9` (Abschnitt 5).
+- **Fremde Vorarbeit:** Bush (1952) für das orthogonale Array `OA(q^4; 4, q + 1, q)` und das `(q + 2)`-Hyperoval `OA(q^3; 3, q + 2, q)` über `GF(2^m)`; Segre (1955) für die Klassifikation der `(q + 1)`-Bögen in `PG(2, q)` für ungerades `q`; Jamison (1977) und Brouwer–Schrijver (1978) für die untere Schranke `|B| >= 2q - 1` affiner Blocking-Sets in `AG(2, q)`; Nurmela (2004) für Tabu-Search-Reparatur; Nayeri–Colbourn–Konjevod (2013) für Post-Optimierung; **X. Bai, „Covering arrays from line-polychromatic colourings of affine planes“ (Preprint vom 30.10.2026, `doi:10.5281/zenodo.23787051`, `polychrome-bai2026`; Daten `doi:10.5281/zenodo.23787055`)** für das gesamte Konstruktionsprinzip der linien-polychromatischen Färbungen von `AG(2, q)` über Bush/RS-OA (Satz 3.5), die Jamison-/Brouwer–Schrijver-Obergrenze `c <= floor(q/2)` (Prop. 4.1) sowie die Pencil-Cover-Formel `N = q^4 + ((q^2 - 1)/2) q^2` (Satz 5.1 / Prop. 5.2 / Kor. 5.3) samt Row-Deletion + Tabu-Post-Optimierung; Sitjar (2026) für die `Z_7`-Coset-Lösung `CA(3556; 4, 9, 7)`.
+- **Eigener Beitrag in Phase 5B-2B (auf Basis von Bai `polychrome-bai2026`):**
+  1. Verallgemeinerung der `GF(q)`-Implementierung auf `q in {7, 8, 9, 11, 13}` und explizite Nachrechnung der beiden ungeraden Obstruktionen für die wörtliche `Q_g`-Bauart (Abschnitt 3).
+  2. Parabel-Packung der überschüssigen freien Punkte in `AG(2, q)` unter Projektion `Q_cd(a, b, c, d) = (c, d)` zur Halbierung von `min_row_unique` bei unveränderter Startgröße `N = q^4 + ((q^2 - 1)/2) q^2` aus Bais Kor. 5.3 (Abschnitt 4).
+  3. Post-Optimierung der parabel-gepackten Startarrays mittels eigenem Reduzierer `solvers/t4_postop` auf `q = 7` und `q = 9` (Abschnitt 5).
 
 ---
 
@@ -70,9 +70,10 @@ Die wörtliche Übertragung der `q = 8`-Bauart (*irreduzibles Quadrat `g(x)` + d
 
 Wechselt man die Projektion von `Q_g` auf **`Q_cd(a, b, c, d) = (c, d)`**, so ist `col_∞ = d` auf jeder Faser konstant und spielt die Rolle des Kegelschnittpunkts `(0, 0, 1)` statt des Nukleus `(0, 1, 0)`. Jeder freie Ankerpunkt `(c_0, d_0) in AG(2, q)` lässt sich dann für **jede** Primzahlpotenz `q` über den Spaltenversatz `T(x) = (c_0 - d_0) x^2 + d_0 x^3` (`T(∞) = 0`) durch `(q - 1)` Slices `c' in GF(q) \ {d_0}` zu einem exakten verschobenen `OA(q^3; 3, q + 1, q)` vervollständigen.
 
-Zugleich bleiben nach Packung von `(q - 1)/2` minimalen Blocking-Sets der Größe `2q - 1` genau `(3q - 1)/2` freie Punkte in `AG(2, q)` übrig. Für jedes ungerade `q` gilt die exakte Punkt-Identität:
-$$\frac{q - 1}{2}(2q - 1) + q + \frac{q - 1}{2} \cdot 1 = q^2.$$
-Ordnet man einem ausgezeichneten Restsymbol `m_* = (q - 1)/2` die **`q`-Punkte-Parabel** `P = {(d^2, d) : d in GF(q)}` zu (und den übrigen `(q - 1)/2` Restsymbolen je `1` Einzelpunkt), so bleiben die Zeilenanzahlen unverändert bei `N_constr(q) = N_poly2(q)`, aber im Hauptblock sind für Symbol `m_*` bereits:
+Zugleich bleiben nach Packung von `(q - 1)/2` minimalen Blocking-Sets der Größe `2q - 1` (Obergrenze aus Bai 2026, Prop. 4.1 via Jamison 1977 / Brouwer–Schrijver 1978) genau `(3q - 1)/2` freie Punkte in `AG(2, q)` übrig. Für jedes ungerade `q` gilt die exakte Punkt-Identität:
+$$q^2 = q + \frac{q - 1}{2}(2q - 1) + \frac{q - 1}{2}$$
+(`q` Punkte Parabel `+ ((q - 1)/2)*(2q - 1)` disjunkte minimale Blocking-Sets `+ (q - 1)/2` Einzelpunkte).
+Ordnet man einem ausgezeichneten Restsymbol `m_* = (q - 1)/2` die **`q`-Punkte-Parabel** `P = {(d^2, d) : d in GF(q)}` zu (und den übrigen `(q - 1)/2` Restsymbolen je `1` Einzelpunkt), so bleiben die Zeilenanzahlen unverändert bei `N_constr(q) = N_poly2(q)` (Bai 2026, Kor. 5.3), aber im Hauptblock sind für Symbol `m_*` bereits:
 - **100 % aller Tripel mit `col_∞`** (`d` durchläuft ganz `GF(q)`) und
 - **`(q + 1)/2` von `q` Restklassen** der zweiten dividierten Differenz auf `{0..q - 1}`
 abgedeckt. Dadurch fällt die Mindestanzahl einzigartig überdeckter 4-Tupel (`min_row_unique`) in den `(q - 1) q^2` Zusatzzeilen von Symbol `m_*` genau auf die Hälfte gegenüber dem Standard-`poly2`-Pencil-Cover (`q = 7`: `30 -> 15`; `q = 9`: `72 -> 36`).
@@ -132,7 +133,7 @@ Der Reduzierer eliminiert demnach exakt **zwei vollständige `OA(q^2)`-Slices** 
 | `13` | `(4, 15, 13)` | `42757` (`VER`) | `CA(42757; 4, 15, 13)` *(Scratch)* | `0` | Nur Scratch (`04997801…`) | **Deterministisch `ca_verify` PASS (`N_constr = N_poly2`); wörtliche `Q_g`-Bauart konstruktiv ausgeschlossen (Segre); kein Post-Op-Lauf in Phase 5B-2B** |
 
 ### Offene Anschlussoptionen (ohne Außenmeldung vor Prüfbericht zu PR `#88`)
-1. **Übertragung der Parabel-Packung + Post-Op auf `q = 11` (`(4, 13, 11) < 21901`) und `q = 13` (`(4, 15, 13) < 42757`):** Analoge `((q - 1)/2) × (2q - 1) + q + (q - 1)/2 = q^2`-Parabel-Partition über `GF(11)` und `GF(13)` (Hinweis: in `solvers/t4_postop` gilt `v^4 <= u16::MAX`, sodass `v = 11` [`14.641 <= 65.535`] und `v = 13` [`28.561 <= 65.535`] direkt ohne Codeänderung unterstützt sind, sofern ein kurzer Lauf im Budget geprüft wird).
+1. **Übertragung der Parabel-Packung + Post-Op auf `q = 11` (`(4, 13, 11) < 21901`) und `q = 13` (`(4, 15, 13) < 42757`):** Analoge Partition `q^2 = q` (Parabel) `+ ((q - 1)/2)*(2q - 1)` (disjunkte minimale Blocking-Sets) `+ (q - 1)/2` (Einzelpunkte) über `GF(11)` und `GF(13)` (Hinweis: in `solvers/t4_postop` gilt `v^4 <= u16::MAX`, sodass `v = 11` [`14.641 <= 65.535`] und `v = 13` [`28.561 <= 65.535`] direkt ohne Codeänderung unterstützt sind, sofern ein kurzer Lauf im Budget geprüft wird).
 2. **Konstruktive Analyse der `2 · q^2`-Einsparung (oder `k = q + 3` auf `q = 7, 9`):** Prüfen, ob sich die von `t4_postop` gefundenen `2 · q^2`-Slice-Reduktionen auf der Parabel-Restmenge algebraisch beschreiben lassen oder ob die `t = 4`-Sammlung in `results/t4_nearbush/` (`CA_5888_4_10_8`, `CA_7070_4_11_8`, `CA_3479_4_9_7`, `CA_9639_4_11_9`) zunächst für Literatur- und Drittprüfung (`RULES.md` Punkt 2) vorbereitet wird.
 
 ---
@@ -186,6 +187,8 @@ Reproduzierbares Analyseskript: [`scripts/analyze_t4_slices.py`](../scripts/anal
    - **Bei festgehaltener, unveränderter Parabel:** Auf einer festen 3-Menge mit Summe `S` fehlen `(q - 1)/2` Restklassen → es werden mindestens `(q - 1)/2` zusätzliche Slices benötigt, also höchstens `(q - 1) - (q - 1)/2 = (q - 1)/2` entfernbare Komplettierungs-Slices auf `m_*` allein (`q = 7: <= 3`, `q = 9: <= 4`).
    - **Allgemeine Einzel-Symbol-Schranke (`CA(3, q + 1, q) >= q^3`):** Jedes Symbol `m in GF(q)` in `col_{q+1}` benötigt mindestens `q^3 = q · q^2` Zeilen. Auf `m_*` allein (Start `2q - 1` Slices) sind damit maximal `q - 1` Slices entfernbar (`q = 7: <= 6`, `q = 9: <= 8`). Global über alle Symbole beträgt der Abstand des Startarrays zum unerreichbaren `OA(q^4)`-Boden `(q^2 - 1)/2` Slices (`q = 7: 24`, `q = 9: 40`).
    - **Empirischer Befund zur Barriere:** Da `CA_3430` explizit eine Blocking-Set-Klasse (`m = 2`) unter die Jamison-Grenze `2q - 1 = 13` auf `11` Bush-Fasern `+ 1` Zusatz-Slice drückt und sowohl `q = 7` als auch `q = 9` mit `--threads 1` bereits `−3 · q^2` erreichen, existiert **keine** feste `−2 q^2`-Barriere; wie viele weitere Slices jenseits von `−3 · q^2` durch Faser-Umfärbung entfernbar sind, bleibt empirisch offen.
+4. **Abgleich gegen Bai (2026) Satz 3.7 / Offenes Problem 2 ([`scripts/analyze_bai_deltas.py`](../scripts/analyze_bai_deltas.py), Details in [`docs/LITERATURE_CHECK_T4_NEARBUSH.md`](LITERATURE_CHECK_T4_NEARBUSH.md) §7):**
+   In `CA(3430; 4, 9, 7)` bleibt das gesamte Bush-`OA(2401; 4, 8, 7)` auf Spalten `0..7` intakt (`2401/2401`, `0` mehrdeutig, `392/2401 = 8` Slices in `col_8` gegenüber `CA(3577)` geändert); die universelle Farbzahl auf den `19.208` 3-Tupel-Fasern fällt dabei auf `2 < floor(7/2) = 3` (in `CA(5888; 4, 10, 8)`: `4 = floor(8/2)`). Keines der beiden Arrays liefert damit `> floor(q/2)` universelle Farbklassen im Sinne von Bais Satz 3.7 / Offenes Problem 2.
 
 ---
 
