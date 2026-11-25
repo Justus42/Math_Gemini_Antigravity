@@ -24,7 +24,7 @@ This construction builds directly on prior strength-3 group-action and pair-expa
 - **Nurmela (2004, `tabu-n2004`)**: tabu search for covering arrays.
 *(By contrast, Maity et al. 2018 [`pgl-macc2018`] apply `PGL(2, q)` at strength `t = 4`.)*
 
-Extending the single-orbit CCL (2008) framework (`k <= q + 1`) to **two deterministic `PGL(2, q)` orbits with balanced column halving (`k <= 2q`)** and a **general (non-self-complementary) partition-dependent binary matrix `C`**, all 13 arrays are built from scratch over `q in {9, 11, 13, 19}` (`v = q + 1`):
+To our knowledge, the specific combination used here extends the single-orbit CCL (2008) framework (`k <= q + 1`) to **two deterministic `PGL(2, q)` orbits with balanced column halving (`k <= 2q`)** and a **general (non-self-complementary) weakened partition-dependent binary matrix `C`**; all 13 arrays are built from scratch over `q in {9, 11, 13, 19}` (`v = q + 1`):
 
 1. **Deterministic `PGL(2, q)` block (`2 · q(q² − 1)` rows):**
    The alphabet is `F_q ∪ {∞}`, encoded 0-based as `{0, ..., q}` with `q` representing `∞`. Partition the `k` columns into balanced halves `L` (`|L| = ⌊k/2⌋`) and `R` (`|R| = ⌈k/2⌉`), both `<= q`. Expand two starter rows under the sharply 3-transitive action of `PGL(2, q)` on `F_q ∪ {∞}`:
@@ -37,7 +37,7 @@ Extending the single-orbit CCL (2008) framework (`k <= q + 1`) to **two determin
    - **`C_const` (`cc = 1`, 12 of 13 arrays):** additionally requires `000` or `111` on every mixed triple; the directed cycle then covers all `v` constant tuples on mixed triples with `0` appended constant rows (`N = 2q(q² − 1) + M · v(v − 1)/2`).
    - **`C_plain` (`cc = 0`, used for `CA(18070; 3, 35, 20)`):** omits the `000`/`111` requirement on mixed triples and appends `+v` constant rows (`N = 2q(q² − 1) + M · v(v − 1)/2 + v`).
 
-   Because mixed triples omit two non-constant patterns, `C` is strictly smaller than regular binary covering arrays (for example `M = 14 < 17 = CAN(3, 15, 2)` at `k = 15`, and `M = 16 < 18 = CAN(3, k, 2)` at `k = 18, 19`). Because `C(M, k)` is independent of `q`, the same `17 × 20` starter yields both `CA(3762; 3, 20, 12)` and `CA(5915; 3, 20, 14)`. A written literature check (including Colbourn Nov 2024, `CAs` v0.25, NIST, Seelman/IRSI 2026-10-13, Sitjar v1.4 Table 1, and Canli's `quantavane-covering-arrays` @ `0b179b52`, plus an explicit list of sources not read in full) is archived in `docs/LITERATURE_CHECK_PGL_CCL.md`.
+   Because mixed triples omit two non-constant patterns, `C` is strictly smaller than regular binary covering arrays (for example `M = 14 < 17 = CAN(3, 15, 2)` [proven exact] at `k = 15`, and `M = 16 < best known upper bound 18` at `k = 18, 19`). Because `C(M, k)` is independent of `q`, the same `17 × 20` starter yields both `CA(3762; 3, 20, 12)` and `CA(5915; 3, 20, 14)`. A written literature check (including Colbourn Nov 2024, `CAs` v0.25, NIST, Seelman/IRSI 2026-10-13, Sitjar v1.4 Table 1, and Canli's `quantavane-covering-arrays` @ `0b179b52`) is archived in `docs/LITERATURE_CHECK_PGL_CCL.md`; novelty status is formally open because Chateauneuf & Kreher (2002) full text, Colbourn–Martirosyan–Trung–Walker (2006), Bai XunDi (2026 Zenodo / 237 arrays), and Sitjar (2026 Zenodo archive / pp. 4–9) were not read in full.
 
 ### Summary of the 13 Pareto-Front Arrays (23 Entries Smaller Than `ca-tools` @ `7b08aef`)
 
@@ -59,10 +59,10 @@ Extending the single-orbit CCL (2008) framework (`k <= q + 1`) to **two determin
 
 ### Verification & Reproducibility
 
-- **Triple exhaustive check:** Every array passed `ca_verify.c` (exit code 0, `0.006–0.451 s`), an independent standard-library Python verifier (`verify_independent.py`, exit code 0, `0.208–33.373 s`), and an independent third-party verifier program (including negative test on a truncated array, documented in `docs/THIRD_PARTY_VERIFICATION.md`).
-- **Bit-exact reproduction:** All 13 arrays were deterministically regenerated from `data/ccl_binary/` via `solvers/pgl_ccl_search expand` and matched all 13 SHA-256 hashes above byte-for-byte (`submission/REPRODUCE.md`).
+- **Triple exhaustive check:** Every array passed `verifiers/ca_verify.c` (exit code 0, `0.006–0.451 s`), an independent standard-library Python verifier (`verifiers/verify_independent.py`, exit code 0, `0.208–33.373 s`), and an independent third-party verifier program (`submission/third_check.py`, including negative test with 70 rows removed; both third-party audit passes — including a local run of `tools/check_submission.py` with 13/13 PASS on `main @ 162d48f` — are documented in `docs/THIRD_PARTY_VERIFICATION.md`).
+- **Bit-exact reproduction:** All 13 arrays were deterministically regenerated from `data/ccl_binary/` via `solvers/pgl_ccl_search expand` (both internally and independently from a fresh build during the third-party audit) and matched all 13 SHA-256 hashes above byte-for-byte (`submission/REPRODUCE.md`).
 - **From scratch (Rule 6):** `Built from: nothing`; no existing table arrays and no Torres-Jimenez arrays were used.
-- **Repository:** https://github.com/Justus42/Math_Gemini_Antigravity (`main` @ `a27da71`; zero-dependency Rust `std`-only solver `solvers/pgl_ccl_search` + binary starters `data/ccl_binary/`).
+- **Repository:** https://github.com/Justus42/Math_Gemini_Antigravity (`main` @ `162d48f`; zero-dependency Rust `std`-only solver `solvers/pgl_ccl_search` + binary starters `data/ccl_binary/`).
 
 ### AI Tools Disclosure (Rule 1 & `CHANGES.md`)
 

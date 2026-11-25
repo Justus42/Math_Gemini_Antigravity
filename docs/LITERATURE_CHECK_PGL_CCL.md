@@ -37,8 +37,8 @@ Geprüft wurden Konstruktionsherkunft, Benennung der binären Komponente `C` und
 
 - **Benennung / Tabellen:** Für die partitionsabhängige binäre $M \times k$-Matrix $C$ (volle 6 nicht-konstante Muster auf $L^3, R^3$; nur 4 nicht-konstante Muster auf $L^2 R, L R^2$; bei $C_{\text{const}}$ zusätzlich `000` oder `111` auf gemischten Tripeln) wurde kein etablierter eigener Fachbegriff und keine eigene Referenztabelle gefunden. Engster Verwandter ist `TOCA` aus Cohen, Colbourn & Ling (2008).
 - **Nachweis der Nicht-Trivialität ($M < \mathrm{CAN}(3, k, 2)$):** $C$ entsteht nicht trivial durch Streichen konstanter Zeilen aus regulären binären Covering Arrays $\mathrm{CA}(N_2; 3, k, 2)$, wie konkrete Werte belegen:
-  - $k = 15$: $M = 14 < 17 = \mathrm{CAN}(3, 15, 2)$ (`ccl_k15_m14_cc1.bin`),
-  - $k = 18, 19$: $M = 16 < 18 = \mathrm{CAN}(3, k, 2)$ (`ccl_k18_m16_cc1.bin`, `ccl_k19_m16_cc1.bin`).
+  - $k = 15$: $M = 14 < 17 = \mathrm{CAN}(3, 15, 2)$ (bewiesener exakter Wert; `ccl_k15_m14_cc1.bin`),
+  - $k = 18, 19$: $M = 16 < 18$ (best known upper bound für $\mathrm{CAN}(3, k, 2)$; `ccl_k18_m16_cc1.bin`, `ccl_k19_m16_cc1.bin`).
 
 ## 5. Frage 3 — Abgleich auf kleinere veröffentlichte Werte
 
