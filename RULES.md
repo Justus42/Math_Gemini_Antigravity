@@ -42,3 +42,20 @@ Kandidaten, die nur einen Verifier bestehen oder ohne SHA-256-Hash und Verifikat
   - regelmäßiges Schreiben von Checkpoints (z. B. alle 60–120 s sowie bei jeder Verbesserung der Kostenfunktion / Zeilenanzahl),
   - sauberes Wiederaufsetzen (`--resume <checkpoint>`) ohne Verlust des besten bisher gefundenen Zustands.
 - **Merge-Gate:** Ein Merge nach `main` erfolgt erst nach bestandener Dual-Verifikation, bestandener `verifiers/test_verifiers.py` und Freigabe.
+
+## Meldung nach außen
+
+1. Kein Agent öffnet Pull Requests, Issues, Mails oder Posts außerhalb dieses Repos. Jede Meldung braucht Justus' ausdrückliche Freigabe für genau dieses Paket.
+2. Vor der Freigabe, je Meldung neu:
+   a) Live-Tabelle am aktuellen Commit holen, jede Zelle gegen die relevanten Tabellen-Dateien (`table/ca_table.csv` / `table/ca_table.csv.gz`, `table/ca_frame.csv`, `table/derived.csv`) prüfen, Commit notieren.
+   b) Offene Pull Requests und Issues des Ziels durchsehen.
+   c) Literaturprüfung mit schriftlichem Prüfvermerk in `docs/`.
+   d) Jedes Array von einem dritten Programm oder einem unbeteiligten Modell nachrechnen lassen, zusätzlich zu den beiden Verifiern.
+   e) Arrays mit dokumentiertem Befehl aus den Startdateien neu erzeugen, SHA-256 vergleichen.
+3. Nur Arrays einreichen, die keine andere eigene Datei dominiert (gleiches oder kleineres N bei mehr Spalten).
+4. Wortwahl: "kleiner als die Tabelle am Commit X". "Rekord" und "neu" nur mit Beleg. Die Bauart mit ihrer Herkunft nennen, fremde Vorarbeit zuerst.
+5. KI-Einsatz offenlegen: in `HOW.md` die Zeile `AI tools used: yes`, dazu die Werkzeuge (Gemini, Antigravity, Gegenprüfung durch Claude).
+6. Form bei `ca-tools`: ein Ordner `submissions/<slug>/` mit `claims.csv` (Kopf: `t,v,k,N,file,source_detail,construction,builds_on,credit,notes`), den Array-Dateien und `HOW.md`. Sonst ändert der Pull Request nichts.
+7. Nach der Meldung: Link, Datum und Commit in `STATUS.md`. Bis zum Prüfbericht des Ziels keine weiteren Meldungen zur selben Bauart. Fehler sofort selbst korrigieren.
+8. Im Laufprotokoll zählt nur die Belegart. Wörter wie "heiß" oder "Near-Miss" sind kein Befund.
+

@@ -59,9 +59,20 @@ Geprüft durch `tools/provenance.py` (Regel 1) sowie angekündigt in `CHANGES.md
 - **Reale Namen (Regel 5):** Jeder PR nennt die verantwortliche(n) reale(n) Person(en) mit E-Mail-Adresse und Affiliation (`Independent researcher` zulässig; optional ORCID) im PR-Text oder per E-Mail an `chrispbsmolen@gmail.com`. KI-Systeme dürfen nur **neben**, niemals **statt** einer Person genannt werden.
 - **Keine Torres-Jimenez-Arrays (Regel 6):** Keine Arrays aus `TJ2level_CAs`, `CAEX_CAs`, `TJcat` oder `web-tj` als Basis/Zutat (unsere Konstruktion ist 100 % from scratch, `Built from: nothing`).
 
-## 6. Live-Prüfung aller 23 Zellen gegen `ca-tools` @ `7b08aef`
+## 6. Live-Prüfung aller 23 Zellen gegen alle Tabellen-Dateien @ `7b08aef`
 
-Stand `2026-11-25` (`7b08aef`, 0 offene PRs): **Alle 23/23 Zellen sind weiterhin frei** und werden durch unsere 13 Pareto-Arrays strikt unterboten (`Delta` zwischen `−44` und `−607`). Lokale Vorabprüfung im `ca-tools`-Klon vor PR-Eröffnung:
+Stand `2026-11-25`, `chrispbsmolen/ca-tools` @ Commit **`7b08aef06cbedaf1b376dbfa68f6aa171a54df4a`** (`2026-11-25T03:31:22Z`), **0 offene PRs**.
+Relevante Tabellen-Dateien in `table/`:
+- `table/ca_table.csv` / `table/ca_table.csv.gz` (Haupttabelle, `VERIFIED` + `CITED`)
+- `table/ca_frame.csv` (Frame-Sicht inkl. bewiesener Ableitungen)
+- `table/derived.csv` (abgeleitete Schranken aus Gesetzmäßigkeiten / Symbol-Fusion)
+
+**Ergebnis der Prüfung über alle 23 Zellen:**
+- Gegen `table/ca_table.csv.gz`: **23/23 strikt kleiner** (`Delta −44` bis `−607`)
+- Gegen `table/ca_frame.csv`: **23/23 strikt kleiner** (`Delta −44` bis `−607`)
+- Gegen `table/derived.csv`: **23/23 strikt kleiner** (z. B. `v=10 k=15..16`: `2070/2115 < 2178`; `v=14 k=23..24`: `6097 < 6193`; `v=20 k=35..38`: `18070/18240 < 18487/18563`)
+
+Lokale Vorabprüfung im `ca-tools`-Klon vor PR-Eröffnung:
 
 ```bash
 cc -O3 -pthread -o ca_verify ca_verify.c
