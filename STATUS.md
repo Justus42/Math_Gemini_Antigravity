@@ -1,26 +1,26 @@
 # Projektstatus & Governance-Gates (`STATUS.md`)
 
-Letzte Aktualisierung: 2026-11-25 (Branch `chore/ca-tools-final-polish`, abgezweigt von `origin/main` @ `162d48f`: Review-Korrekturen vollständig eingearbeitet — `CAN(3,18/19,2)` als `best known upper bound 18` präzisiert, `submission/third_check.py` unverändert archiviert, `docs/THIRD_PARTY_VERIFICATION.md` um 70-Zeilen-Negativkontrolle & 2. Drittprüfung auf `main @ 162d48f` [inkl. `tools/check_submission.py` 13/13 PASS] ergänzt, `"to our knowledge"` + Restliste in `HOW.md`/`PR_DRAFT.md`, `ca-tools` weiterhin @ `7b08aef` mit 0 offenen PRs, `verify_all.sh` 16/16 `DUAL_PASS`; bereit für PR #8 gegen eigenes `main`).
+Letzte Aktualisierung: 2026-11-25 (Branch `chore/ca-tools-pre-submit`, abgezweigt von `origin/main` @ `734d768` [PR #8 gemergt]: frischer Live-Check gegen `chrispbsmolen/ca-tools` @ `083a0933e3561625b2aad9bd19035ad76d783f03` [`2026-11-25T13:32:06Z`, 0 offene PRs, 23/23 strikt kleiner über `ca_table.csv.gz`, `ca_frame.csv` & `derived.csv`], einheitlicher Slug `submissions/jeserigk-pgl-ccl-2026-11/`, explizite `Extent of AI use:`-Offenlegung in `HOW.md`/`PR_DRAFT.md` + KI-Hinweis in `claims.csv`, `Independent` statt `Independent researcher`, Voll-Audit & Vorbereitung PR #9 gegen eigenes `main`).
 Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprotokoll siehe [`docs/RUN_LOG.md`](docs/RUN_LOG.md), Audit-Paket siehe [`submission/MANIFEST.md`](submission/MANIFEST.md).
 
 ## 0. Governance- & Branch-Status
 
-- **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`), PR #6 (`exp/pgl-binary-ccl-v5` @ `a27da71`), PR #7 (`chore/ca-tools-submission-prep` @ `162d48f`).
-- **Aktiver Branch (`chore/ca-tools-final-polish`, PR #8 gegen eigenes `main`):**
-  - Keinerlei Schreibzugriff auf Fremd-Repos (`chrispbsmolen/ca-tools` nur lesend via `gh api` geprüft).
+- **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`), PR #6 (`exp/pgl-binary-ccl-v5` @ `a27da71`), PR #7 (`chore/ca-tools-submission-prep` @ `162d48f`), PR #8 (`chore/ca-tools-final-polish` @ `734d768`).
+- **Aktiver Branch (`chore/ca-tools-pre-submit`, PR #9 gegen eigenes `main`):**
+  - Keinerlei Schreibzugriff auf `chrispbsmolen/ca-tools` (`chrispbsmolen/ca-tools` nur lesend via `gh api` geprüft; ausdrückliche begrenzte Freigabe nach Regel 1 ausschließlich für Branch-Push `submit/jeserigk-pgl-ccl-2026-11` auf Justus' eigenen Fork `Justus42/ca-tools` ohne PR-Eröffnung).
   - **Checkliste Meldung nach außen (`RULES.md` Punkt 2) — 5/5 PASS (erneut geprüft am 2026-11-25):**
-    - `2a` (Tabellen-Check @ `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a`): **PASS** — `table/ca_table.csv.gz` 23/23, `table/ca_frame.csv` 23/23, `table/derived.csv` 23/23 strikt kleiner (`submission/CA_TOOLS_FORMAT.md`).
-    - `2b` (Offene PRs & Issues `ca-tools`): **PASS** — 0 offene PRs.
+    - `2a` (Tabellen-Check @ `083a0933e3561625b2aad9bd19035ad76d783f03`, `2026-11-25T13:32:06Z`): **PASS** — `table/ca_table.csv.gz` 23/23, `table/ca_frame.csv` 23/23, `table/derived.csv` 23/23 strikt kleiner (`submission/CA_TOOLS_FORMAT.md`).
+    - `2b` (Offene PRs & Issues `ca-tools`): **PASS** — 0 offene PRs (`[]`); 2 offene Wanted-Issues (`#85`, `#86`).
     - `2c` (Literaturprüfung in `docs/`): **PASS** — [`docs/LITERATURE_CHECK_PGL_CCL.md`](docs/LITERATURE_CHECK_PGL_CCL.md) (inkl. Seelman/IRSI, Sitjar v1.4, Canli `quantavane-covering-arrays` @ `0b179b52` mit `0` Konflikten und transparenter Restliste; Neuheitsstatus formal offen; `k=18, 19` als *best known upper bound 18* präzisiert).
     - `2d` (Drittprüfung): **PASS** — [`docs/THIRD_PARTY_VERIFICATION.md`](docs/THIRD_PARTY_VERIFICATION.md) + archiviertes [`submission/third_check.py`](submission/third_check.py) (SHA-256 `2acd4477…`): 1. Prüfung auf `results/` (16/16 gültig, Negativkontrolle 70 Zeilen entfernt) & 2. Prüfung auf `main @ 162d48f` (13/13 Staging byte-identisch, 13/13 gültig unter `ca_verify` & `third_check.py`, 13/13 bit-exakt aus frischem Build, lokales `ca-tools` `tools/check_submission.py` 13/13 PASS).
     - `2e` (Deterministische Reproduktion & SHA-256-Vergleich): **PASS** — 13/13 byte-identische Übereinstimmung aus `data/ccl_binary/` (`submission/REPRODUCE.md`).
-  - Finalisiertes Staging [`submission/ca_tools_staging/`](submission/ca_tools_staging/) (`8,7 MB`, 13 Pareto-Arrays, `claims.csv` mit `credit=Justus Jeserigk` und unveränderten `builds_on`-IDs, `HOW.md` mit `AI tools used: yes` & `"to our knowledge"` + Restliste) + [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md) (`0 TBD`, `LANGUAGE_AUDIT_PASS`, `verify_all.sh` 16/16 `DUAL_PASS`). Warten auf Justus' Freigabe für externe Meldung nach Regel 1.
+  - Finalisiertes Staging [`submission/ca_tools_staging/`](submission/ca_tools_staging/) (`8,7 MB`, 13 Pareto-Arrays, `claims.csv` mit `credit=Justus Jeserigk`, KI-Vermerk in `notes` und unveränderten `builds_on`-IDs, `HOW.md` mit `AI tools used: yes` + `Extent of AI use:`-Absatz + `Independent` + `"to our knowledge"` & Restliste) + kopierfertiges [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md) (`0 TBD`, `LANGUAGE_AUDIT_PASS`, `verify_all.sh` 16/16 `DUAL_PASS`, offizielles `ca-tools` `tools/check_submission.py` @ `083a093` **13/13 PASS** in `39,0 s`). PR #9 gegen eigenes `main` geöffnet; Schritt-5-Push auf `Justus42/ca-tools` (`submit/jeserigk-pgl-ccl-2026-11`) sauber wegen Token-Scope mit HTTP 403 abgebrochen (`Justus42/ca-tools` ist nicht als Projekt-Ressource angebunden).
 
-## 1. Pareto-Front der 13 Arrays (kleiner als `ca-tools` @ `7b08aef` auf 23 Zellen)
+## 1. Pareto-Front der 13 Arrays (kleiner als `ca-tools` @ `083a093` auf 23 Zellen)
 
 Frisch dual-verifiziert am `2026-11-25` durch [`submission/verify_all.sh`](submission/verify_all.sh) (`xargs -P 2`); vollständige Checksummen in [`results/SHA256SUMS`](results/SHA256SUMS) (`32/32 OK`) und [`submission/records.csv`](submission/records.csv).
 
-| Zelle `(3, k, v)` | `ca_table` (`7b08aef`) | `derived.csv` | Best `M` (`cc`) | Array `N` | Delta vs `ca_table` | Abgedeckte `k` | `ca_verify` / `py_verify` | Datei (`results/`) & SHA-256 (Prefix) |
+| Zelle `(3, k, v)` | `ca_table` (`083a093`) | `derived.csv` | Best `M` (`cc`) | Array `N` | Delta vs `ca_table` | Abgedeckte `k` | `ca_verify` / `py_verify` | Datei (`results/`) & SHA-256 (Prefix) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | --- |
 | **`(3, 15, 10)`** | `2205` (`VER`) | `2178` | `14` (`1`) | **2070** | −135 | `15` | `0,008s` / `0,208s` | `CA_2070_3_15_10.txt` (`78b0497f…`) |
 | **`(3, 16, 10)`** | `2205` (`VER`) | `2178` | `15` (`1`) | **2115** | −90 | `16` | `0,006s` / `0,238s` | `CA_2115_3_16_10.txt` (`4734fd80…`) |
