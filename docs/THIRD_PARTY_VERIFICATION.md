@@ -44,6 +44,14 @@ Am **2026-11-25** wurde das gemergte Repository (`main @ 162d48f`, PR #7) erneut
 - **PR-Text:** gelesen (`8281` Bytes; enthält `AI tools used: yes`, den Absatz `Extent of AI use:` und `Independent`).
 - **Bot-Prüfbericht:** noch nicht vorhanden (`0` Issue-Kommentare, `0` Reviews, `0` Review-Kommentare; die drei GitHub-Actions-Läufe `Verify submission`, `Consistency` und `Tests` auf `66a9947` vom `2026-11-25T14:44:25Z` stehen auf `status: completed`, `conclusion: action_required` — warten auf Ersteinreicher-Freigabe durch den Maintainer; Bot-Prüfbericht daher noch nicht vorliegend / nicht gelesen).
 
+### 4c. Nachtrag: Korrektur an `HOW.md` und erneute Prüfung (Angabe von Claude, 2026-11-25)
+
+- **Anlass:** Lauf `Consistency #128` auf `66a9947` fehlgeschlagen. Ursache lokal nachgestellt (`tools/consistency.py --check --pr`, Merge-Stand `5327245`): `5 problems`, alle in `HOW.md` (fünf Verweise auf `docs/…` und `results/…` dieses Repos, vom Skript als Pfade im Tabellen-Repo gelesen).
+- **Versäumnis der Vorprüfung:** Vor der Einreichung lief nur `tools/check_submission.py`, nicht `tools/consistency.py`.
+- **Korrektur:** Commit `8d3365c618918106322e119a23b983fdb9520b04` durch Justus (`2026-11-25T17:05:37Z`): `HOW.md`, 3 Zeilen, fünf Verweise als volle Links; SHA-256 neu `f9bd1f868da97f173b6f3e70954758d9cf205407d5a5b79e6f5295711fddcfb7`.
+- **Nachprüfung am Merge-Stand `a8c203b`:** `consistency.py` `0 problems`; `check_submission.py --selftest` und `tests_frame/test_build_frame.py` bestanden; `check_submission.py` `13/13` PASS (`--credit-offline`); PR gegen Basis weiter genau `15` Dateien; die 13 Arrays unverändert.
+- **Nicht geprüft:** das Ergebnis der Läufe auf GitHub nach dem neuen Commit.
+
 ## 5. Zusammenfassung (Punkt 2d)
 
 Die Voraussetzung nach `RULES.md` Abschnitt *Meldung nach außen*, Punkt 2d (Nachrechnung aller Arrays durch ein drittes unabhängiges Programm / unbeteiligtes Modell zusätzlich zu `verifiers/ca_verify` und `verifiers/verify_independent.py`) ist für das eingereichte 13-Array-Paket (`chrispbsmolen/ca-tools#88`) **erfüllt**.
