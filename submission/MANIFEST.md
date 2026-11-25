@@ -9,9 +9,9 @@ Alle hier aufgeführten `t = 3` Covering Arrays `CA(N; 3, k, v)` ($v = q + 1$, $
 1. **Deterministischer `PGL(2, q)`-Block (`2 * q(q² - 1)` Zeilen):** Zwei balancierte Starterzeilen (`|L| = floor(k/2)`, `|R| = ceil(k/2)`, beide $\le q$) decken unter scharf 3-transitivem `PGL(2, q)` deterministisch 100 % aller 3-distinkten Tupel, alle Konstant-Tupel auf reinen Tripeln (`L³`, `R³`) sowie `aab` auf `L²R` und `baa` auf `LR²` ab.
 2. **Allgemeine binäre CCL-Matrix `C` (`M × k`) über `v(v-1)/2` orientierte Paare:** Gerichteter Zyklus `(0,1), ..., (v-1,0)` plus Restpaare `u < w` stellt sicher, dass jedes Symbol mindestens einmal als `0` und `1` auftritt; mit `--cover-const` (`000` oder `111` auf jedem gemischten Tripel) entfallen alle `v` Konstantzeilen (`N = 2q(q²-1) + M·v(v-1)/2`; bei `cc=0`: `+ v`).
 
-## 2. Pareto-Front der 13 Rekord-Arrays (23 verbesserte `(3, k, v)`-Zellen)
+## 2. Pareto-Front der 13 Arrays (kleiner als `ca-tools` @ `7b08aef` auf 23 `(3, k, v)`-Zellen)
 
-Alle Dateien wurden am `2026-11-25` frisch via `./submission/verify_all.sh` (`xargs -P 2`) durch **beide** unveränderte Verifier (`./verifiers/ca_verify` und `python3 verifiers/verify_independent.py`) bestätigt und auf strikte `ca-tools`-Formatkonformität (0-basierte Integer `0..v-1`, genau `N × k`, Einzel-Leerzeichen, kein Header, keine Leerzeilen/Trailing-Spaces, LF) geprüft.
+Alle Dateien wurden am `2026-11-25` frisch via `./submission/verify_all.sh` (`xargs -P 2`) durch **beide** unveränderte Verifier (`./verifiers/ca_verify` und `python3 verifiers/verify_independent.py`) bestätigt, gegen `table/ca_table.csv.gz`, `table/ca_frame.csv` und `table/derived.csv` @ `7b08aef` abgeglichen (23/23 strikt kleiner), auf strikte `ca-tools`-Formatkonformität geprüft und gemäß [`submission/REPRODUCE.md`](REPRODUCE.md) 13/13 bit-identisch aus `data/ccl_binary/` reproduziert.
 
 | `t` | `k` | `v` | `N_new` | `N_live` (`ca-tools`) | Delta | Dominierte `k` | Methode | `ca_verify` | `py_verify` | Datei & SHA-256 |
 | :-: | :-: | :-: | :---: | :---: | :---: | :---: | --- | :---: | :---: | --- |
