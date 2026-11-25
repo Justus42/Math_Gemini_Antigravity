@@ -1,19 +1,12 @@
 # Pull Request Draft for `chrispbsmolen/ca-tools`
 
-> **Release Checklist (for Justus before opening a PR on a fork of `chrispbsmolen/ca-tools`):**
-> 1. Re-verify `chrispbsmolen/ca-tools` `main` commit and open PRs immediately prior to submission (`RULES.md` #2a/#2b).
-> 2. Copy `submission/ca_tools_staging/` as `submissions/jeserigk-pgl-ccl-2026-11/` into your fork (changing **no** files outside that directory, Rule 7).
-> 3. Run `python3 tools/check_submission.py submissions/jeserigk-pgl-ccl-2026-11` locally in your `ca-tools` clone before pushing.
-
----
-
 ## Suggested PR Title
 
-`Submission jeserigk-pgl-ccl-2026-11: 13 strength-3 covering arrays smaller than ca-tools @ 7b08aef (v=10, 12, 14, 20; 23 entries)`
+`Submission jeserigk-pgl-ccl-2026-11: 13 strength-3 covering arrays smaller than ca-tools @ 083a093 (v=10, 12, 14, 20; 23 entries)`
 
 ## Suggested PR Body
 
-Adds `submissions/jeserigk-pgl-ccl-2026-11/` containing **13 Pareto-front strength-3 covering arrays**, `claims.csv`, and `HOW.md`. Under stair-step semantics, these 13 arrays are strictly smaller than `chrispbsmolen/ca-tools` at commit `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a` (checked across `table/ca_table.csv.gz`, `table/ca_frame.csv`, and `table/derived.csv`, 0 open PRs at check time) on **23 entries** across four alphabet sizes (`v = 10, 12, 14, 20`), reducing `N` by **44 to 607 rows** relative to that snapshot.
+Adds `submissions/jeserigk-pgl-ccl-2026-11/` containing **13 Pareto-front strength-3 covering arrays**, `claims.csv`, and `HOW.md`. Under stair-step semantics, these 13 arrays are strictly smaller than `chrispbsmolen/ca-tools` at commit `083a0933e3561625b2aad9bd19035ad76d783f03` (`2026-11-25T13:32:06Z`, checked across `table/ca_table.csv.gz`, `table/ca_frame.csv`, and `table/derived.csv`, 0 open PRs at check time) on **23 entries** across four alphabet sizes (`v = 10, 12, 14, 20`), reducing `N` by **44 to 607 rows** relative to that snapshot.
 
 ### Prior Work & Construction
 
@@ -39,9 +32,9 @@ To our knowledge, the specific combination used here extends the single-orbit CC
 
    Because mixed triples omit two non-constant patterns, `C` is strictly smaller than regular binary covering arrays (for example `M = 14 < 17 = CAN(3, 15, 2)` [proven exact] at `k = 15`, and `M = 16 < best known upper bound 18` at `k = 18, 19`). Because `C(M, k)` is independent of `q`, the same `17 × 20` starter yields both `CA(3762; 3, 20, 12)` and `CA(5915; 3, 20, 14)`. A written literature check (including Colbourn Nov 2024, `CAs` v0.25, NIST, Seelman/IRSI 2026-10-13, Sitjar v1.4 Table 1, and Canli's `quantavane-covering-arrays` @ `0b179b52`) is archived in `docs/LITERATURE_CHECK_PGL_CCL.md`; novelty status is formally open because Chateauneuf & Kreher (2002) full text, Colbourn–Martirosyan–Trung–Walker (2006), Bai XunDi (2026 Zenodo / 237 arrays), and Sitjar (2026 Zenodo archive / pp. 4–9) were not read in full.
 
-### Summary of the 13 Pareto-Front Arrays (23 Entries Smaller Than `ca-tools` @ `7b08aef`)
+### Summary of the 13 Pareto-Front Arrays (23 Entries Smaller Than `ca-tools` @ `083a093`)
 
-| `t` | `k` | `v` | `N` | `ca_table` (`7b08aef`) | `derived.csv` | Delta vs `ca_table` | Covered `k` range | SHA-256 |
+| `t` | `k` | `v` | `N` | `ca_table` (`083a093`) | `derived.csv` | Delta vs `ca_table` | Covered `k` range | SHA-256 |
 | :-: | :-: | :-: | :---: | :---: | :---: | :---: | :---: | --- |
 | 3 | 15 | 10 | **2070** | 2205 (`VER`) | 2178 | −135 | `15` | `78b0497f2c81b0f72b9a454c7fbf42a3d66f1e31851be5f568c95d7f584c1865` |
 | 3 | 16 | 10 | **2115** | 2205 (`VER`) | 2178 | −90 | `16` | `4734fd80ffe90f11664912e113b045ba599cbeb4a0bc749729764b7f700b86b4` |
@@ -62,14 +55,15 @@ To our knowledge, the specific combination used here extends the single-orbit CC
 - **Triple exhaustive check:** Every array passed `verifiers/ca_verify.c` (exit code 0, `0.006–0.451 s`), an independent standard-library Python verifier (`verifiers/verify_independent.py`, exit code 0, `0.208–33.373 s`), and an independent third-party verifier program (`submission/third_check.py`, including negative test with 70 rows removed; both third-party audit passes — including a local run of `tools/check_submission.py` with 13/13 PASS on `main @ 162d48f` — are documented in `docs/THIRD_PARTY_VERIFICATION.md`).
 - **Bit-exact reproduction:** All 13 arrays were deterministically regenerated from `data/ccl_binary/` via `solvers/pgl_ccl_search expand` (both internally and independently from a fresh build during the third-party audit) and matched all 13 SHA-256 hashes above byte-for-byte (`submission/REPRODUCE.md`).
 - **From scratch (Rule 6):** `Built from: nothing`; no existing table arrays and no Torres-Jimenez arrays were used.
-- **Repository:** https://github.com/Justus42/Math_Gemini_Antigravity (`main` @ `162d48f`; zero-dependency Rust `std`-only solver `solvers/pgl_ccl_search` + binary starters `data/ccl_binary/`).
+- **Repository:** https://github.com/Justus42/Math_Gemini_Antigravity (`main` @ `734d768`; zero-dependency Rust `std`-only solver `solvers/pgl_ccl_search` + binary starters `data/ccl_binary/`).
 
 ### AI Tools Disclosure (Rule 1 & `CHANGES.md`)
 
 - `AI tools used: yes` (recorded explicitly in `HOW.md`).
-- Tools: Gemini and Google Antigravity for construction engineering, solver implementation, and binary CCL search sweeps; independent third-party verification and review by Claude. All coverage checks are deterministic and exhaustive.
+- Extent of AI use: The construction, the solver, the searches and the text of this submission were produced almost entirely by AI systems (Gemini in Google Antigravity); Claude acted as independent reviewer. The submitter has no formal training in combinatorics. He directed the project, approved each step and takes responsibility for the submission, but did not derive the construction himself.
+- All coverage checks are deterministic and exhaustive.
 
 ### Submitter & Licence (Rules 4 & 5)
 
-- **Responsible person:** Justus Jeserigk, Independent researcher (`j.jeserigk.dev@outlook.de`).
+- **Responsible person:** Justus Jeserigk, Independent (`j.jeserigk.dev@outlook.de`).
 - **Licence:** All submitted arrays are released under **CC BY 4.0**.

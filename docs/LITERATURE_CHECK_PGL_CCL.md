@@ -1,7 +1,7 @@
 # Literaturprüfung: Zweibahn-`PGL(2,q)` + partitionsabhängige binäre CCL-Matrix (`docs/LITERATURE_CHECK_PGL_CCL.md`)
 
 Stand: **2026-11-25** | Prüfvermerk gemäß [`RULES.md`](../RULES.md) Abschnitt *Meldung nach außen*, Punkt 2c.
-Referenzstand Ziel-Tabelle: `chrispbsmolen/ca-tools` @ Commit `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a` (`2026-11-25T03:31:22Z`, 0 offene PRs).
+Referenzstand Ziel-Tabelle: `chrispbsmolen/ca-tools` @ Commit `083a0933e3561625b2aad9bd19035ad76d783f03` (`2026-11-25T13:32:06Z`, 0 offene PRs).
 
 ---
 
@@ -31,7 +31,7 @@ Geprüft wurden Konstruktionsherkunft, Benennung der binären Komponente `C` und
 2. **Théo Nicolas Sitjar (`2611.covering-arrays-strength-bounds`, v1.4 vom 2026-11-13, S. 1–3 inkl. vollständiger Table 1):**
    - *Methode:* $\mathrm{PGL}(2,q)$-Orbitsuche für $t = 4$; für $t = 3$ listet Table 1 insgesamt 20 Einträge.
    - *Überschneidung für $v \in \{10, 12, 14, 20\}$:* Alle Einträge in Table 1 liegen unterhalb unserer Spaltenzahlen (maximal $k = 13$ bei $v=10$, $k = 15$ bei $v=12$, $k = 19$ bei $v=14$, $k = 8$ bei $v=20$).
-   - *Hinweis zu S. 4 (Tabelle überholter Einträge):* Dort ist $(3, 16, 10)$ mit Sitjars Wert `2205` als überholt gelistet; die Spalten `smaller`/`source` waren im lokalen Snapshot abgeschnitten. In `ca-tools` führt `table/derived.csv` @ `7b08aef` für $(3, 16, 10)$ den Wert `2178`, der weiterhin deutlich oberhalb unseres verifizierten $N = 2115$ liegt.
+   - *Hinweis zu S. 4 (Tabelle überholter Einträge):* Dort ist $(3, 16, 10)$ mit Sitjars Wert `2205` als überholt gelistet; die Spalten `smaller`/`source` waren im lokalen Snapshot abgeschnitten. In `ca-tools` führt `table/derived.csv` @ `083a093` für $(3, 16, 10)$ den Wert `2178`, der weiterhin deutlich oberhalb unseres verifizierten $N = 2115$ liegt.
 
 ## 4. Frage 2 — Einordnung der binären Matrix $C$
 
@@ -43,7 +43,7 @@ Geprüft wurden Konstruktionsherkunft, Benennung der binären Komponente `C` und
 ## 5. Frage 3 — Abgleich auf kleinere veröffentlichte Werte
 
 In den folgenden geprüften Quellen wurden **keine** kleineren oder gleichen Werte für unsere 13 Pareto-Zellen (bzw. 23 abgedeckten Zellen) gefunden:
-- `chrispbsmolen/ca-tools` @ `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a` (`table/ca_table.csv.gz`, `table/ca_frame.csv`, `table/derived.csv`, 0 offene PRs): **23/23 strikt kleiner**.
+- `chrispbsmolen/ca-tools` @ `083a0933e3561625b2aad9bd19035ad76d783f03` (`2026-11-25T13:32:06Z`, `table/ca_table.csv.gz`, `table/ca_frame.csv`, `table/derived.csv`, 0 offene PRs): **23/23 strikt kleiner**.
 - Colbourn-Tabellenstand (Nov. 2024), R-Paket `CAs` v0.25, NIST-Covering-Array-Tabellen, Seelman / IRSI (Draft 2026-10-13), Sitjar v1.4 (Table 1), Dzoba, Bergeron.
 - **Arhan Canli (`arhancanli/quantavane-covering-arrays` @ Commit `0b179b520c9eb8b6c2ce8ea6273403a8d861c608`, 2026-11-21, lesend geprüft via `gh api`):**
   - `cells.csv` (`448.049` Zeilen gesamt, $t \in \{3,4,5,6\}$, $v \in \{4..25\}$) enthält für unsere Alphabete ausschließlich große Spaltenzahlen aus CPHF-Familien:
@@ -63,4 +63,4 @@ Folgende Quellen wurden in dieser Prüfung **nicht im Volltext** bzw. nicht voll
 - Colbourn, Martirosyan, Tran Van Trung & Walker (2006, Roux-type),
 - Colbourn & Zhou (2012, Power CZ).
 
-**Formeller Neuheitsstatus:** **offen** (da die Restliste nicht im Volltext geprüft ist). Entsprechend beschränkt sich jede Außenformulierung gemäß `RULES.md` Regel 4 strikt auf: **„kleiner als `chrispbsmolen/ca-tools` am Commit `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a`“**.
+**Formeller Neuheitsstatus:** **offen** (da die Restliste nicht im Volltext geprüft ist). Entsprechend beschränkt sich jede Außenformulierung gemäß `RULES.md` Regel 4 strikt auf: **„kleiner als `chrispbsmolen/ca-tools` am Commit `083a0933e3561625b2aad9bd19035ad76d783f03`“**.

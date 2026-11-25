@@ -1,13 +1,13 @@
 # `chrispbsmolen/ca-tools` Einreichungsformat & Regeln (`submission/CA_TOOLS_FORMAT.md`)
 
-Stand: **2026-11-25** | Lesend ermittelt via `gh api` aus `chrispbsmolen/ca-tools` @ `main` Commit **`7b08aef06cbedaf1b376dbfa68f6aa171a54df4a`** (`2026-11-25T03:31:22Z`).
+Stand: **2026-11-25** | Lesend ermittelt via `gh api` aus `chrispbsmolen/ca-tools` @ `main` Commit **`083a0933e3561625b2aad9bd19035ad76d783f03`** (`2026-11-25T13:32:06Z`).
 Offene Pull Requests in `ca-tools` zum Prüfzeitpunkt: **0** (`[]`). Zuletzt gemergte PRs: `#87` (`laverdi-2026-11`), `#84` (`baig-ai-2026-11`), `#83`, `#82`, `#81`.
 
 ---
 
 ## 1. Verzeichnis- & PR-Struktur (Regel 7)
 
-- Jede Einreichung ist **genau ein neues Verzeichnis** `submissions/<slug>/` (`[A-Za-z0-9._-]+`, z. B. `<name>-pgl-ccl-2026-11`).
+- Jede Einreichung ist **genau ein neues Verzeichnis** `submissions/<slug>/` (`[A-Za-z0-9._-]+`, z. B. `submissions/jeserigk-pgl-ccl-2026-11/`).
 - **Strikt keine Änderungen außerhalb von `submissions/<slug>/`** (keine Code-, Test-, Workflow- oder Dokumentationsänderungen; PRs mit Änderungen außerhalb von `submissions/` werden ungemerged geschlossen).
 - Inhalt von `submissions/<slug>/`:
   1. `claims.csv` (exakt 10 Spalten, 1 Zeile pro Array-Datei)
@@ -56,12 +56,12 @@ Geprüft durch `tools/provenance.py` (Regel 1) sowie angekündigt in `CHANGES.md
 
 - **Array-Format:** Klartext, genau `N` nicht-leere Zeilen × `k` Einträge (`0..v-1` Einzel-Leerzeichen-getrennt, kein Header, keine Kommentare, LF-Zeilenende). Duplikate anhand SHA-256 des kanonischen Textes werden abgelehnt.
 - **Lizenz (Regel 4):** Mit Öffnen des PR werden die Arrays unter **CC BY 4.0** freigegeben.
-- **Reale Namen (Regel 5):** Jeder PR nennt die verantwortliche(n) reale(n) Person(en) mit E-Mail-Adresse und Affiliation (`Independent researcher` zulässig; optional ORCID) im PR-Text oder per E-Mail an `chrispbsmolen@gmail.com`. KI-Systeme dürfen nur **neben**, niemals **statt** einer Person genannt werden.
+- **Reale Namen (Regel 5):** Jeder PR nennt die verantwortliche(n) reale(n) Person(en) mit E-Mail-Adresse und Affiliation (`Independent` zulässig; optional ORCID) im PR-Text oder per E-Mail an `chrispbsmolen@gmail.com`. KI-Systeme dürfen nur **neben**, niemals **statt** einer Person genannt werden.
 - **Keine Torres-Jimenez-Arrays (Regel 6):** Keine Arrays aus `TJ2level_CAs`, `CAEX_CAs`, `TJcat` oder `web-tj` als Basis/Zutat (unsere Konstruktion ist 100 % from scratch, `Built from: nothing`).
 
-## 6. Live-Prüfung aller 23 Zellen gegen alle Tabellen-Dateien @ `7b08aef`
+## 6. Live-Prüfung aller 23 Zellen gegen alle Tabellen-Dateien @ `083a093`
 
-Stand `2026-11-25`, `chrispbsmolen/ca-tools` @ Commit **`7b08aef06cbedaf1b376dbfa68f6aa171a54df4a`** (`2026-11-25T03:31:22Z`), **0 offene PRs**.
+Stand `2026-11-25`, `chrispbsmolen/ca-tools` @ Commit **`083a0933e3561625b2aad9bd19035ad76d783f03`** (`2026-11-25T13:32:06Z`), **0 offene PRs**.
 Relevante Tabellen-Dateien in `table/`:
 - `table/ca_table.csv` / `table/ca_table.csv.gz` (Haupttabelle, `VERIFIED` + `CITED`)
 - `table/ca_frame.csv` (Frame-Sicht inkl. bewiesener Ableitungen)
