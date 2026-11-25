@@ -21,22 +21,22 @@ Alle `10` lokalen `t = 4`-Arrays in `results/t4_nearbush/` wurden vom Drittprüf
 
 ## 2. Fremd-Reproduktion auf der Maschine des Drittprüfers (Angabe des Drittprüfers)
 
-Auf einer zweiten Maschine **rechnerunabhängig bestätigt** sind bisher **`5`** Arrays (`3` mit `t4_postop --threads 1 --target-n`, `2` rein deterministische Generatoren); **`2`** Pareto-Best-Arrays sind noch offen:
+Stand **`2026-11-25 23:46 CET`** (Angabe des Drittprüfers Claude/Fable): Auf einer zweiten Maschine **rechnerunabhängig bestätigt** sind nun alle **`6/6`** Pareto-Best-Arrays (`5` mit `t4_postop --threads 1 --target-n`, `1` rein deterministischer Generator) sowie zusätzlich der historische Anker `CA(7561; 4, 11, 8)`:
 
-| Array | Status auf zweiter Maschine | Methode |
+| Array | Status auf zweiter Maschine | Methode / Laufzeit (Angabe Drittprüfer) |
 | --- | :---: | --- |
 | `CA(3430; 4, 9, 7)` | **rechnerunabhängig bestätigt** (byte-identisch) | `t4_postop --threads 1 --target-n 3430` |
-| `CA(5888; 4, 10, 8)` | **rechnerunabhängig bestätigt** (byte-identisch) | `gen_t4_q8_nearbush.py --mode k10-polychrom` |
-| `CA(7561; 4, 11, 8)` *(historischer Anker, dominiert)* | **rechnerunabhängig bestätigt** (byte-identisch) | `gen_t4_q8_nearbush.py --mode k11-pencil` |
+| `CA(5888; 4, 10, 8)` | **rechnerunabhängig bestätigt** (byte-identisch) | `gen_t4_q8_nearbush.py --mode k10-polychrom` (zusätzlich mit exakt im Vermerk dokumentiertem Befehl neu erzeugt und bestätigt) |
+| `CA(7561; 4, 11, 8)` *(historischer Anker, dominiert)* | **rechnerunabhängig bestätigt** (byte-identisch) | `gen_t4_q8_nearbush.py --mode k11-pencil` (zusätzlich mit exakt im Vermerk dokumentiertem Befehl neu erzeugt und bestätigt) |
+| `CA(7056; 4, 11, 8)` | **rechnerunabhängig bestätigt** (byte-identisch, `2026-11-25 23:46 CET`) | `t4_postop --threads 1 --target-n 7056` (`60 s`) |
 | `CA(9558; 4, 11, 9)` | **rechnerunabhängig bestätigt** (byte-identisch) | `t4_postop --threads 1 --target-n 9558` |
 | `CA(21900; 4, 13, 11)` | **rechnerunabhängig bestätigt** (byte-identisch) | `t4_postop --threads 1 --target-n 21900` |
-| `CA(7056; 4, 11, 8)` | **offen** | — |
-| `CA(42722; 4, 15, 13)` | **offen** | — |
+| `CA(42722; 4, 15, 13)` | **rechnerunabhängig bestätigt** (byte-identisch, `2026-11-25 23:46 CET`) | `t4_postop --threads 1 --target-n 42722` (`112 s`) |
 
 ## 3. Offene Punkte
 
-1. **Fremd-Reproduktion** von `CA(7056; 4, 11, 8)` und `CA(42722; 4, 15, 13)` auf einer zweiten Maschine (Befehle mit festem `--target-n` siehe [`VERIFICATION_LOG.md`](../results/t4_nearbush/VERIFICATION_LOG.md) §7).
+1. ~~**Fremd-Reproduktion** von `CA(7056; 4, 11, 8)` und `CA(42722; 4, 15, 13)`~~ — **erledigt** (`2026-11-25 23:46 CET`, `6/6` beste `t = 4`-Arrays auf zweiter Maschine byte-identisch bestätigt).
 2. **Nachvollzug der Schranken-Argumente** in [`docs/T4_ODD_Q_NEAR_BUSH.md`](T4_ODD_Q_NEAR_BUSH.md) §8.2 (Anzahl entfernbarer `q^2`-Slices, Einzel-Symbol-Schranke, Parabel-Restklassen).
 3. **Offene Restliste der externen Literaturprüfung** (neuere Zenodo-Versionen, systematische arXiv-Suche 2023–2026, Primärliteratur-Volltexte), siehe [`docs/LITERATURE_CHECK_T4_NEARBUSH.md`](LITERATURE_CHECK_T4_NEARBUSH.md) Abschnitt 6.
 
-Solange diese Punkte offen sind, gilt Punkt 2d der Checkliste für `t = 4` als **nicht abgeschlossen**. Eine Meldung nach außen ist ohnehin gesperrt, bis PR `#88` vom Maintainer entschieden ist (Regel 7).
+Solange Punkte 2 und 3 offen sind, gilt die Gesamtvorbereitung für eine mögliche `t = 4`-Meldung als **nicht abgeschlossen**. Eine Meldung nach außen ist ohnehin gesperrt, bis PR `#88` vom Maintainer entschieden ist (Regel 7).
