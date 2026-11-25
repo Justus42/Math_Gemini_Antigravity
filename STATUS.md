@@ -1,20 +1,30 @@
 # Projektstatus & Governance-Gates (`STATUS.md`)
 
-Letzte Aktualisierung: 2026-11-25 (Branch `chore/ca-tools-pre-submit`, abgezweigt von `origin/main` @ `734d768` [PR #8 gemergt]: frischer Live-Check gegen `chrispbsmolen/ca-tools` @ `083a0933e3561625b2aad9bd19035ad76d783f03` [`2026-11-25T13:32:06Z`, 0 offene PRs, 23/23 strikt kleiner über `ca_table.csv.gz`, `ca_frame.csv` & `derived.csv`], einheitlicher Slug `submissions/jeserigk-pgl-ccl-2026-11/`, explizite `Extent of AI use:`-Offenlegung in `HOW.md`/`PR_DRAFT.md` + KI-Hinweis in `claims.csv`, `Independent` statt `Independent researcher`, Voll-Audit & Vorbereitung PR #9 gegen eigenes `main`).
+Letzte Aktualisierung: 2026-11-25 (Branch `docs/pr88-accounting`, abgezweigt von `origin/main` @ `e945ed5` [PR #9 gemergt]: Nachdokumentation gemäß `RULES.md` Regel 7 für externe Einreichung `chrispbsmolen/ca-tools#88` [eröffnet durch Justus am `2026-11-25T14:44:16Z`, Head `66a9947`, Base `083a093`, Zustand offen/wartet auf Prüfbericht und Maintainer]; nur Dokumentation, keine Suche, keine Änderung an `submission/ca_tools_staging/`, `results/`, `verifiers/`, `data/`).
 Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprotokoll siehe [`docs/RUN_LOG.md`](docs/RUN_LOG.md), Audit-Paket siehe [`submission/MANIFEST.md`](submission/MANIFEST.md).
 
 ## 0. Governance- & Branch-Status
 
-- **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`), PR #6 (`exp/pgl-binary-ccl-v5` @ `a27da71`), PR #7 (`chore/ca-tools-submission-prep` @ `162d48f`), PR #8 (`chore/ca-tools-final-polish` @ `734d768`).
-- **Aktiver Branch (`chore/ca-tools-pre-submit`, PR #9 gegen eigenes `main`):**
-  - Keinerlei Schreibzugriff auf `chrispbsmolen/ca-tools` (`chrispbsmolen/ca-tools` nur lesend via `gh api` geprüft; ausdrückliche begrenzte Freigabe nach Regel 1 ausschließlich für Branch-Push `submit/jeserigk-pgl-ccl-2026-11` auf Justus' eigenen Fork `Justus42/ca-tools` ohne PR-Eröffnung).
-  - **Checkliste Meldung nach außen (`RULES.md` Punkt 2) — 5/5 PASS (erneut geprüft am 2026-11-25):**
+- **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`), PR #6 (`exp/pgl-binary-ccl-v5` @ `a27da71`), PR #7 (`chore/ca-tools-submission-prep` @ `162d48f`), PR #8 (`chore/ca-tools-final-polish` @ `734d768`), PR #9 (`chore/ca-tools-pre-submit` @ `e945ed5`).
+- **Aktiver Branch (`docs/pr88-accounting`, Doku-PR #10 gegen eigenes `main`):**
+  - Reine Nachdokumentation nach erfolgter externer Einreichung (keine Suche, kein Schreibzugriff auf `Justus42/ca-tools` oder `chrispbsmolen/ca-tools`).
+  - **Checkliste Meldung nach außen (`RULES.md` Punkt 2) — 5/5 PASS (Stand `2026-11-25`):**
     - `2a` (Tabellen-Check @ `083a0933e3561625b2aad9bd19035ad76d783f03`, `2026-11-25T13:32:06Z`): **PASS** — `table/ca_table.csv.gz` 23/23, `table/ca_frame.csv` 23/23, `table/derived.csv` 23/23 strikt kleiner (`submission/CA_TOOLS_FORMAT.md`).
-    - `2b` (Offene PRs & Issues `ca-tools`): **PASS** — 0 offene PRs (`[]`); 2 offene Wanted-Issues (`#85`, `#86`).
+    - `2b` (Offene PRs & Issues `ca-tools`): **PASS** — 0 offene PRs vor Einreichung; 2 offene Wanted-Issues (`#85`, `#86`).
     - `2c` (Literaturprüfung in `docs/`): **PASS** — [`docs/LITERATURE_CHECK_PGL_CCL.md`](docs/LITERATURE_CHECK_PGL_CCL.md) (inkl. Seelman/IRSI, Sitjar v1.4, Canli `quantavane-covering-arrays` @ `0b179b52` mit `0` Konflikten und transparenter Restliste; Neuheitsstatus formal offen; `k=18, 19` als *best known upper bound 18* präzisiert).
-    - `2d` (Drittprüfung): **PASS** — [`docs/THIRD_PARTY_VERIFICATION.md`](docs/THIRD_PARTY_VERIFICATION.md) + archiviertes [`submission/third_check.py`](submission/third_check.py) (SHA-256 `2acd4477…`): 1. Prüfung auf `results/` (16/16 gültig, Negativkontrolle 70 Zeilen entfernt) & 2. Prüfung auf `main @ 162d48f` (13/13 Staging byte-identisch, 13/13 gültig unter `ca_verify` & `third_check.py`, 13/13 bit-exakt aus frischem Build, lokales `ca-tools` `tools/check_submission.py` 13/13 PASS).
+    - `2d` (Drittprüfung): **PASS** — [`docs/THIRD_PARTY_VERIFICATION.md`](docs/THIRD_PARTY_VERIFICATION.md) + archiviertes [`submission/third_check.py`](submission/third_check.py) (SHA-256 `2acd4477…`): 1. Prüfung auf `results/` (16/16 gültig, Negativkontrolle 70 Zeilen entfernt), 2. Prüfung auf `main @ 162d48f` (13/13 Staging byte-identisch, 13/13 bit-exakt aus frischem Build, `tools/check_submission.py` 13/13 PASS) & 3. Gegenprüfung PR #88 durch Claude (13/13 Arrays byte-identisch, `tools/check_submission.py` @ `083a093` 13/13 PASS) + eigene Nur-Lese-Nachprüfung von `refs/pull/88/head`.
     - `2e` (Deterministische Reproduktion & SHA-256-Vergleich): **PASS** — 13/13 byte-identische Übereinstimmung aus `data/ccl_binary/` (`submission/REPRODUCE.md`).
-  - Finalisiertes Staging [`submission/ca_tools_staging/`](submission/ca_tools_staging/) (`8,7 MB`, 13 Pareto-Arrays, `claims.csv` mit `credit=Justus Jeserigk`, KI-Vermerk in `notes` und unveränderten `builds_on`-IDs, `HOW.md` mit `AI tools used: yes` + `Extent of AI use:`-Absatz + `Independent` + `"to our knowledge"` & Restliste) + kopierfertiges [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md) (`0 TBD`, `LANGUAGE_AUDIT_PASS`, `verify_all.sh` 16/16 `DUAL_PASS`, offizielles `ca-tools` `tools/check_submission.py` @ `083a093` **13/13 PASS** in `39,0 s`). PR #9 gegen eigenes `main` geöffnet; Schritt-5-Push auf `Justus42/ca-tools` (`submit/jeserigk-pgl-ccl-2026-11`) sauber wegen Token-Scope mit HTTP 403 abgebrochen (`Justus42/ca-tools` ist nicht als Projekt-Ressource angebunden).
+
+## Meldung nach außen
+
+- **Pull Request:** https://github.com/chrispbsmolen/ca-tools/pull/88 (eigenständig eröffnet durch `Justus42`)
+- **Datum und Uhrzeit (UTC):** `2026-11-25T14:44:16Z`
+- **Einreichungsordner:** `submissions/jeserigk-pgl-ccl-2026-11/` (`15` neue Dateien: `claims.csv`, `HOW.md`, 13 Pareto-Arrays über 23 Zellen; `0` geänderte oder gelöschte Dateien außerhalb)
+- **Basis-Commit (`chrispbsmolen/ca-tools`):** `083a0933e3561625b2aad9bd19035ad76d783f03` (`083a093`)
+- **Head-Commit (`Justus42:submit/jeserigk-pgl-ccl-2026-11`):** `66a9947c0d422b5ce30d551736a4befe84c474b1` (`66a9947`)
+- **Zustand:** **offen, wartet auf Prüfbericht und Maintainer** (`draft: false`, `0` Issue-Kommentare, `0` Reviews; GitHub-Actions-Workflows `Verify submission`, `Consistency` und `Tests` auf `66a9947` stehen auf `action_required` — warten auf Ersteinreicher-Freigabe durch den Maintainer; Bot-Prüfbericht noch nicht vorliegend / nicht gelesen)
+- **Nur-Lese-Nachprüfung (2026-11-25):** `13/13` Arrays aus `refs/pull/88/head` SHA-256-identisch zu [`results/SHA256SUMS`](results/SHA256SUMS), `15/15` Dateien byte-identisch zu [`submission/ca_tools_staging/`](submission/ca_tools_staging/), PR-Text gelesen (`8281` Bytes, inkl. `AI tools used: yes` & `Extent of AI use:`). Korrespondenz-Entwürfe bei Maintainer-Rückfragen: [`docs/PR88_KORRESPONDENZ.md`](docs/PR88_KORRESPONDENZ.md).
+- **Vermerk nach `RULES.md` Regel 7:** Bis zum Prüfbericht des Ziels (`chrispbsmolen/ca-tools`) **keine weitere Meldung zur Bauart `PGL(2,q)+CCL`**. Kein Push auf `Justus42/ca-tools` (auch nicht auf den PR-Branch `submit/jeserigk-pgl-ccl-2026-11`), solange der PR unverändert im Review steht.
 
 ## 1. Pareto-Front der 13 Arrays (kleiner als `ca-tools` @ `083a093` auf 23 Zellen)
 
