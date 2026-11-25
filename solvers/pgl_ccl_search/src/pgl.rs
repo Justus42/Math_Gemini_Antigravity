@@ -18,7 +18,7 @@ impl FiniteField {
         let mut mul = vec![vec![0; q]; q];
 
         match q {
-            5 | 11 | 13 => {
+            5 | 11 | 13 | 17 | 19 => {
                 for a in 0..q {
                     for b in 0..q {
                         add[a][b] = (a + b) % q;
@@ -51,7 +51,31 @@ impl FiniteField {
                     }
                 }
             }
-            _ => panic!("Unsupported prime power q={} (supported: 5, 9, 11, 13)", q),
+            16 => {
+                // GF(16) = GF(2)[x] / (x^4 + x + 1)
+                for a in 0..16 {
+                    for b in 0..16 {
+                        add[a][b] = a ^ b;
+                        sub[a][b] = a ^ b;
+                        let mut res = 0usize;
+                        let mut aa = a;
+                        let mut bb = b;
+                        for _ in 0..4 {
+                            if (bb & 1) != 0 {
+                                res ^= aa;
+                            }
+                            let hi = (aa & 8) != 0;
+                            aa = (aa << 1) & 0xF;
+                            if hi {
+                                aa ^= 0b0011; // x^4 = x + 1
+                            }
+                            bb >>= 1;
+                        }
+                        mul[a][b] = res;
+                    }
+                }
+            }
+            _ => panic!("Unsupported prime power q={} (supported: 5, 9, 11, 13, 16, 17, 19)", q),
         }
 
         let mut inv = vec![0; q];
