@@ -42,6 +42,7 @@ Kandidaten, die nur einen Verifier bestehen oder ohne SHA-256-Hash und Verifikat
   - regelmäßiges Schreiben von Checkpoints (z. B. alle 60–120 s sowie bei jeder Verbesserung der Kostenfunktion / Zeilenanzahl),
   - sauberes Wiederaufsetzen (`--resume <checkpoint>`) ohne Verlust des besten bisher gefundenen Zustands.
 - **Merge-Gate:** Ein Merge nach `main` erfolgt erst nach bestandener Dual-Verifikation, bestandener `verifiers/test_verifiers.py` und Freigabe.
+- **Budget-Ausweis (Suche vs. Reproduktion):** Suchbudget (Wall-Clock für Erstläufe) und Determinismus-/Reproduktions-Wiederholungen (`--target-n`, 2× byte-identisch) werden getrennt ausgewiesen und getrennt budgetiert; in `docs/RUN_LOG.md` werden stets beide Zeiten (Erstlauf-Summe und Gesamt-Wall-Clock inkl. Repro) angegeben.
 
 ## Meldung nach außen
 
