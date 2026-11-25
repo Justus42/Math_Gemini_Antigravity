@@ -1,9 +1,8 @@
-# Literaturprüfung `t = 4 NEAR_BUSH` — Phase 1: `ca-tools`-Quellen & `builds_on`-Abgrenzung
+# Literaturprüfung `t = 4 NEAR_BUSH` — Phase 1 (`ca-tools`), Phase 2 (extern) & Struktur-Analyse
 
 - **Stand:** `2026-11-25`, Branch `chore/t4-nearbush-audit` (Basis `origin/main` @ `ca637a6`, nach Merge von PR `#17`).
-- **Umfang dieser Phase:** ausschließlich Quellen, die im Tabellen-Repository `chrispbsmolen/ca-tools` selbst liegen (Tabellen-Dateien, `references.csv`, `submissions/*/claims.csv` und `HOW.md`, `docs/llms.txt`). Alle Abrufe rein lesend via `gh api` in ein Scratch-Verzeichnis außerhalb des Repos; nichts davon ist committet.
-- **Nicht Teil dieser Phase:** externe Literatur (arXiv, Colbourn-Tabellen, Zenodo-Preprints). Siehe Abschnitt 6 (*offen*).
-- **Status:** interner Prüfvermerk. Er ersetzt **nicht** Punkt 2c der Checkliste `RULES.md` („Meldung nach außen“); eine Meldung nach außen ist weiterhin gesperrt (PR `#88` offen, Regel 7).
+- **Umfang:** Phase 1 prüft alle relevanten Quellen in `chrispbsmolen/ca-tools` @ `d739412` (rein lesend via `gh api` in ein Scratch-Verzeichnis außerhalb des Repos); Phase 2 dokumentiert den externen Literaturabgleich (Stand `2026-11-25`) sowie den Abgleich durch den Drittprüfer (Claude/Fable); Abschnitt 7 liefert die suchfreie Struktur-Analyse ([`scripts/analyze_bai_deltas.py`](../scripts/analyze_bai_deltas.py)) zu Bais Prop. 5.4, Satz 6.2 und Satz 3.7.
+- **Status:** interner Prüfvermerk mit expliziter offener Restliste (Abschnitt 6.3). Eine Meldung nach außen ist weiterhin gesperrt (PR `#88` offen, Regel 7).
 
 ---
 
@@ -22,14 +21,14 @@
 
 | Zelle `(t, k, v)` | Bestwert `ca_frame` | Tier | Quelle / Credit (`ca_table`) | `construction` (`ca_table`) | `builds_on` | Unser Array | Abstand |
 | --- | :---: | :---: | --- | --- | --- | :---: | :---: |
-| `(4, 9, 7)` | `3556` | `VERIFIED` (S7, `2026-11-01`) | T. N. Sitjar (tns-research), Release v1.5, `doi:10.5281/zenodo.23864483`; Einreichung `sitjar-t3t4-2026-11` | „Union of 508 cosets of the all-ones code of length 9 over Z_7“ | `new https://github.com/tns-research/covering-array-records` | `3430` | `−126` |
+| `(4, 9, 7)` | `3556` | `VERIFIED` (S7, `2026-11-01`) | T. N. Sitjar (`tns-research`), Release v1.5, `doi:10.5281/zenodo.23864483`; Einreichung `sitjar-t3t4-2026-11` | „Union of 508 cosets of the all-ones code of length 9 over Z_7“ | `new https://github.com/tns-research/covering-array-records` | `3430` | `−126` |
 | `(4, 10, 8)` | `6101` | `VERIFIED` (S7, `2026-11-02`) | Bai XunDi, `doi:10.5281/zenodo.23787055`; Einreichung `bai-xundi-2026-11-part11`; Credit „Nayeri, Colbourn and Konjevod (the ingredient CA(6125; 4, 10, 8)), Bai XunDi (the derivation)“ | „row deletion + Nurmela-style tabu repair post-optimisation of CA(6125;4,10,8)“ | `fuse-ckrs2010; postop-nck2013; tabu-n2004; deposit-bai2026` | `5888` | `−213` |
 | `(4, 11, 8)` | `7680` (Zeile `k = 15`) | `CITED` (S1) | Colbourn-Tabelle 2024-11 | „3-Restricted SCPHF RE (CL)“ | `cphf-smc2006; cphf-cl2018` | `7056` | `−624` |
 | `(4, 11, 9)` | `9801` | `VERIFIED` (S7, `2026-11-01`) | Bai XunDi, `doi:10.5281/zenodo.23787055`; Einreichung `bai-xundi-2026-10-part3` | „degree-2 polynomial construction + block cover / SA post-processing“ | `deposit-bai2026` | `9558` | `−243` |
 | `(4, 13, 11)` | `21901` | `VERIFIED` (S7, `2026-11-01`) | Bai XunDi, `doi:10.5281/zenodo.23787055`; Einreichung `bai-xundi-2026-10-part4` | „degree-2 polynomial construction (poly2) with a pencil cover of AG(2,q)“ | `deposit-bai2026` | `21900` | `−1` |
 | `(4, 15, 13)` | `42757` | `VERIFIED` (S7, `2026-11-01`) | Bai XunDi, `doi:10.5281/zenodo.23787055`; Einreichung `bai-xundi-2026-10-part3` | „degree-2 polynomial construction (poly2) with a pencil cover of AG(2,q)“ | `deposit-bai2026` | `42722` | `−35` |
 
-**Korrektur gegenüber der Arbeitsannahme:** Nicht alle sechs Zellen tragen einen Eintrag von Bai XunDi. Die `poly2`-Bauart von Bai XunDi steht auf `(4, 11, 9)`, `(4, 13, 11)` und `(4, 15, 13)`. Auf `(4, 10, 8)` steht ein Post-Op-Eintrag von Bai XunDi (Zutat `CA(6125)` von Nayeri–Colbourn–Konjevod), **keine** `poly2`-Bauart. Auf `(4, 9, 7)` steht Sitjar (`Z_7`-Nebenklassen), auf `(4, 11, 8)` nur ein `CITED`-Wert aus der Colbourn-Tabelle.
+**Widerspruch-Hinweis zu `(4, 9, 7)`:** Der Startwert `3577` stammt aus Bais Formel in Kor. 5.3 (`7^4 + ((7^2 - 1)/2) * 7^2 = 3577`), **nicht** aus einem abgelegten Bai-Eintrag in `ca-tools`. Der Tabellenwert `3556` stammt aus `tns-research` v1.5 (Coset-Union über `Z_7`, Sitjar), der vorherige Wert `3569` aus `OA fuse postop NCK` (Dwyer / Colbourn-Tabelle). Ebenso steht auf `(4, 10, 8)` kein `poly2`-Eintrag von Bai XunDi, sondern eine Post-Op-Ableitung aus `CA(6125)` (NCK), und auf `(4, 11, 8)` nur ein `CITED`-Wert aus der Colbourn-Tabelle.
 
 ### 2.2 Nachbarzellen (Plateau-Kontext)
 
@@ -42,50 +41,116 @@
 | `13` | `k = 14`: `28561` (Bush-OA, `CITED` & `VERIFIED` S7 Smolen); `k = 15`: `54756` (`CITED`, „extended OA (Colbourn)“), `42757` (S7 Bai) |
 
 - `table/derived.csv`: **`0`** Zeilen für `t = 4` in den Zielzellen oder Nachbarzellen.
-- `table/withdrawn_files.csv`: **`0`** Zeilen für `t = 4` in den Zielzellen oder Nachbarzellen. Keines unserer Startarrays stammt aus der Tabelle; alle Startarrays werden von eigenen Generatoren erzeugt (Abschnitt 3). Die Regel „withdrawn arrays are never used as a start or an ingredient“ (`docs/llms.txt`) ist damit nicht berührt.
+- `table/withdrawn_files.csv`: **`0`** Zeilen für `t = 4` in den Zielzellen oder Nachbarzellen. Alle Startarrays werden von eigenen Generatoren erzeugt; zurückgezogene Arrays sind nicht berührt.
 
-## 3. Einreichungen, Referenzen und `HOW.md`
+## 3. Vollständige Zitation von Bai XunDi & Baustein-Zuordnung
 
-- **`HOW.md`:** Die Einreichungsordner `bai-xundi-2026-10-part3`, `bai-xundi-2026-10-part4`, `bai-xundi-2026-11-part11` und `sitjar-t3t4-2026-11` enthalten **nur `claims.csv`** und die Arrays, **kein `HOW.md`** (älteres Format ohne `builds_on`-Spalte; Kopf `t,v,k,N,file,source_detail,construction,credit,notes`). Ein `HOW.md` mit Bai-Bezug liegt nur in `bai-xundi-2026-11-external2/3` und `bai-xundi-2026-11-genus2` vor; diese betreffen keine der sechs Zielzellen.
-- **Herkunft von `poly2` + Pencil-Cover:** `bai-xundi-2026-11-external2/HOW.md` ordnet „the poly2 construction with a pencil cover of AG(2, q)“ dem Preprint **„paper A“, `doi:10.5281/zenodo.23787051`** zu. In `table/references.csv` ist das die Referenz `polychrome-bai2026`: *X. Bai, Covering arrays from line-polychromatic colourings of affine planes, preprint, Zenodo (2026)*.
-- **`polychrome-bai2026` in der Tabelle:** `15` Zeilen nennen diese Referenz in `builds_on` (`t = 3`: `v = 8, 10, 12, 14, 15, 16, 17, 18`; `t = 5`: `v = 14, 15, 17, 18, 19`; `t = 6`: `v = 10, 11`). Für `t = 4` nennen die Zeilen nur `deposit-bai2026` (Zenodo-Datendepot `23787055`); die Bauart ist in der Spalte `construction` aber wörtlich dieselbe („poly2 with a pencil cover of AG(2,q)“).
-- **Weitere relevante Referenzen (`references.csv`):** `deposit-bai2026` (`10.5281/zenodo.23787055`), `oa-bush1952` (Bush 1952), `tabu-n2004` (Nurmela 2004), `postop-nck2013` (Nayeri–Colbourn–Konjevod 2013), `fuse-ckrs2010` (Colbourn–Keri–Rivas Soriano–Schlage-Puchta 2010), `pgl-s2026` (Sitjar 2026).
-- **`docs/llms.txt`, „Rules for agents“ (gelesen):** benannte verantwortliche Person; `HOW.md` mit Zeile `AI tools used: yes/no`; nur selbst gebaute Arrays einreichen und jeden tatsächlichen Urheber nennen; Größen und Arrays der Tabelle gehören den Autoren ihrer Zeilen und dürfen nicht als neue Ergebnisse dargestellt werden; Tiers wörtlich lesen (`CITED` ohne Array); zurückgezogene Arrays nie als Start oder Zutat; jede Nutzung der Daten zitiert die Tabellen-DOI `10.5281/zenodo.24168008` und die Autoren der benutzten Zeilen.
+**Primärquelle der Grundbauart:**
+- **X. Bai, „Covering arrays from line-polychromatic colourings of affine planes“, Preprint vom 30.10.2026, `doi:10.5281/zenodo.23787051`** (in `ca-tools/table/references.csv` unter Kennung `polychrome-bai2026`; zugehöriges Datendepot `deposit-bai2026`: `doi:10.5281/zenodo.23787055`).
 
-## 4. Gegenüberstellung unserer Bauarten mit den Tabellen-Einträgen
+Jeder tragende theoretische Baustein unserer `t = 4`-Konstruktionen ist diesem Preprint explizit zuzuordnen:
 
-| `q` / Zelle | Unsere Bauart (Startarray → Ergebnis) | Bezug zu fremder Vorarbeit | Eigener Anteil | Pflicht-Credit (bei späterer Meldung) |
+| Baustein in Bai (30.10.2026) | Inhalt im Preprint | Zuordnung zu unseren `t = 4`-Konstruktionen |
+| --- | --- | --- |
+| **Satz 3.5** | Zusatzspalte als linien-polychromatische Färbung von `AG(2, q)` über Bush/RS-OA + `OA(q^3; 3, q + 1, q)`-Blöcke für die Restsymbole (`N = q^4 + (q - c) q^3`) | Direkter Konstruktionsrahmen aller `6` Zielzellen (`q = 7, 8, 9, 11, 13`) |
+| **Prop. 4.1** | Obergrenze `c <= floor(q/2)` über Jamison (1977) / Brouwer–Schrijver (1978) (`>= 2q - 1` Punkte pro affinem Blocking-Set) | Identisch mit der in `docs/T4_ODD_Q_NEAR_BUSH.md` §3.2 genutzten Paritätsschranke (`q = 8: c <= 4`, ungerades `q: c <= (q - 1)/2`) |
+| **Satz 5.1 / Prop. 5.2 / Kor. 5.3** | Pencil-Cover-Überdeckung von `AG(2, q)`, Zeilenformel `N = q^4 + ((q^2 - 1)/2) * q^2` | Identisch mit den Startgrößen `3577` (`q = 7`), `9801` (`q = 9`), `21901` (`q = 11`), `42757` (`q = 13`) |
+| **Prop. 5.4** | Optimalität innerhalb von Bais Kostenmodell; für gerades `q` gilt `g >= q^2 / 2`, also bei `q = 8, t = 4` mindestens **`6144`** (`4096 + 32 * 64`) | Vergleichsmarke für `CA(5888; 4, 10, 8)` (`−256` Zeilen unter `6144`; Mechanismus in Abschnitt 7.1) |
+| **Satz 6.2** | Zwei Zusatzspalten (`k = q + 3`); für `q = 8` mit Hyperoval-Block `E` ergibt Satz 6.2 **`8192`** (`4096 + 4 * 512 + 4 * 512`) | Vergleichsmarke für das Roh-Array `CA(7203; 4, 11, 8)` (`−989` Zeilen unter `8192`; Mechanismus in Abschnitt 7.2) |
+| **Satz 3.7 & Offenes Problem 2** | Allgemeinere Spaltenfunktionen jenseits reiner Ebenenfärbungen (`> floor(q/2)` Farbklassen für `t >= 4`) | Suchfrei geprüft an `CA(3430; 4, 9, 7)` und `CA(5888; 4, 10, 8)` in Abschnitt 7.3 (Ergebnis: **nein**, keines der beiden Arrays überschreitet `floor(q/2)`) |
+
+- **Einreichungen & `HOW.md` in `ca-tools`:** `bai-xundi-2026-10-part3`, `bai-xundi-2026-10-part4`, `bai-xundi-2026-11-part11` und `sitjar-t3t4-2026-11` enthalten nur `claims.csv` (ohne `HOW.md`). `bai-xundi-2026-11-external2/HOW.md` ordnet `poly2` + Pencil-Cover ausdrücklich `doi:10.5281/zenodo.23787051` („paper A“) zu.
+- **`docs/llms.txt` („Rules for agents“):** benannte verantwortliche Person; `HOW.md` mit `AI tools used: yes/no`; nur selbst gebaute Arrays einreichen und tatsächliche Urheber nennen; Tabellen-DOI `10.5281/zenodo.24168008` und Zeilen-Autoren zitieren.
+
+## 4. Gegenüberstellung unserer Arrays mit Bai (30.10.2026) & Tabellen-Einträgen
+
+| `q` / Zelle | Bauart (Startarray → Ergebnis) | Bezug zu Bai (30.10.2026) & Tabelle | Eigener Anteil | Pflicht-Credit (bei späterer Meldung) |
 | --- | --- | --- | --- | --- |
-| `q = 8`, `(4, 10, 8)` | Projektion `Q_g` entlang `x^2 + x + 1` über `GF(8)`; Bush-`OA(8^4; 4, 9, 8)` + Spalte `k = 10` aus einer Zerlegung von `AG(2, 8)` in `4` disjunkte `15`-Punkte-Blocking-Sets + `4` Einzelpunkte; Komplettierung durch Hyperoval-Slices; rein deterministisch, `5888` ohne Post-Op | Das Prinzip „Bush-OA + Zusatzspalte über eine Färbung von `AG(2, q)`, deren Farbklassen jede Gerade treffen“ ist nach Titel und Tabelleneinträgen der Gegenstand von `polychrome-bai2026` (Bai XunDi, paper A). Bai XunDis Tabelleneintrag auf dieser Zelle (`6101`) ist dagegen eine Post-Op-Ableitung aus `CA(6125)` (NCK) und nicht `poly2`. | Konkrete Wahl der Projektion `Q_g` (Hyperoval-Nukleus in Charakteristik `2`), die gefundene Blocking-Set-Zerlegung von `AG(2, 8)` und die Zeilenbilanz `4096 + 4 · 448 = 5888`. Ob paper A diese oder eine gleich große Zerlegung für `t = 4, q = 8` bereits enthält: **offen** (Abschnitt 6). | Bush 1952; Bai XunDi (`polychrome-bai2026`, `deposit-bai2026`); Jamison 1977 / Brouwer–Schrijver 1978 (Mindestgröße affiner Blocking-Sets) |
-| `q = 8`, `(4, 11, 8)` | Zwei balancierte 4-polychromatische Färbungen von `AG(2, 8)` + Hyperoval-Slices + `35` Reparaturzeilen (`7203`), danach `t4_postop` (`7203 → 7056`) | Gleicher Färbungsrahmen wie oben (`polychrome-bai2026`); Post-Op nach Nayeri–Colbourn–Konjevod 2013 und Nurmela 2004, in derselben Art wie Bai XunDis `6101`-Ableitung. Tabellenwert `7680` ist ein `CITED`-SCPHF-Wert (Colbourn–Lanus), keine Bai-Zeile. | Eigene Färbungen, eigener Generator und eigener Zero-Dep-Reduzierer `solvers/t4_postop`. | Bush 1952; Bai XunDi (`polychrome-bai2026`); Nayeri–Colbourn–Konjevod 2013; Nurmela 2004 |
-| `q = 7`, `(4, 9, 7)` | Projektion `Q_cd`, `3` disjunkte Blocking-Sets + Parabel `{(d^2, d)}` + Einzelpunkte (`poly2-disjoint`, `3577 = N_poly2(7)`), danach `t4_postop` (`3577 → 3430`) | Startgröße `3577` ist exakt Bai XunDis `poly2`-Formel `q^4 + ((q^2 - 1)/2) q^2`; Färbungsrahmen `polychrome-bai2026`. Tabellenwert `3556` stammt von Sitjar (`Z_7`-Nebenklassen), nicht von Bai XunDi. Post-Op wie oben. | Parabel-Packung (Symbol `(q - 1)/2` auf `q` Punkten statt Einzelpunkt bzw. Pencil), die `min_row_unique` halbiert (`30 → 15`); eigener Reduzierer. Der Abstand `−126` zu Sitjar entsteht erst durch die Post-Op-Phase. | Bush 1952; Bai XunDi (`polychrome-bai2026`, `deposit-bai2026`); Nayeri–Colbourn–Konjevod 2013; Nurmela 2004; Sitjar als Inhaber des Vergleichswerts |
-| `q = 9`, `(4, 11, 9)` | wie `q = 7` (`poly2-disjoint`, `9801 = N_poly2(9)`), danach `t4_postop` (`9801 → 9558`) | Startgröße identisch mit Bai XunDis Tabelleneintrag `9801` (gleiche Formel); Bai XunDis Eintrag nennt ebenfalls eine Nachbearbeitung („block cover / SA post-processing“). | Parabel-Packung (`72 → 36`) und eigener Reduzierer; `−243 = −3 · 9^2`. | wie `q = 7`, Bai XunDi zusätzlich als Inhaber des Vergleichswerts |
-| `q = 11`, `(4, 13, 11)` | `poly2-disjoint` **ohne** Parabel (`5` disjunkte `22`-Punkte-Blocking-Sets + `11` freie Punkte, `21901 = N_poly2(11)`), danach `t4_postop` (`21901 → 21900`) | **Setzt direkt auf Bai XunDis Bauart auf:** Startgröße gleich Bai XunDis `poly2`-Wert `21901`; die Färbung ersetzt den Pencil-Cover durch disjunkte Blocking-Sets, bleibt aber im selben Rahmen. Post-Op-Methode wie bei Bai XunDis `6101`-Ableitung. | Eigener Generator und eigene Färbung; Gewinn ausschließlich durch Post-Op (`1` Zeile). | Bai XunDi zuerst (`polychrome-bai2026`, `deposit-bai2026`); Bush 1952; Nayeri–Colbourn–Konjevod 2013; Nurmela 2004 |
-| `q = 13`, `(4, 15, 13)` | wie `q = 11` (`6` disjunkte `27`-Punkte-Blocking-Sets + `7` freie Punkte, `42757 = N_poly2(13)`), danach `t4_postop` (`42757 → 42722`) | **Setzt direkt auf Bai XunDis Bauart auf** (Startgröße gleich Bai XunDis Tabelleneintrag `42757`). | Eigener Generator und eigene Färbung; Gewinn ausschließlich durch Post-Op (`35` Zeilen). | wie `q = 11` |
+| `q = 8`, `(4, 10, 8)` | Rahmen Bai Satz 3.5 / Prop. 4.1 (`4` disjunkte `15`-Punkte-Blocking-Sets in `AG(2, 8)`), aber Projektion `Q_g` entlang `x^2 + x + 1` (Char. `2`), sodass die `4` freien Punkte direkt `4` `OA(64)`-Slices im Bush-OA liefern → `5888` ohne Post-Op | Grundrahmen vollständig bei Bai (`polychrome-bai2026`); unterbietet Bais Modellgrenze `6144` (Prop. 5.4) um `256` Zeilen durch Nutzung der `4` freien Punkte (Abschnitt 7.1). Tabelleneintrag `6101` ist Bais Post-Op aus `CA(6125)` (NCK). | Konkrete Wahl der `Q_g`-Projektion (Hyperoval-Nukleus in Char. `2`) und Blocking-Set-Zerlegung mit `4` freien Ankerpunkten | Bai XunDi (`polychrome-bai2026`, `deposit-bai2026`) zuerst; Bush 1952; Jamison 1977 / Brouwer–Schrijver 1978 |
+| `q = 8`, `(4, 11, 8)` | Rahmen Bai Satz 3.5 / Satz 6.2 mit zwei balancierten `4`-polychromatischen Färbungen, `16` geteilten Hyperoval-Slices + `35` Reparaturzeilen (`7203`), danach `t4_postop` (`7203 → 7056`) | Grundrahmen bei Bai (`polychrome-bai2026`); Roh-Array `7203` unterbietet Satz 6.2 (`8192`) um `989` Zeilen (Abschnitt 7.2). Post-Op nach NCK 2013 / Nurmela 2004. Tabellenwert `7680` ist `CITED` (Colbourn–Lanus). | Geteilte Hyperoval-Slices zwischen `col9` und `col10`, eigene Färbungen, eigener Reduzierer `solvers/t4_postop` | Bai XunDi (`polychrome-bai2026`) zuerst; Bush 1952; Nayeri–Colbourn–Konjevod 2013; Nurmela 2004 |
+| `q = 7`, `(4, 9, 7)` | Startgröße `3577` aus Bai Kor. 5.3 unter Projektion `Q_cd` mit Parabel-Packung `q^2 = q + ((q - 1)/2)(2q - 1) + (q - 1)/2`, danach `t4_postop` (`3577 → 3430`) | Rahmen und Startgröße vollständig bei Bai (`polychrome-bai2026`, Kor. 5.3); Tabellenwert `3556` stammt von Sitjar (`tns-research` v1.5). Post-Op wie oben. | Parabel-Packung zur Halbierung von `min_row_unique` (`30 → 15`) und eigener Reduzierer (`−147 = −3 · 7^2`) | Bai XunDi (`polychrome-bai2026`, `deposit-bai2026`) zuerst; Bush 1952; Nayeri–Colbourn–Konjevod 2013; Nurmela 2004; Sitjar (Vergleichswert) |
+| `q = 9`, `(4, 11, 9)` | wie `q = 7` (`9801` aus Bai Kor. 5.3), danach `t4_postop` (`9801 → 9558`) | Rahmen und Startgröße identisch mit Bai (`polychrome-bai2026`, Kor. 5.3; Tabellenwert `9801`). | Parabel-Packung (`72 → 36`) und eigener Reduzierer (`−243 = −3 · 9^2`) | wie `q = 7`, Bai XunDi zusätzlich als Inhaber des Vergleichswerts |
+| `q = 11`, `(4, 13, 11)` | `poly2-disjoint` ohne Parabel (`21901` aus Bai Kor. 5.3), danach `t4_postop` (`21901 → 21900`) | **Reine Nachoptimierung (`−1` Zeile) auf Bais Bauart (`polychrome-bai2026`, Kor. 5.3; Tabellenwert `21901`).** | Eigene Implementierung und `1` Zeile Post-Op | Bai XunDi (`polychrome-bai2026`, `deposit-bai2026`) zuerst; Bush 1952; Nayeri–Colbourn–Konjevod 2013; Nurmela 2004 |
+| `q = 13`, `(4, 15, 13)` | wie `q = 11` (`42757` aus Bai Kor. 5.3), danach `t4_postop` (`42757 → 42722`) | **Reine Nachoptimierung (`−35` Zeilen) auf Bais Bauart (`polychrome-bai2026`, Kor. 5.3; Tabellenwert `42757`).** | Eigene Implementierung und `35` Zeilen Post-Op | wie `q = 11` |
 
-### 4.1 Vorschlag für `builds_on` (nur intern, keine Meldung)
-
-Falls nach Abschluss von PR `#88` und vollständiger Checkliste je eine Meldung freigegeben würde, wäre nach dem heutigen Stand mindestens folgende `builds_on`-Kette zu nennen: `oa-bush1952; polychrome-bai2026; deposit-bai2026; postop-nck2013; tabu-n2004` (für `q = 7, 9, 11, 13` und `(4, 11, 8)`), sowie `oa-bush1952; polychrome-bai2026` für das rein deterministische `CA(5888; 4, 10, 8)`. Jamison 1977 und Brouwer–Schrijver 1978 haben keinen Eintrag in `references.csv` und wären im `HOW.md` zu zitieren. Diese Liste ist vorläufig, bis Abschnitt 6 abgeschlossen ist.
+### 4.1 Vorläufige `builds_on`-Kette (intern)
+`oa-bush1952; polychrome-bai2026; deposit-bai2026; postop-nck2013; tabu-n2004` für `q = 7, 9, 11, 13` und `(4, 11, 8)`; `oa-bush1952; polychrome-bai2026` für das rein deterministische `CA(5888; 4, 10, 8)`.
 
 ## 5. Trennung: große Abstände und dünne Nachschliffe
 
-| Gruppe | Zellen | Abstand zur Tabelle @ `d739412` | Woher der Abstand kommt | Einordnung |
+| Gruppe | Zellen | Abstand zur Tabelle @ `d739412` | Herkunft des Abstands | Einordnung |
 | --- | --- | :---: | --- | --- |
-| **Große Abstände** | `(4, 9, 7)` | `−126` | Parabel-gepacktes Startarray `3577` (`+21` über Sitjar), Post-Op `−147 = −3 · 7^2` | Startarray liegt über dem Tabellenwert; der Abstand entsteht nur durch die Post-Op-Phase |
-| | `(4, 10, 8)` | `−213` | rein deterministische Konstruktion, keine Post-Op | einziger Fall ohne Suchanteil; Nähe zu `polychrome-bai2026` extern zu prüfen |
-| | `(4, 11, 8)` | `−624` | Startarray `7203` liegt schon `−477` unter dem `CITED`-Wert, Post-Op `−147` | Vergleichswert ist nur `CITED` (kein Array in der Tabelle) |
-| | `(4, 11, 9)` | `−243` | Parabel-gepacktes Startarray `9801` (gleich Bai XunDi), Post-Op `−243 = −3 · 9^2` | Startgröße gleich Bai XunDi; Abstand nur durch Post-Op |
-| **Dünne Nachschliffe** | `(4, 13, 11)` | `−1` | Startgröße gleich Bai XunDi `21901`; Post-Op entfernt `1` Zeile | Nachbearbeitung einer Bai-XunDi-gleichen Bauart; als eigenständige Bauart nicht tragfähig |
-| | `(4, 15, 13)` | `−35` | Startgröße gleich Bai XunDi `42757`; Post-Op entfernt `35` Zeilen | wie `q = 11`; deutlich unter `q^2 = 169`, also keine ganze Faser |
+| **Große Abstände** | `(4, 9, 7)` | `−126` | Startarray `3577` (Bai Kor. 5.3, `+21` über Sitjar), Post-Op `−147 = −3 · 7^2` | Abstand entsteht erst durch Post-Op |
+| | `(4, 10, 8)` | `−213` | rein deterministisch, `−256` unter Bai Prop. 5.4 (`6144`), keine Post-Op | einziger Fall ohne Suchanteil |
+| | `(4, 11, 8)` | `−624` | Roh-Array `7203` (`−989` unter Bai Satz 6.2, `−477` unter `CITED`), Post-Op `−147` | Vergleichswert nur `CITED` (kein Array in Tabelle) |
+| | `(4, 11, 9)` | `−243` | Startarray `9801` (Bai Kor. 5.3), Post-Op `−243 = −3 · 9^2` | Abstand entsteht erst durch Post-Op |
+| **Dünne Nachschliffe** | `(4, 13, 11)` | `−1` | Startarray `21901` (Bai Kor. 5.3), Post-Op `−1` Zeile | reine Nachoptimierung auf Bais Bauart |
+| | `(4, 15, 13)` | `−35` | Startarray `42757` (Bai Kor. 5.3), Post-Op `−35` Zeilen | reine Nachoptimierung (`< q^2 = 169`) auf Bais Bauart |
 
-## 6. Offen: externe Literaturprüfung außerhalb des Containers (arXiv/Colbourn/Zenodo)
+---
 
-Folgende Punkte sind in dieser Phase **nicht** geprüft und müssen außerhalb dieses Containers nachgeholt werden, bevor Punkt 2c der Checkliste (`RULES.md`) als erfüllt gelten kann:
+## 6. Phase 2: Externe Literaturprüfung (Stand 2026-11-25) & Abgleich durch Drittprüfer
 
-1. **Bai XunDi, paper A (`doi:10.5281/zenodo.23787051`, `polychrome-bai2026`):** Volltext lesen; prüfen, ob dort für `t = 4` und `q = 7, 8, 9, 11, 13` Färbungen, Blocking-Set-Zerlegungen oder Größen genannt sind, die `5888`, `7203`, `3430`, `7056`, `9558`, `21900` oder `42722` erreichen oder unterbieten; insbesondere ob die `q = 8`-Zerlegung in `4` disjunkte `15`-Punkte-Blocking-Sets dort bereits steht.
-2. **Bai XunDi, Datendepot (`doi:10.5281/zenodo.23787055`) und paper B (`doi:10.5281/zenodo.23787053`):** Arrays und Begleittexte für `t = 4` auf Größen unterhalb der Tabellenwerte prüfen.
-3. **Sitjar (`doi:10.5281/zenodo.23842218`, `23864483` und Folgeversionen):** spätere Releases (v1.6 ff.) auf `(4, 9, 7)` und Nachbarzellen.
-4. **Colbourn-Tabelle (aktueller Stand) und arXiv:** Suche nach `CAN(4, k, q)` für `k = q + 2` und nach Arbeiten zu affinen Blocking-Sets / polychromatischen Färbungen in Verbindung mit Covering Arrays (u. a. Shokri–Moura–Stevens, Torres-Jiménez, Colbourn–Lanus).
-5. **Schranken-Argumente in `docs/T4_ODD_Q_NEAR_BUSH.md` §8.2:** Nachvollzug durch eine unabhängige Person oder ein unbeteiligtes Modell (vgl. `docs/THIRD_PARTY_VERIFICATION_T4_NEARBUSH.md`).
+### 6.1 Extern gelesene Quellen & Gesamtbefund
+In keiner der extern gelesenen Quellen wurde für eine der `6` Zielzellen ein `N <=` unserer Werte gefunden:
+- Bai XunDi, Preprint vom `30.10.2026` (`doi:10.5281/zenodo.23787051`, Volltext via alphaXiv),
+- `tns-research` README (Sitjar),
+- Colbourn–Kéri–Rivas Soriano–Schlage-Puchta (2010), Lemma 3.3,
+- Colbourn–Lanus (2018),
+- Torres-Jimenez & Izquierdo-Marquez (2024),
+- Barát–Marcugini–Pambianco–Szőnyi (2006),
+- `arXiv:2507.05037`,
+- `ca-tools` PR-Auszüge.
 
-Bis dahin gilt die Wortwahl nach Regel 4: „kleiner als die Tabelle `ca-tools` am Commit `d739412`“; keine Aussage über Neuheit.
+**Einordnung:** Die Grundbauart (linien-polychromatische Färbung von `AG(2, q)` über Bush/RS-OA, Jamison-Obergrenze, Pencil-Cover-Formel `q^4 + ((q^2 - 1)/2) q^2`) ist durch Bai (`30.10.2026`) vollständig vorweggenommen. Insbesondere sind `q = 11` (`−1`) und `q = 13` (`−35`) reine Nachoptimierungen mit Pflicht-Credit auf Bai.
+
+### 6.2 Ergänzender Abgleich durch den Drittprüfer (Angabe von Claude/Fable, `ca-tools @ d739412`)
+- `ca-tools` PR `#36` enthält für `v = 8` nur `CA(6101; 4, 10, 8)`, **kein** Array für `(4, 11, 8)`.
+- Alle **`1.008` Claims** in `submissions/*/claims.csv` und `external.csv` wurden durchsucht; keiner liegt `<=` unseren Größen auf den `6` Zielzellen.
+
+### 6.3 Offene Restliste
+1. **Neuere Zenodo-Versionen & nicht eingereichte Ergebnisse:** Zenodo `23787055` (Folgeversionen), `tns-research` v1.7–v1.9 (`23959429`, `24060956`, `24141927`) sowie noch nicht in `ca-tools` eingereichte Ergebnisse.
+2. **Systematische arXiv-Volltextsuche (2023–2026) & Primärliteratur-Volltexte:** Colbourn–Lanus (2018), Raaphorst–Moura–Stevens (2014), Nurmela (2004), Chateauneuf–Kreher (2002).
+3. **Existenz der Parabel-Packung für `q = 11` und `q = 13`:** weiterhin offen (`60 s`-Suche in Phase 5B-2C erfolglos).
+4. **Methodischer Hinweis:** Bai arbeitete ebenfalls mit Claude; dies berührt Neuheitsurteile (offen zu dokumentieren), nicht die deterministische Verifikation durch `ca_verify` und den `ca-tools`-Verifier.
+
+Bis zum Abschluss dieser Restliste gilt nach Regel 4 weiterhin die Wortwahl „kleiner als die Tabelle `ca-tools` am Commit `d739412`“; keine Aussage über Neuheit.
+
+---
+
+## 7. Suchfreie Struktur-Analyse (`scripts/analyze_bai_deltas.py`)
+
+Deterministische Prüfung ohne Suche (`timeout --kill-after=10s 60 python3 scripts/analyze_bai_deltas.py`, Laufzeit `0,86 s`):
+
+### 7.1 Warum liegt `CA(5888; 4, 10, 8)` unter Bais Modellgrenze `6144` (Prop. 5.4)?
+- **Bais Prop. 5.4 (`q = 8, t = 4`):** `c <= floor(8/2) = 4` Blocking-Set-Farben `{0, 1, 2, 3}`, `4` Restsymbole `{4, 5, 6, 7}` mit je einem vollen `OA(512; 3, 9, 8)` (`8 * 64` Zeilen) → `g >= q^2 / 2 = 32` Blöcke à `64` Zeilen (`2048` Zusatzzeilen) → **`4096 + 2048 = 6144`**.
+- **Gemessener Befund an `results/t4_nearbush/CA_5888_4_10_8.txt`:**
+  - `4096/4096` Zeilen bilden das vollständige Bush-`OA(4096; 4, 9, 8)` auf Spalten `0..8`; die `4` disjunkten minimalen `15`-Punkte-Blocking-Sets belegen `4 * 15 = 60` Punkte von `AG(2, 8)` (`960` Zeilen je Symbol `{0..3}`).
+  - Die `4` verbleibenden freien Punkte `(9, 39, 42, 59)` werden im Bush-OA direkt den `4` Restsymbolen `{4, 5, 6, 7}` zugewiesen (`64` Zeilen je Symbol im Bush-OA).
+  - Unter der Projektion `Q(a, b, c, d) = (a ^ c ^ d, a ^ b ^ d)` (Kern `{(u + v x)(x^2 + x + 1)}`, Charakteristik `2`, Hyperoval-Nukleus `(0, 1, 0)`) bildet jede dieser `4` 64-Zeilen-Fasern im Bush-OA bereits ein **exaktes `OA(64; 2, 9, 8)`** (`OA(64;2,9,8) = True` für alle `m in {4..7}`).
+  - Daher benötigt jedes Restsymbol `m in {4..7}` nur noch `7` statt `8` externe `OA(64)`-Slices (`7 * 64 = 448` statt `512` Zeilen) → `28 * 64 = 1792` statt `32 * 64 = 2048` Zusatzzeilen (`−4` Blöcke à `64` = **`−256` Zeilen**, `4096 + 1792 = 5888`). Die Einsparung entsteht nicht durch `c > 4`, sondern durch die Wiederverwendung der `4` freien Punkte als vollwertige `OA(64)`-Slices.
+
+### 7.2 Warum liegt das Roh-Array `CA(7203; 4, 11, 8)` unter Bais Satz 6.2 (`8192`)?
+- **Bais Satz 6.2 (`q = 8, k = 11`):** `4096` (Bush-OA) `+ 4 * 512` (`col9 in {4..7}`) `+ 4 * 512` (`col10 in {4..7}`) `= 8192`.
+- **Gemessene Zerlegung von `build_k11_polychrom()` (`7203` Zeilen, `−989` vs. `8192`):**
+  - `4096` Zeilen Basis-Bush-OA (`col9, col10 in {0..3}` aus zwei balancierten `[16, 16, 16, 16]`-4-polychromatischen Färbungen),
+  - `2048` Zeilen Hyperoval-Blöcke für `col9 in {4..7}` (`4 * 512`), in denen `col10 = b ^ (m9 - 4)` alle `8` Symbole durchläuft: genau `1024` Zeilen haben `(col9 >= 4, col10 < 4)` und **`1024` Zeilen (`16` `OA(64)`-Slices, je `256` Zeilen pro `m10 in {4..7}`) haben `(col9 >= 4, col10 >= 4)`**,
+  - `1024` Zeilen dezidierte Hyperoval-Slices für `col10 in {4..7}` mit `col9 in {0..3}` (`256` Zeilen pro `m10 in {4..7}`; zusammen mit den `256` geteilten Zeilen aus den `col9`-Blöcken ein exaktes `OA(512; 3, 9, 8)` für jedes `m10 in {4..7}`),
+  - `35` deterministische Greedy-Reparaturzeilen für die `68` fehlenden `(c0, c1, col9, col10)`-Tupel in `{0..3}^2`.
+  - Netto-Bilanz: `8192 − 1024` (geteilte Hyperoval-Slices) `+ 35` (Paar-Reparatur) `= 7203` (`−989`).
+
+### 7.3 Suchfreier Check auf Bai Satz 3.7 / Offenes Problem 2 (`CA_5888` & `CA_3430`)
+
+| Kenngröße (gemessen direkt an der Datei) | `CA(5888; 4, 10, 8)` (`q = 8`) | `CA(3430; 4, 9, 7)` (`q = 7`) |
+| --- | :---: | :---: |
+| Bush-`OA(q^4; 4, q + 1, q)` auf Spalten `0..q` | **`4096/4096`** (`0` fehlend, `0` mehrdeutig) | **`2401/2401`** (`0` fehlend, `0` mehrdeutig) |
+| Zeilen außerhalb Bush-OA-Präfix (`col_∞ != d`) | `1792` (`28 × 64`) | `1029` (`21 × 49`), `0` Nicht-Polynomzeilen auf `0..6` |
+| Modifizierte `col_{q+1}`-Zeilen im Bush-OA vs. Startarray | `0/4096` (deterministisch) | **`392/2401`** (`8` Slices à `49` gegenüber `CA(3577)`) |
+| Reine Funktion `f: OA(q^4) -> GF(q)` auf `0..q` | **ja** | **ja** |
+| Geprüfte `(t - 1)`-Tupel-Fasern auf `0..q` (`C(q+1, 3) * q^3`) | `43.008` | `19.208` |
+| Farben pro Faser (nur Bush-OA-Zeilen): `min / max` | `4 / 7` | `3 / 6` |
+| Universelle Farben (treffen jede Faser im Bush-OA) | `{0, 1, 2, 3}` (**`4 = floor(8/2)`**) | `{0, 1}` (**`2 < floor(7/2) = 3`**) |
+| Min. getroffene Fasern pro Symbol (von `q^3`) im Bush-OA | `{0..3: 512, 4..7: 64}` | `{0: 343, 1: 343, 2: 294, 3: 196, 4: 49, 5: 49, 6: 98}` |
+| Satz 3.7 / Offenes Problem 2 (`> floor(q/2)` universelle Farben)? | **nein** (`4 <= 4`) | **nein** (`2 < 3`) |
+
+**Befund:** In beiden Arrays bleibt das gesamte Bush-`OA(q^4; 4, q + 1, q)` auf Spalten `0..q` vollständig intakt (die lokale Suche bricht die `OA(7^4)`-Basis in `CA_3430` **nicht** auf, sondern färbt genau `392/2401 = 8` `q^2`-Slices in `col_8` um). Keines der beiden Arrays erreicht `> floor(q/2)` universelle Farbklassen im Sinne von Bais Satz 3.7 / Offenes Problem 2; bei `CA_3430` sinkt die universelle Farbzahl sogar von `3` auf `2`, während die verbleibenden Lücken von `m = 2` (`294/343`) durch `1` Zusatz-Slice (`49` Zeilen) statt `2` Bush-Slices geschlossen werden.
