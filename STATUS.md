@@ -1,20 +1,20 @@
 # Projektstatus & Governance-Gates (`STATUS.md`)
 
-Letzte Aktualisierung: 2026-11-25 (Branch `chore/ca-tools-submission-prep`: Checkliste `RULES.md` #2a–#2e vollständig **PASS** — `ca-tools` @ `7b08aef` [23/23 kleiner in `ca_table`/`ca_frame`/`derived`, 0 offene PRs], Canli-Check @ `0b179b52` [0 Konflikte], `docs/LITERATURE_CHECK_PGL_CCL.md`, `docs/THIRD_PARTY_VERIFICATION.md`, 13/13 Repro-Audit und finalisiertes Einreichungspaket unter `submission/` ohne `TBD`-Platzhalter; bereit für PR gegen eigenes `main`).
+Letzte Aktualisierung: 2026-11-25 (Branch `chore/ca-tools-final-polish`, abgezweigt von `origin/main` @ `162d48f`: Review-Korrekturen vollständig eingearbeitet — `CAN(3,18/19,2)` als `best known upper bound 18` präzisiert, `submission/third_check.py` unverändert archiviert, `docs/THIRD_PARTY_VERIFICATION.md` um 70-Zeilen-Negativkontrolle & 2. Drittprüfung auf `main @ 162d48f` [inkl. `tools/check_submission.py` 13/13 PASS] ergänzt, `"to our knowledge"` + Restliste in `HOW.md`/`PR_DRAFT.md`, `ca-tools` weiterhin @ `7b08aef` mit 0 offenen PRs, `verify_all.sh` 16/16 `DUAL_PASS`; bereit für PR #8 gegen eigenes `main`).
 Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprotokoll siehe [`docs/RUN_LOG.md`](docs/RUN_LOG.md), Audit-Paket siehe [`submission/MANIFEST.md`](submission/MANIFEST.md).
 
 ## 0. Governance- & Branch-Status
 
-- **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`), PR #6 (`exp/pgl-binary-ccl-v5` @ `a27da71`).
-- **Aktiver Branch (`chore/ca-tools-submission-prep`, PR gegen eigenes `main`):**
-  - `RULES.md` um `## Meldung nach außen` (Punkte 1–8) erweitert; keinerlei Schreibzugriff auf Fremd-Repos.
-  - **Checkliste Meldung nach außen (`RULES.md` Punkt 2) — 5/5 PASS:**
+- **Gemergte PRs:** PR #1 (`phase-1-setup`), PR #2 (`chore/sync-main-docs`), PR #3 (`exp/pgl-binary-ccl-v2`), PR #4 (`exp/pgl-binary-ccl-v3`), PR #6 (`exp/pgl-binary-ccl-v5` @ `a27da71`), PR #7 (`chore/ca-tools-submission-prep` @ `162d48f`).
+- **Aktiver Branch (`chore/ca-tools-final-polish`, PR #8 gegen eigenes `main`):**
+  - Keinerlei Schreibzugriff auf Fremd-Repos (`chrispbsmolen/ca-tools` nur lesend via `gh api` geprüft).
+  - **Checkliste Meldung nach außen (`RULES.md` Punkt 2) — 5/5 PASS (erneut geprüft am 2026-11-25):**
     - `2a` (Tabellen-Check @ `7b08aef06cbedaf1b376dbfa68f6aa171a54df4a`): **PASS** — `table/ca_table.csv.gz` 23/23, `table/ca_frame.csv` 23/23, `table/derived.csv` 23/23 strikt kleiner (`submission/CA_TOOLS_FORMAT.md`).
     - `2b` (Offene PRs & Issues `ca-tools`): **PASS** — 0 offene PRs.
-    - `2c` (Literaturprüfung in `docs/`): **PASS** — [`docs/LITERATURE_CHECK_PGL_CCL.md`](docs/LITERATURE_CHECK_PGL_CCL.md) (inkl. Seelman/IRSI, Sitjar v1.4, Canli `quantavane-covering-arrays` @ `0b179b52` mit `0` Konflikten und transparenter Restliste; Neuheitsstatus formal offen).
-    - `2d` (Drittprüfung): **PASS** — [`docs/THIRD_PARTY_VERIFICATION.md`](docs/THIRD_PARTY_VERIFICATION.md) (unabhängige Prüfung aller 16 Arrays inkl. drittem Verifier & Negativtest durch Claude / „Fable“).
-    - `2e` (Deterministische Reproduktion & SHA-256-Vergleich): **PASS** — 13/13 byte-identische Übereinstimmung aus `data/ccl_binary/` nach `/tmp/repro_check/` (`submission/REPRODUCE.md`).
-  - Finalisiertes Staging [`submission/ca_tools_staging/`](submission/ca_tools_staging/) (`8,7 MB`, 13 Pareto-Arrays, `claims.csv` mit `credit=Justus Jeserigk` und verifizierten `builds_on`-IDs, `HOW.md` mit `AI tools used: yes`) + [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md) (`0 TBD`, `LANGUAGE_AUDIT_PASS`, `verify_all.sh` 16/16 `DUAL_PASS`). Warten auf Justus' Freigabe für externe Meldung nach Regel 1.
+    - `2c` (Literaturprüfung in `docs/`): **PASS** — [`docs/LITERATURE_CHECK_PGL_CCL.md`](docs/LITERATURE_CHECK_PGL_CCL.md) (inkl. Seelman/IRSI, Sitjar v1.4, Canli `quantavane-covering-arrays` @ `0b179b52` mit `0` Konflikten und transparenter Restliste; Neuheitsstatus formal offen; `k=18, 19` als *best known upper bound 18* präzisiert).
+    - `2d` (Drittprüfung): **PASS** — [`docs/THIRD_PARTY_VERIFICATION.md`](docs/THIRD_PARTY_VERIFICATION.md) + archiviertes [`submission/third_check.py`](submission/third_check.py) (SHA-256 `2acd4477…`): 1. Prüfung auf `results/` (16/16 gültig, Negativkontrolle 70 Zeilen entfernt) & 2. Prüfung auf `main @ 162d48f` (13/13 Staging byte-identisch, 13/13 gültig unter `ca_verify` & `third_check.py`, 13/13 bit-exakt aus frischem Build, lokales `ca-tools` `tools/check_submission.py` 13/13 PASS).
+    - `2e` (Deterministische Reproduktion & SHA-256-Vergleich): **PASS** — 13/13 byte-identische Übereinstimmung aus `data/ccl_binary/` (`submission/REPRODUCE.md`).
+  - Finalisiertes Staging [`submission/ca_tools_staging/`](submission/ca_tools_staging/) (`8,7 MB`, 13 Pareto-Arrays, `claims.csv` mit `credit=Justus Jeserigk` und unveränderten `builds_on`-IDs, `HOW.md` mit `AI tools used: yes` & `"to our knowledge"` + Restliste) + [`submission/PR_DRAFT.md`](submission/PR_DRAFT.md) (`0 TBD`, `LANGUAGE_AUDIT_PASS`, `verify_all.sh` 16/16 `DUAL_PASS`). Warten auf Justus' Freigabe für externe Meldung nach Regel 1.
 
 ## 1. Pareto-Front der 13 Arrays (kleiner als `ca-tools` @ `7b08aef` auf 23 Zellen)
 
