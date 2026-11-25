@@ -665,17 +665,28 @@ fn write_array_atomic(path: &Path, rows: &[Vec<u8>]) {
 
 // ---------- Gate 0 Self-Test (>= 10,000 incremental vs brute-force checks) ----------
 
-fn run_self_test(steps: usize, seed: u64) {
+fn run_self_test(steps: usize, seed: u64, explicit_v: Option<usize>) {
     let t0 = Instant::now();
     let mut rng = Rng::new(seed);
 
-    // Test 1: small t=4, k=8, v=3 (N=120) -> 6000 single-cell moves + 5 row deletions
-    // Test 2: target-scale t=4, k=11, v=8 (N=250) -> 6000 single-cell moves + 5 row deletions
-    let configs = [(120usize, 8usize, 3usize, steps / 2), (250usize, 11usize, 8usize, steps - steps / 2)];
+    let configs: Vec<(usize, usize, usize, usize)> = match explicit_v {
+        Some(v) => {
+            let k = (v + 2).max(4).min(64);
+            let s1 = (steps / 4).max(1000);
+            let s2 = steps.saturating_sub(s1).max(2000);
+            vec![(120usize, 8usize, 3usize, s1), (250usize, k, v, s2)]
+        }
+        None => vec![
+            (120usize, 8usize, 3usize, steps / 2),
+            (250usize, 11usize, 8usize, steps - steps / 2),
+        ],
+    };
     let mut total_checks = 0usize;
     let mut total_deletes = 0usize;
+    let mut tested_desc: Vec<String> = Vec::new();
 
     for (n_init, k, v, n_moves) in configs {
+        tested_desc.push(format!("(N={},k={},v={})", n_init, k, v));
         let mut init_rows = Vec::with_capacity(n_init);
         for _ in 0..n_init {
             let mut r = Vec::with_capacity(k);
@@ -689,7 +700,13 @@ fn run_self_test(steps: usize, seed: u64) {
         assert_eq!(st.unc(), fu0, "Initial unc mismatch");
         assert_eq!(st.cov, fcov0, "Initial cov mismatch");
 
-        let check_every = if k >= 10 { 250 } else { 50 };
+        let check_every = if v >= 11 {
+            1000
+        } else if k >= 10 {
+            250
+        } else {
+            50
+        };
         for step in 1..=n_moves {
             let r = rng.gen_range(st.n);
             let c = rng.gen_range(st.k);
@@ -744,7 +761,8 @@ fn run_self_test(steps: usize, seed: u64) {
     }
 
     println!(
-        "SELF_TEST_PASS: {} incremental cell deltas + {} row deletions verified against brute force (0 deviations, elapsed={:.3}s)",
+        "SELF_TEST_PASS [{}]: {} incremental cell deltas + {} row deletions verified against brute force (0 deviations, elapsed={:.3}s)",
+        tested_desc.join(", "),
         total_checks,
         total_deletes,
         t0.elapsed().as_secs_f64()
@@ -758,6 +776,7 @@ struct Config {
     output: Option<PathBuf>,
     snapshot_dir: Option<PathBuf>,
     v: usize,
+    v_explicit: bool,
     threads: usize,
     seed: u64,
     time_limit_secs: f64,
@@ -780,6 +799,7 @@ fn parse_args() -> Config {
         output: None,
         snapshot_dir: None,
         v: 8,
+        v_explicit: false,
         threads: 2,
         seed: 5201,
         time_limit_secs: 30.0,
@@ -820,6 +840,7 @@ fn parse_args() -> Config {
             "--v" => {
                 i += 1;
                 cfg.v = args[i].parse().expect("v");
+                cfg.v_explicit = true;
             }
             "--threads" => {
                 i += 1;
@@ -1127,7 +1148,8 @@ fn commit_new_best(
 fn main() {
     let cfg = parse_args();
     if cfg.self_test {
-        run_self_test(cfg.self_test_steps, cfg.seed);
+        let ev = if cfg.v_explicit { Some(cfg.v) } else { None };
+        run_self_test(cfg.self_test_steps, cfg.seed, ev);
         return;
     }
 
