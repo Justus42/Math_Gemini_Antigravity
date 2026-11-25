@@ -43,6 +43,7 @@ Kandidaten, die nur einen Verifier bestehen oder ohne SHA-256-Hash und Verifikat
   - sauberes Wiederaufsetzen (`--resume <checkpoint>`) ohne Verlust des besten bisher gefundenen Zustands.
 - **Merge-Gate:** Ein Merge nach `main` erfolgt erst nach bestandener Dual-Verifikation, bestandener `verifiers/test_verifiers.py` und Freigabe.
 - **Budget-Ausweis (Suche vs. Reproduktion):** Suchbudget (Wall-Clock für Erstläufe) und lokal deterministische Reproduktions-Wiederholungen (2× byte-identisch mit `--target-n`, `--threads 1`) werden getrennt ausgewiesen und getrennt budgetiert; in `docs/RUN_LOG.md` werden stets beide Zeiten (Erstlauf-Summe und Gesamt-Wall-Clock inkl. Repro) angegeben. Wird `--target-n` innerhalb des gesetzten Zeitlimits nicht erreicht, gilt der Reproduktionslauf als **`FAIL`**. Die Bezeichnung „rechnerunabhängig bestätigt“ ist ausschließlich Arrays mit bestätigter Fremd-Reproduktion auf einer zweiten Maschine vorbehalten.
+- **Vorab-Prüfregel (Planung & Experimente):** Vor jedem neuen Konstruktions- oder Suchauftrag wird die erwartete Zeilengröße (Vorhersage) rechnerisch bestimmt und gegen die aktuelle `table/ca_frame.csv` (einschließlich größerer `k` derselben `(t, v)`-Reihe) geprüft, bevor ein Skript oder Solver geschrieben wird. Maßstab ist stets die aktuelle Tabelle, nicht eine Modellgrenze aus einem Einzelpaper.
 
 ## Meldung nach außen
 
