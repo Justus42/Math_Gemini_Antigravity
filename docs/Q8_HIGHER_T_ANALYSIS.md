@@ -76,3 +76,21 @@ Die Ursache des Ausschlusses für `t = 5` und `t = 6` ist rein algebraisch und s
 ## 5. Fazit
 
 Der `q = 8`-Mechanismus mit freien Einzelpunkten als fertigen $8^{t-2}$-Scheiben (`N = 8^t + 28 * 8^(t-2)`) ist auf **`t = 4`** (`CA(5888; 4, 10, 8)`) beschränkt. Für **`(5, 10, 8)`** (`47.104` vs. `49.128`) und **`(6, 10, 8)`** (`376.832` vs. `393.018`) ist er **vollständig durchgerechnet, für diese Bauart ausgeschlossen**. Es wurden keine neuen Arrays erzeugt und kein Verzeichnis `results/q8_higher_t/` angelegt.
+
+---
+
+## 6. Abschlussvermerk Track 2 (mit Live-Abgleich `table/ca_frame.csv` @ `d739412`)
+
+### 6.1 Live-Abgleich `table/ca_frame.csv` (`chrispbsmolen/ca-tools` @ `d7394120eb9703fbd92e5a28cbbda970c298f115`, rein lesend via `gh api`)
+- **`(4, 18, 16)`:** `83.519` (`CITED`, `orthogonal array fuse` / OA über `GF(17)` fusioniert nach Colbourn–Kéri–Rivas Soriano–Schlage-Puchta 2010, Lemma 3.1).
+- **`(4, 19, 16)`:** `114.489` (`VERIFIED`, Post-Op auf `CA(114495; 4, 19, 16)`).
+- **`q = 32, 64`:** `0` Tabellenzellen in `table/ca_frame.csv` vorhanden.
+
+### 6.2 Gesamtbewertung aller Parameterbereiche des freie-Scheiben-Mechanismus
+- **`q = 4`:** `(4, 6, 4)` Vorhersage `352 > 340` (Tabelle); `(5, 6, 4)` Vorhersage `1.408 > 1.024` (Tabelle).
+- **`q = 8, t = 5, 6`:** vollständig durchgerechnet, für diese Bauart ausgeschlossen (PR `#19`, Abschnitte 3–4).
+- **`q = 16, t = 4`:** `(4, 18, 16)` Vorhersage `96.256 > 83.519` (Tabelle); `(4, 19, 16)` Aufbau `16^4 + 8 * 16^3 + 64 * 16^2 = 114.688` plus Reparaturzeilen `> 114.489` (Tabelle).
+- **`q = 32, 64`:** keine Tabellenzellen in `ca-tools`.
+
+**Fazit:** Der freie-Scheiben-Mechanismus trägt ausschließlich bei **`q = 8, t = 4`** (`CA(5888; 4, 10, 8)`, kleiner als `ca-tools` am Commit `d739412`). Track 2 ist abgeschlossen.
+

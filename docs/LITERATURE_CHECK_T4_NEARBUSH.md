@@ -154,3 +154,22 @@ Deterministische Prüfung ohne Suche (`timeout --kill-after=10s 60 python3 scrip
 | Satz 3.7 / Offenes Problem 2 (`> floor(q/2)` universelle Farben)? | **nein** (`4 <= 4`) | **nein** (`2 < 3`) |
 
 **Befund:** In beiden Arrays bleibt das gesamte Bush-`OA(q^4; 4, q + 1, q)` auf Spalten `0..q` vollständig intakt (die lokale Suche bricht die `OA(7^4)`-Basis in `CA_3430` **nicht** auf, sondern färbt genau `392/2401 = 8` `q^2`-Slices in `col_8` um). Keines der beiden Arrays erreicht `> floor(q/2)` universelle Farbklassen im Sinne von Bais Satz 3.7 / Offenes Problem 2; bei `CA_3430` sinkt die universelle Farbzahl sogar von `3` auf `2`, während die verbleibenden Lücken von `m = 2` (`294/343`) durch `1` Zusatz-Slice (`49` Zeilen) statt `2` Bush-Slices geschlossen werden.
+
+---
+
+## 8. Phase 3: Ergänzender Literatur- und Datenabgleich (Angabe von Claude, `ca-tools @ d739412`, Zenodo gelesen `2026-11-26`)
+
+### 8.1 Geschlossen (Angabe von Claude)
+- **`PR #78` (`bai-xundi-2026-11-external2`):** `29` Einträge vollständig gelesen; `t = 4` nur `v = 20..25`, `t = 5` nur `v >= 12`, `t = 6` nur `v >= 10` — keine unserer Zellen.
+- **`PR #36`:** `11` Claims, für `v = 8` ausschließlich `CA(6101; 4, 10, 8)`.
+- **Bai-Ablage `doi:10.5281/zenodo.23787055` (Version `1.0` vom `30.10.2026`, `records.csv` gelesen):** `(4, 9, 7) = 3557`, `(4, 10, 8) = 6101`, `(4, 11, 9) = 9801`, `(4, 13, 11) = 21901`, `(4, 15, 13) = 42757`, kein Eintrag für `(4, 11, 8)`; `(5, 10, 8) = 49136`, `(6, 10, 8) = 393088`.
+- **`1.008` Claims + `237` `EXTERNAL`-Einträge:** kein Wert `<=` unseren `6` `t = 4`-Größen bzw. den Track-2-Vorhersagen `47.104` / `376.832`.
+
+### 8.2 Weiter offen
+1. Systematische arXiv-Suche (2023–2026).
+2. Colbourn–Lanus (2018) im Volltext (Herkunft `7680` auf `(4, 11, 8)`).
+3. `tns-research`-Zenodo-Ablagen direkt (`v1.7`–`v1.9`).
+4. Existenz der Parabel-Packung für `q = 11, 13` (Empfehlung Drittprüfer: vollständiger SAT/CP-Löser statt Heuristik, damit auch ein Negativbefund als Beleg gilt).
+
+Bis zum Abschluss der offenen Punkte gilt nach Regel 4 weiterhin die Wortwahl „kleiner als `ca-tools` am Commit `d739412`“.
+
