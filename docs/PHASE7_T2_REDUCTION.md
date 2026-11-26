@@ -1,6 +1,6 @@
 # Phase 7: Rückführung auf Stärke 2, die Fälle `q = 5, 7, 8, 9` (`docs/PHASE7_T2_REDUCTION.md`)
 
-Stand: 2026-11-26, ca. 13:50 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11`, §10 zu den längeren Läufen `q = 11, 13`, §11 zu `v < q`, §12 Korrektur nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
+Stand: 2026-11-26, ca. 16:10 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11`, §10 zu den längeren Läufen `q = 11, 13`, §11 zu `v < q`, §12 Korrektur, §13 zweite Läufe, §14 geschlossene Bauart für `v < q` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
 (Schritte 1 und 2 aus Geminis Phase-7-Plan). Vergleichsstand: `chrispbsmolen/ca-tools @ e673ab4`.
 
 **Rollenhinweis:** Diese Rechnung stammt vom Prüfer. Sie ist damit *nicht* fremdgeprüft. Antigravity soll
@@ -316,3 +316,126 @@ Nachprüfung der elf Arrays aus §5, §8, §9 im neuen Chat (neuer Zähler, neue
 aus Repo-Skript und Nachbau; alle elf `PASS` (Zähler, `ca_verify.c`); Negativkontrollen (letzte bzw. mittlere
 Zeile entfernt) alle `FAIL`; alle elf kleiner als `ca-tools @ e673ab4`. Das ist weiter eine Prüfung durch den
 Prüfer selbst, **keine Fremdprüfung**.
+
+## 13. Zweite Läufe nach Abbruchregel (2026-11-26, 14:11–15:45 MEZ)
+
+Regel (vorab mit Justus festgelegt): Eine Liste gilt als einreichungsreif, wenn ein weiterer Lauf gleicher Länge
+von ihr aus nichts findet. Je Lauf Limit `1800 s`, Start von der besten Liste (`hintfile`), Skripte und
+Einstellungen wie in §10 und §11, Maschine mit 2 Kernen, Läufe nacheinander.
+
+| Liste | Start | Lauf (`1800 s`) | Regel erfüllt? |
+| --- | --- | --- | --- |
+| `q = 11`, `v = 10` | `158` (§11.3) | **`157`** (`data/phase7/R_q11_v10_m157.txt`) | nein (Verbesserung gefunden) |
+| `q = 13`, `v = 12` | `224` (Bauart §14) | `224` | ja (ein Lauf) |
+| `q = 11`, `v = 11` | `175` (§10) | `175` | ja (ein Lauf) |
+
+Abweichung: Der Lauf zu `(13, 12)` war zuerst von der Phase-6A-Liste (`235`) gestartet und wurde nach 2 Minuten
+abgebrochen, als die Bauart aus §14 mit `224` vorlag; gewertet ist nur der Lauf ab `224`.
+Einschränkung: Bei dieser Modellgröße (`24336` Variablen) fand derselbe Löser auch für `q = 13`, `v = 13` in
+`1800 s` nichts (§10). „Regel erfüllt“ heißt: dieser Löser fand in dieser Zeit nichts. Ausgeschlossen ist nichts.
+
+Die `157` des Lösers ist dieselbe Blockzahl wie die der Bauart aus §14 für `(11, 10)`. Die Arrays in §14.4
+stammen aus der Bauart; die Löserliste bleibt als Beleg des Laufs im Repo. Die Arrays aus §11.3 (`158` Blöcke)
+sind damit überholt.
+
+## 14. Geschlossene Bauart für `v <= q` ohne Löser (2026-11-26, ab 14:44 MEZ)
+
+### 14.1 Aussage
+
+Für jede Primzahlpotenz `q`, jedes `2 <= v <= q` und `2 <= t <= q + 2` gibt es ein
+`CA((q^2 + C(w, 2)) * q^(t-2); t, q+2, v)` mit `w = max(0, 2v - q)`.
+Für `v = q` ist das die Zahl aus Phase 6A (`w = q`). Für `v < q` ist `C(2v - q, 2) < C(v, 2)`.
+
+### 14.2 Liste
+
+`f = q - v`, `w = max(0, q - 2f)`, `n = v - w`. Geraden `d = const` in der Ebene der Punkte `(c, d)`:
+
+- `d < w` („doppelt belegt“): Grundbeschriftung `(a, b) = (d, d)`. An den Punkten `c < d` stehen statt eines
+  Vertreters zwei: `(a, b) = (d, c)` und `(c, d)`. Das sind `C(w, 2)` zusätzliche Vertreter.
+- `w <= d < w + n` („nur `a`“): `a = w + (d - w)` auf der ganzen Geraden, `b = c` für `c < v`, sonst `0`.
+- `w + n <= d < w + 2n` („nur `b`“): `b = w + (d - w - n)` auf der ganzen Geraden, `a = c` für `c < v`, sonst `0`.
+- `d >= w + 2n` (nur für `v < q/2`): `(0, 0)`.
+
+Erzeugen: `python3 scripts/phase7_reps_vq.py Q V AUSGABE` (reines Python, keine Suche).
+Für `v = q` ist die Liste gleich der Phase-6A-Liste (geprüft für `q = 7`).
+
+### 14.3 Argument (Bedingungen 1–3 aus §11.1)
+
+1. Jeder Punkt trägt mindestens einen Vertreter.
+2. Jedes Symbol `s` von `a` hat eine ganze Gerade `d = const`, auf der jeder Punkt einen Vertreter mit `a = s`
+   trägt: für `s < w` die Gerade `d = s` (am Punkt `c < s` der Vertreter `(s, c)`), für `s >= w` eine
+   „nur `a`“-Gerade. Jede Gerade `c + al*d = u` trifft jede Gerade `d = const` in genau einem Punkt. Ebenso für
+   `b` (für `m < w` am Punkt `c < m` der Vertreter `(c, m)`).
+3. Paare `(s, m)`: `s >= w` → auf der „nur `a`“-Geraden von `s` laufen alle `b` durch; `m >= w` → entsprechend;
+   `s = m < w` → Punkt `c >= s` der Geraden `d = s`; `s > m`, beide `< w` → Vertreter `(s, m)` am Punkt
+   `(m, s)`; `s < m`, beide `< w` → Vertreter `(s, m)` am Punkt `(s, m)`.
+
+Die Zusatzvertreter entstehen nur zwischen den `w` doppelt belegten Geraden. Jede Gerade, die nur ein Symbol
+tragen muss, liefert alle Paare mit diesem Symbol ohne Zusatz.
+
+### 14.4 Belegart
+
+- Aussage 14.1 allgemein: **Argument** (14.3 zusammen mit Aussage A' aus §11.1, die selbst Argument ist).
+- Bedingungen 1–3 **nachgezählt** (`phase7_lift.py --check-m`): alle `99` Paare `(q, v)` mit
+  `q in {4, 5, 7, 8, 9, 11, 13, 16, 17, 19}`, `2 <= v <= q`.
+- Arrays **nachgezählt**: die 20 Zellen der Tabelle unten und `(6, 13, 10)`, außerdem `(t, 7, 4)` für
+  `t = 3, 4, 5`. Jeweils eigener Zähler `PASS`; die 20 auch `verifiers/ca_verify.c` `PASS` und
+  Negativkontrolle (letzte Zeile entfernt) `FAIL`; 10 davon (Primzahl-`q`, `N <= 250000`) byte-gleich im eigenen
+  Nachbau; 7 davon (`t = 3` alle fünf, `(4, 13, 10)`, `(4, 15, 12)`) `verify_independent.py` `PASS`.
+- Alle übrigen Zellen in `docs/PHASE7_VQ_SCAN.md`: **Vorhersage aus der Formel**, kein Array erzeugt.
+- Nicht fremdgeprüft. Nichts in `results/`.
+
+| Zelle `(t, k, v)` | `q` | Blöcke | `N` | `ca-tools @ e673ab4` | Differenz | SHA-256 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `(3, 13, 10)` | `11` | `157` | `1727` | `1760` | `-33` | `98e5906a59dc0e0f4aef4a32c2841ce71e0b0c56b2f8aac6728f6a08851f36ec` |
+| `(4, 13, 10)` | `11` | `157` | `18997` | `20383` | `-1386` | `2bd4886415f8f1c4871ebb7aeaa3ed4e9fcba272cfc8407bd0fa789cbe4bc3a8` |
+| `(5, 13, 10)` | `11` | `157` | `208967` | `224844` | `-15877` | `591fedf245e1a8fd2c982010ce2af7595df04b180b05258a951dd2b09912881c` |
+| `(3, 15, 12)` | `13` | `224` | `2912` | `2955` | `-43` | `9f41ef45a18fe5b773cd309a5b253632dd09d1b548a50d37a3408e1fcb67fb84` |
+| `(4, 15, 12)` | `13` | `224` | `37856` | `40476` | `-2620` | `b5d916c34d0bd89988578fca51179ad6e9b6439e1db67b1611eae2ce3138abf0` |
+| `(5, 15, 12)` | `13` | `224` | `492128` | `527205` | `-35077` | `240b6c938f6b87088ccebaa50515ebc7e8b8468f07cb03db08259cc731c05028` |
+| `(4, 18, 14)` | `16` | `322` | `82432` | `82993` | `-561` | `dcf37e8dabdadfefb8237cddd7b1e2f80df715b54e054f2e94fa5d721ad8ba53` |
+| `(4, 19, 14)` | `17` | `344` | `99416` | `106023` | `-6607` | `881f8187a6f2c4dbd2022cff25a1742a1a39b62bd6672ad89ef4965ef63acbfb` |
+| `(4, 19, 15)` | `17` | `367` | `106063` | `110273` | `-4210` | `6db6dbf97f4b0b644ed2e5907432c2f852e5c96bcb68aaa7b891ae8f604ac776` |
+| `(4, 19, 16)` | `17` | `394` | `113866` | `114489` | `-623` | `53b0db39d2a010f7642c3e873a65e5d9ad6d1c10aec8a2dcaebbdfa8e97d688c` |
+| `(3, 21, 17)` | `19` | `466` | `8854` | `9376` | `-522` | `8df731279c7495d533b1a729ef7eded790824de82d224a8c874ffc623208bb28` |
+| `(3, 21, 18)` | `19` | `497` | `9443` | `9830` | `-387` | `e3cd323a0881232338651f910687a81fda8c5401a2dc03863f7c1dff428416ec` |
+| `(4, 21, 18)` | `19` | `497` | `179417` | `188412` | `-8995` | `36d945d874fb6c3b87be4c3f24931256dd9d2d0f026ac0684414ab85e55833b3` |
+| `(4, 25, 20)` | `23` | `665` | `351785` | `382933` | `-31148` | `43a09235850184dbf7e568339fa9edba0db7d060721a2654f380524b39217f3c` |
+| `(4, 25, 21)` | `23` | `700` | `370300` | `390612` | `-20312` | `edd06b3b669e7fb1994f69d6d225f16556aaed0b37cdbd188157c50063154d83` |
+| `(4, 27, 20)` | `25` | `730` | `456250` | `507412` | `-51162` | `d70e6fdae82ca64c92d0d19a26af8c8e48bee392af1a64131ad70007215971ff` |
+| `(3, 27, 21)` | `25` | `761` | `19025` | `19052` | `-27` | `77f289f1638481979bb10b3b4e96f73c745ab73be00fb7364a3c4e59380d2d78` |
+| `(4, 27, 21)` | `25` | `761` | `475625` | `523044` | `-47419` | `e26bf9386702049101ba9afb4889d68e1a09df15e4174c2ec92b8210bf2e0adb` |
+| `(4, 27, 22)` | `25` | `796` | `497500` | `531431` | `-33931` | `46d3d41574a66f858d52f6d83f34a0bbcba97a364fa24bd09fdabb35ee7dd826` |
+| `(4, 27, 23)` | `25` | `835` | `521875` | `531433` | `-9558` | `26ca374a133c4974a990e6e0abcb01f0004606560e26e1942f8512647e691def` |
+
+`(6, 13, 10)`: `N = 2298637`, SHA-256 `a126c2daad42ae90517d74cc960bda09c7df91396b5d1d3a92f648713675bb8f`,
+eigener Zähler `PASS` (nur dieser), Tabelle `2483623`.
+
+```
+python3 scripts/phase7_reps_vq.py 11 10 R_q11_v10.txt
+python3 scripts/phase7_lift.py --q 11 --v 10 --reps R_q11_v10.txt --check-m --t 3 --out CA_1727_3_13_10.txt
+sha256sum CA_1727_3_13_10.txt   # 98e5906a59dc0e0f4aef4a32c2841ce71e0b0c56b2f8aac6728f6a08851f36ec
+```
+
+### 14.5 Verhältnis zu den Löserläufen
+
+| `(q, v)` | Phase 6A | Bauart | Löser (bestes gefundenes `m`) |
+| --- | --- | --- | --- |
+| `(5, 3)` | `28` | `25` | `25` |
+| `(5, 4)` | `31` | `28` | `27` |
+| `(7, 6)` | `64` | `59` | `58` |
+| `(8, 7)` | `85` | `79` | `79` |
+| `(9, 8)` | `109` | `102` | `104` |
+| `(11, 10)` | `166` | `157` | `157` |
+| `(13, 12)` | `235` | `224` | `224` (Start bei `224`, `1800 s`, nichts gefunden) |
+
+Die Bauart ist nicht bestmöglich: bei `(5, 4)` und `(7, 6)` fand der Löser je einen Block weniger. Ob das für
+größere `q` auch gilt, ist **offen**.
+
+### 14.6 Tabellenvergleich und Folgen
+
+- Scan: [`docs/PHASE7_VQ_SCAN.md`](PHASE7_VQ_SCAN.md). `76` Zellen kleiner als `ca-tools @ e673ab4` (Phase 6A: `56`),
+  davon `48` mit `v < q`. `20` Zellen hatte Phase 6A nicht erreicht.
+- Jede `v < q`-Zelle aus Phase 6A wird durch die Bauart unterboten. Betroffen in `results/general_tqv/` und im
+  Staging von PR `#24`: `CA_9766_3_21_18`, `CA_20086_4_13_10`, `CA_39715_4_15_12`, `CA_220946_5_13_10`.
+- Literatur zu dieser Bauart: **nicht geprüft**.
