@@ -61,3 +61,14 @@ Kandidaten, die nur einen Verifier bestehen oder ohne SHA-256-Hash und Verifikat
 7. Nach der Meldung: Link, Datum und Commit in `STATUS.md`. Bis zum Prüfbericht des Ziels keine weiteren Meldungen zur selben Bauart. Fehler sofort selbst korrigieren.
 8. Im Laufprotokoll zählt nur die Belegart. Wörter wie "heiß" oder "Near-Miss" sind kein Befund.
 
+## 5. Verbindliches `HANDOVER`-Format
+
+Jede Antwort endet mit einem kompakten `HANDOVER`-Codeblock (**max. 30 Zeilen, keine Adjektive**), der neben `branch`, `commit`, `target`, `live_record`, den letzten `3` Einträgen aus `docs/RUN_LOG.md` und `gate_status` verbindlich folgende Pflichtfelder enthält:
+
+- `files`: `<n neu> / <n geaendert, Pfade> / geschuetzte Pfade: leer?`
+- `deviations`: was vom Auftrag abwich oder nicht gemacht wurde, inkl. Budget (Erstlauf / Repro / gesamt); `"keine"` nur, wenn wirklich keine.
+- `unverified`: Aussagen, die auf Argument statt Rechnung beruhen (Beweisskizzen, Verallgemeinerungen über gerechnete Fälle hinaus), je mit Belegart.
+- `repro`: exakter Befehl + SHA-256 für das Hauptergebnis.
+- `decision_question`: je Option explizit Formel, Vorhersage, Tabellenwert.
+
+

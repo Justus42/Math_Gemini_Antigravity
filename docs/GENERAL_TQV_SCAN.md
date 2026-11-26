@@ -100,3 +100,33 @@
 | # | Zelle `(t, k, v)` | `q` | `N_pred == N_eff` (`tier`) | `C(k, t) * N_pred` | `est_ca_s` | `est_py_s` | Dateigröße (ca.) | Hinweis |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | --- |
 | 1 | `(5, 7, 5)` | `5` | `4.375` (`CITED`) | `91.875` | `0,01 s` | `0,08 s` | `0,06 MB` | reine `CITED`-Schranke ohne verifiziertes Array in `ca_frame.csv` (nicht strikt kleiner, daher nicht in Schritt 4) |
+
+---
+
+## Einreichungsform
+
+Rein deskriptive Auswertung von `submissions/README.md` und `table/README.md` in `chrispbsmolen/ca-tools` am Commit **`e673ab45758a3959710c662a34837f79f6add689`** (`e673ab4`, rein lesend via `gh api`, `2026-11-26`; keine Entscheidung getroffen):
+
+1. **Regelbasierte Schranken (`table/derived.csv`, `derived`-Zeilen in `table/ca_frame.csv`):**
+   - `table/derived.csv` und `table/ca_frame.csv` werden nicht von Hand editiert und nicht über Einreichungs-PRs ergänzt, sondern nach jedem Push auf `main` automatisch aus den gezählten Tabellenzeilen (`CITED` / `VERIFIED`) neu berechnet (`tools/derive_table.py` bzw. `tools/build_frame.py`, geprüft durch `tools/consistency.py`).
+   - **PR-Regel 7 (`submissions/README.md`):** Ein Pull Request fügt ausschließlich ein Verzeichnis `submissions/<slug>/` hinzu („Arrays and certificates only“); PRs, die Code, Tests, Workflows oder Dokumente ändern, werden ungemergt geschlossen. Änderungen an Regeln oder Werkzeugen nimmt ausschließlich der Maintainer vor (Meldung über Issue).
+   - **PR-Regel 2 & 3 (`submissions/README.md`):** Eine reine Formel, Beschreibung oder Beweisskizze wird nicht als Submission-Anspruch angenommen („Arrays, not assertions“). Zertifikate ohne explizites Array sind nur für Zertifikatstypen zulässig, für die `ca-tools` ein eigenes unabhängiges Prüfwerkzeug besitzt (`certificates.csv` für CPHFs via `tools/cphf/cphfcheck.c`; `constructions.csv` für die `9` fest implementierten Konstruktionen in `tools/construction_cert.py`: `powercz-1`, `powercz-2`, `fuse-1`, `derive-1`, `product-1`, `sms51-1`, `sms65-1`, `sm-xplication-1`, `product-ctj-1`). Andere Zertifikatstypen werden abgelehnt, bis ein entsprechendes Werkzeug existiert.
+   - Im Frame (`ca_frame.csv`) erzeugen nur drei bewiesene Regeln (`fuse`, `derive`, `add1`) `derived`-Zeilen (ohne `id`, `get = none`). Weitere veröffentlichte Regeln in `derived.csv` (Komposition, Chateauneuf–Kreher-Verdopplung, CMTW Thm. 3.4, `k`-äres Roux, Power CT, Direktprodukt, Ordered Design, Shokri–Moura) erscheinen nur als berechnete Lookup-Werte, nicht als gezählte Zeilen.
+   - Größen aus einer veröffentlichten Formel ohne vorliegendes Array gelangen nur durch den Maintainer als `CITED`-Zeile (Quellenklasse `S7`, z. B. per eigenem Maintainer-Skript wie `tools/add_sms_cited.py`) in `ca_table.csv`.
+
+2. **Verlangte Belege (Beweis, Code, Verifikations-Artefakte, Zenodo/DOI):**
+   - **Für Array-Einreichungen (`submissions/<slug>/` mit `claims.csv` oder `external.csv`):**
+     - `claims.csv` bzw. `external.csv` mit den Pflichtfeldern `source_detail` (Repo-URL mit Commit, DOI oder exakter Erzeugungsbefehl samt Software-Version), `construction` (`unknown` unzulässig), `builds_on` (IDs aus `table/references.csv` oder `new <URL/DOI/arXiv>`), `credit` (Klarnamen realer Personen + E-Mail + Affiliation im PR-Text oder per Mail an den Maintainer, Regel 5) und `notes`.
+     - `HOW.md` (Regel 1) mit den Pflichtabschnitten `Construction:`, `Built from:`, `Program:` (Link zum Code oder exakte Rekonstruktionsbefehle; bei noch unveröffentlichtem Paper vollständige Spezifikation + `program pending` in `notes`) sowie `AI tools used: yes/no`.
+     - Lizenzierung der eingereichten Arrays unter `CC BY 4.0` (Regel 4); keine zurückgezogenen oder Torres-Jimenez-Datenpaket-Arrays (Regel 6).
+     - **Verifikation:** ausschließlich durch die eigenen Werkzeuge von `ca-tools` (`ca_verify` auf dem PR-Runner mit `15 min` Budget pro Array / `300 min` pro PR; bei OOM und `C(k, t) * N <= 4e8` per `exact count`; für größere/externe Arrays nach Merge in Shards über `certificate-check.yml` mit Budget bis `20` Shards × `5 h` × `4` Kerne = `400` Core-Stunden, darüber `SCREENED`). Externe Beweise oder Modell-Aussagen ersetzen die Verifikation nicht.
+   - **Für `CITED`-Zeilen ohne Array (`S7`, `table/README.md` „Admissible sources“):** erforderlich ist eine datierbare, dauerhaft abrufbare Veröffentlichung mit stabilem Identifier — Peer-reviewed Paper, Preprint mit stabilem Identifier (z. B. arXiv-ID) oder Dissertation (DOI/arXiv-ID + Satz-/Tabellenangabe). **Selbstveröffentlichte Deposits (z. B. ein persönlicher Zenodo-Record) sind als `CITED`-Quelle ausdrücklich nicht zulässig**; Größen daraus werden ausschließlich als verifizierte Arrays über die Submission-Prüfung (`claims.csv` oder `external.csv`) aufgenommen.
+
+3. **Größenschwellen für `.gz`-Speicherung und externe Ablage (`EXTERNAL.csv` / Deposit):**
+   - **Einreichung im PR (`claims.csv`):** Einzeldatei **`<= 50 MiB`** unkomprimierter Klartext (GitHub-Web-Upload bis `25 MiB`, darüber via `git`), Summe aller Dateien einer Einreichung **`<= 200 MiB`** unkomprimierter Klartext. Einreicher liefern **immer unkomprimierten Klartext**; `check_submission.py` liest keine komprimierten Dateien.
+   - **`.gz`-Speicherung in `table/arrays/` (seit `2026-11-01`):** Akzeptierte Arrays mit **`> 1 MiB`** Klartext werden nach Merge automatisch gzip-komprimiert als `CA_N_t_k_v.txt.gz` (Header-Zeitstempel `0`) in `table/arrays/` abgelegt (`<= 1 MiB` bleibt `.txt`). Der `array_sha256` bleibt der SHA-256 des unkomprimierten kanonischen Klartexts.
+   - **Externe Führung in `table/EXTERNAL.csv` (`external.csv` + öffentliches Deposit auf `zenodo.org` oder `github.com`, ggf. `.zip::member`):**
+     - **Zwingend bei `> 50 MiB`** je Datei (oder `> 200 MiB` je Einreichung): Datei verbleibt im Deposit, `external.csv` nennt `location` und kanonischen `sha256`; nach Merge lädt `tools/external_array.py` die Datei herunter, prüft Hash und `ca_verify` (ggf. sharded bis `400` Core-Stunden) und verzeichnet sie in `table/EXTERNAL.csv` ohne lokale Kopie im `ca-tools`-Repo.
+     - **Seit `2026-11-13` zusätzlich ab `>= 1 MB` Klartext:** Wenn der Autor ein Array mit `>= 1 MB` ohnehin in einem öffentlichen Deposit führt, wird es ebenfalls über `EXTERNAL.csv` statt in `table/arrays/` verzeichnet.
+   - **Konstruktions-Zertifikate (`constructions.csv`):** Rekonstruierte Arrays `<= 50 MiB` werden in `table/arrays/` gespeichert (über `1 MiB` als `.gz`); rekonstruierte Arrays `> 50 MiB` werden nur als Zertifikat gespeichert.
+

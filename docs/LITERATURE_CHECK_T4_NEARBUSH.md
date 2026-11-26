@@ -167,9 +167,17 @@ Deterministische Prüfung ohne Suche (`timeout --kill-after=10s 60 python3 scrip
 
 ### 8.2 Weiter offen
 1. Systematische arXiv-Suche (2023–2026).
-2. Colbourn–Lanus (2018) im Volltext (Herkunft `7680` auf `(4, 11, 8)`).
+2. Colbourn–Lanus (2018) im Volltext (Herkunft `7680` auf `(4, 11, 8)` — **Vermerk: PDF wird vom Nutzer besorgt**).
 3. `tns-research`-Zenodo-Ablagen direkt (`v1.7`–`v1.9`).
 4. Existenz der Parabel-Packung für `q = 11, 13` (Empfehlung Drittprüfer: vollständiger SAT/CP-Löser statt Heuristik, damit auch ein Negativbefund als Beleg gilt).
+5. **Offene Literatur-Restliste zur allgemeinen Konstruktion `q^t + C(v, 2) * q^(t - 2)` (`k = q + 2`, beliebige Stärke `t` und `2 <= v <= q`, ergänzt `2026-11-26`):**
+   - Hartman (2005)
+   - Ji & Yin (2010)
+   - Colbourn (2004 / 2015)
+   - Hedayat–Sloane–Stufken (Bush-Arrays mit `q + 2` Spalten)
+   - Chateauneuf–Kreher (2002)
+   - Colbourn–Lanus (2018) *(Vermerk: PDF wird vom Nutzer besorgt)*
 
-Bis zum Abschluss der offenen Punkte gilt nach Regel 4 weiterhin die Wortwahl „kleiner als `ca-tools` am Commit `d739412`“.
+Bis zum Abschluss der offenen Punkte gilt nach Regel 4 weiterhin die Wortwahl „kleiner als `ca-tools` am Commit `<SHA>`“ (für `t = 4 NEAR_BUSH` @ `d739412`, für `general_tqv` @ `e673ab4`).
+
 
