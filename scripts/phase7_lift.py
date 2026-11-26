@@ -102,6 +102,10 @@ def main():
     ap.add_argument("--out")
     args = ap.parse_args()
     q = args.q
+    if not args.known and not args.reps:
+        sys.exit("need --reps FILE or --known")
+    if args.t is not None and not args.out:
+        sys.exit("--t needs --out FILE")
     v = args.v if args.v is not None and args.v != q else None
     if v is not None and not 2 <= v < q:
         sys.exit("need 2 <= v <= q")

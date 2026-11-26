@@ -21,6 +21,9 @@ sie nachbauen und nach den Repo-Regeln dual verifizieren, bevor etwas nach `resu
 - `M(R)`: je Vertreter eine Zeile mit den Spalten `c + al*d` für `al = 0, ..., q-1`, dann `a`, dann `b`.
 - `L_t(R)`: je Vertreter und je `(a_0, ..., a_{t-3})` die Zeile `(P(0), ..., P(q-1), a, b)` mit
   `P(x) = a_0 + ... + a_{t-3} x^(t-3) + c x^(t-2) + d x^(t-1)`. Das sind `|R| * q^(t-2)` Zeilen.
+- Konventionen: Die Nummern `0` und `1` stehen für die Körpernull und -eins (so in `GeneralGF`). Zeilen werden mit
+  Vielfachheit gezählt; ein Vertreter ist eine Koeffizientenvorgabe, verschiedene Vertreter können für `t > q`
+  dieselbe Zeile liefern.
 - Die Bauart aus Phase 6A ist `R = {(c, d, d, min(c,d))} ∪ {(c, d, c, d): c < d}` mit `|R| = q^2 + C(q,2)`.
   Gegenprobe: `phase7_lift.py --q 5 --known --t 5` liefert dieselbe Zeilenmenge wie
   `gen_general_tqv.py --t 5 --q 5 --v 5` (sortiert `sha256:49b6c01b…`).
@@ -411,6 +414,9 @@ tragen muss, liefert alle Paare mit diesem Symbol ohne Zusatz.
   Dokument und die drei Skripte): Glieder §2/§3 Aussage A, Aussage B, §11.1 Aussage A' ohne Befund; §14.2 und
   §14.3 ohne Befund; zwei Nebenfehler, beide behoben (Ungleichung in §14.1 ohne `max`; `phase7_lift.py` brach
   bei leerer Liste mit `IndexError` ab). Vermerk: [`docs/THIRD_MODEL_REVIEW_PHASE7.md`](THIRD_MODEL_REVIEW_PHASE7.md).
+  Ein zweiter Durchgang desselben Modells am korrigierten Stand (Wortlaut:
+  [`docs/openrouter/PHASE7_ARGUMENT_REVIEW_gpt-6.2-sol.md`](openrouter/PHASE7_ARGUMENT_REVIEW_gpt-6.2-sol.md)) urteilt für
+  alle Glieder „korrekt“ und hält die Beschreibung als Verfeinerung von CKRS (2010) Lemma 3.3 für sachgerecht.
   Belegart bleibt **Argument**, jetzt von zwei Modellen gelesen; kein formaler Beweis.
 - Randfälle **nachgezählt** (eigener Zähler): alle `q = 2..5`, alle `v`, alle `t = 2..q+2` (`50` Arrays) sowie
   `(q, v, t) = (7,6,8), (7,6,9), (7,5,8)`.
