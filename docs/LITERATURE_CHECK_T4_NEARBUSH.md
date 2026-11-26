@@ -178,6 +178,14 @@ Deterministische Prüfung ohne Suche (`timeout --kill-after=10s 60 python3 scrip
    - Chateauneuf–Kreher (2002)
    - Colbourn–Lanus (2018) *(Vermerk: PDF wird vom Nutzer besorgt)*
 
-Bis zum Abschluss der offenen Punkte gilt nach Regel 4 weiterhin die Wortwahl „kleiner als `ca-tools` am Commit `<SHA>`“ (für `t = 4 NEAR_BUSH` @ `d739412`, für `general_tqv` @ `e673ab4`).
+### 8.3 arXiv-Literatur-Nachtrag (Angabe von Claude, 26.11., 09:37)
+- arXiv-Sichtung `2023-01` bis `2026-11` über alphaXiv-Volltextindex, 5 Anfragen (covering arrays allgemein; OA + Zusatzspalte / Reed-Solomon; CPHF; endliche Körper / LFSR / Zyklotomie; MDS-Erweiterung), ca. 40 Treffer gesichtet.
+- Volltext neu gelesen: Sitjar, „New upper bounds for covering arrays of strengths 3 to 6“, v1.4 vom 13.11.2026 (Vergleich gegen `ca-tools @ b6fe439`).
+- Befund: Keine Arbeit enthält die Schranke `q^t + C(v,2)*q^(t-2)` oder eine OA-plus-Spalte-Bauart außer Bai (`polychrome-bai2026`).
+- Grenze: Index liefert Top-Treffer, keine Vollliste; Zenodo-only-Preprints nur teilweise erfasst.
+- `ca-tools` PR `#89` (`project-lattice-2026-11`): `CA(165; 3, 8, 5)`, keine Überschneidung mit den 56 Zellen.
+
+Bis zum Abschluss der offenen Punkte gilt nach Regel 4 weiterhin die Wortwahl „kleiner als `ca-tools` am Commit `<SHA>`“ (für `t = 4 NEAR_BUSH` @ `d739412`, für `general_tqv` und Phase 7 @ `e673ab4`).
+
 
 
