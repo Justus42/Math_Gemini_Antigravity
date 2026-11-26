@@ -96,14 +96,16 @@ Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprot
 
 ## Meldung nach außen
 
-### Zweite Einreichung: `jeserigk-ckrs-coset-2026-11` (37 Arrays) — Branch gepusht, Pull Request noch nicht geöffnet
+### Zweite Einreichung: `jeserigk-ckrs-coset-2026-11` (37 Arrays) — Pull Request `#91` offen
+
+- **Pull Request:** https://github.com/chrispbsmolen/ca-tools/pull/91, geöffnet von Justus am 26.11.2026 zwischen 22:53 und 23:03 MEZ (Angabe Justus). Über `git ls-remote` bestätigt (23:04 MEZ): `refs/pull/91/head` = `0acc8244…`, also genau der geprüfte Commit; `main` dort weiter `808945f`. Die PR-Seite und den Prüfbericht konnte der Prüfer nicht lesen (kein API-Zugriff, Seitenabruf abgelehnt). **Nachzutragen:** Im vorgeschlagenen PR-Text fehlten E-Mail-Adresse und Affiliation, die Regel 5 von `submissions/README.md` im PR-Text oder per Mail an den Maintainer verlangt (beides steht in `HOW.md`; Hinweis von Gemini, am Regeltext geprüft). Justus ergänzt die Zeile in der PR-Beschreibung.
 
 - **Freigabe:** Justus, 26.11.2026, 22:42 MEZ, im Prüfer-Chat: Einreichung freigegeben, Push eines Branches nach `Justus42/ca-tools` durch Claude erlaubt (hebt für diesen Schritt die Grenze „kein Push nach `Justus42/ca-tools`“ auf). Der Pull Request bei `chrispbsmolen/ca-tools` wird von Justus geöffnet; Claude hat dort keinen Zugriff.
 - **Branch:** `Justus42/ca-tools`, `submit/jeserigk-ckrs-coset-2026-11`, Head `0acc8244f4506f795cc14e4d3b2f9c2c0228f412`, gepusht 26.11.2026, ca. 22:52 MEZ. Autor des Commits: `Justus42` (GitHub-noreply-Adresse wie bei PR `#88`), Committer: Claude, mit `Co-Authored-By`.
 - **Basis:** `chrispbsmolen/ca-tools` `main` @ `808945fb…` (`808945f`, Stand 22:24 MEZ; um 22:52 MEZ unverändert, höchste PR-Nummer `90`). `main` des Forks (`083a093`) nicht angefasst, kein Force-Push.
 - **Inhalt:** ausschließlich `submissions/jeserigk-ckrs-coset-2026-11/` (`39` Dateien: `37` Arrays, `claims.csv`, `HOW.md`; `199.087.972 B`), byte-gleich zu `staging/jeserigk-ckrs-coset-2026-11/` auf `main @ e7ab2dd`; auf dem Fork nachgeprüft (`39/39` Blob-Hash und Größe gleich).
 - **Prüfung auf genau diesem Baum vor dem Push:** `tools/check_submission.py --constant-rows-minutes 0.05` `PASS` (`37/37` `verified`, `exceeds_table`, `0` Probleme, `Credit check: No flags`, `394 s`); `tools/consistency.py --check --pr --base 808945f` Komplettlauf `0 problems` (`264 s`).
-- **Offen:** Pull Request öffnen (Justus), Prüfbericht der GitHub Actions abwarten, PR-Nummer hier nachtragen. Bis zum Prüfbericht keine weitere Meldung zur selben Bauart (Regel 7).
+- **Offen:** Angaben nach Regel 5 in der PR-Beschreibung ergänzen (Justus), Prüfbericht der GitHub Actions abwarten und hier nachtragen. Bis zum Prüfbericht keine weitere Meldung zur selben Bauart (Regel 7).
 - Der folgende Absatz „Sperrstatus“ unter PR `#88` ist für dieses Paket durch die Freigabe überholt.
 
 ### Erste Einreichung: PR `#88`
