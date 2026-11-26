@@ -109,3 +109,29 @@ Damit sind die offenen Punkte 1 und 2 aus §4 erledigt (Komplettlauf von `consis
 | Ordner (`39` Dateien) | `199087132` | `189,8643 MiB <= 200 MiB` |
 
 Einschränkung: Die Korrekturen hat der Prüfer selbst geschrieben. Der geänderte Text ist danach von niemandem sonst gelesen worden; die Werkzeugläufe prüfen Form, Größen und Arrays, nicht den Inhalt des Textes.
+
+## 6. Nachtrag 2026-11-26, 22:21–22:35 MEZ: Gegenlesen durch Gemini, neuer Stand von `ca-tools` (Claude, Branch `claude/howmd-gemini-befunde`)
+
+**Gegenlesen.** Gemini hat die korrigierte `HOW.md` (Stand PR `#36`) gezielt gelesen: keine sachlichen Fehler, kein Neuheitsanspruch, acht Stellen, die ein Maintainer missverstehen könnte. Jede Stelle gegen das Repo geprüft, alle acht übernommen (nur `HOW.md`; `claims.csv` und die `37` Arrays unverändert):
+
+1. „reduces … to“ ersetzt durch „sufficient“; Notwendigkeit wird in `HOW.md` nicht behauptet (Aussage A und A' sind hinreichend).
+2. „`C(w, 2)` extra rows“ → „extra representatives, that is, extra rows of `M(R)`“.
+3. Weitere Läufe: Modus `hintfile` genannt; beim `q = 13`-Lauf die geteilten Kerne in den ersten etwa 15 Minuten (§10 des Phase-7-Dokuments).
+4. CKRS-Zeile unter „Built from“: Preprint-Nummerierung, „in our reading“.
+5. Ausgangs-Arrays: „each lies on a linear code different from `K_t`“.
+6. „Reviewer's records“ → „Records of the checking session, a separate AI session (Claude) on a second machine, not an external human reviewer“.
+7. „last row deleted“ → „one row deleted“ (zwei der vier Protokolle nennen die gelöschte Zeile nicht).
+8. Offener Punkt zur Nicht-Minimalität: auf `v < q` bezogen; Skript `phase7_solve_cpsat_vq.py` genannt und verlinkt.
+
+**Neuer Stand von `ca-tools`.** `main` steht seit 22:14 MEZ bei `4effb7a` (PR `#89` und `#90` gemergt, `CA(165; 3, 8, 5)` in der Tabelle). Kein Tabellenwert an unseren `37` Zellen hat sich geändert. `HOW.md` nennt jetzt zusätzlich diesen Commit. Die Angabe „smaller than ca-tools @ e673ab4“ in `claims.csv` bleibt richtig und ist nicht geändert; vor einer Einreichung ist der dann aktuelle Stand noch einmal zu prüfen.
+
+| Prüfung (Worktree `ca-tools @ 4effb7a`) | Ergebnis |
+| --- | --- |
+| Tabellenwert, eigenes `scripts/pruefer/tabelle.py` | `37/37` kleiner |
+| `tools/check_submission.py … --constant-rows-minutes 0.05` | `PASS`, `37/37` `verified` und `exceeds_table`, `0` Probleme, `Credit check: No flags`, Prüfzeit `590 s`, `rc = 0` |
+| `tools/consistency.py --check --pr --base 4effb7a` | Komplettlauf, `0 problems`, `rc = 0`, `389 s` |
+| Links | `24` verschiedene, alle am Commit `da59460` vorhanden; `da59460` liegt in `main` (PR `#36` normal gemergt) |
+| `HOW.md` | `13637` Bytes, SHA-256 `c6c475c6a2f1feb46387125b5e522489413fffd82991a8e8c2b53c7d9248b632` |
+| Ordner (`39` Dateien) | `199087972` Bytes (`189,8651 MiB <= 200 MiB`) |
+
+Abweichung: Ein erster Start beider Werkzeuge wurde nach etwa einer Minute abgebrochen, weil `HOW.md` noch um den Satz zum Commit `4effb7a` ergänzt wurde; gewertet ist der Lauf auf der endgültigen Datei. Während der Läufe ist `ca-tools` `main` noch einmal weitergegangen: seit 22:24 MEZ `808945f` (`CA(73; 3, 28, 3)` aus PR `#90` in der Tabelle; Werkzeuge und `ca_verify.c` unverändert). Gegen diesen Stand nur der Tabellenwert geprüft: `37/37` kleiner (eigenes `tabelle.py`); die beiden Werkzeuge liefen gegen `4effb7a`.
