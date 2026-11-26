@@ -16,10 +16,15 @@ See docs/PHASE7_T2_REDUCTION.md section 14 for the argument.
 
 Usage: phase7_reps_vq.py Q V OUT
 """
+import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gen_general_tqv import factor_prime_power  # noqa: E402
 
 
 def reps_vq(q, v):
+    factor_prime_power(q)  # raises ValueError unless q is a prime power
     assert 2 <= v <= q
     f = q - v
     w = max(0, q - 2 * f)

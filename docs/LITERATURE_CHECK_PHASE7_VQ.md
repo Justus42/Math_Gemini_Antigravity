@@ -1,6 +1,6 @@
 # Literaturprüfung zur Bauart `v <= q` aus Phase 7 (`docs/LITERATURE_CHECK_PHASE7_VQ.md`)
 
-- **Stand:** 2026-11-26, ca. 17:15 MEZ. **Autor:** Claude (Prüfer-Chat). Prüfvermerk nach `RULES.md` „Meldung nach außen“ 2c.
+- **Stand:** 2026-11-26, ca. 16:55 MEZ. **Autor:** Claude (Prüfer-Chat). Prüfvermerk nach `RULES.md` „Meldung nach außen“ 2c.
 - **Gegenstand:** `CAN(t, q+2, v) <= (q^2 + C(max(0, 2v - q), 2)) * q^(t-2)` ([`docs/PHASE7_T2_REDUCTION.md`](PHASE7_T2_REDUCTION.md) §14) und die Nebenklassen-Listen für `v = q` (§5–§10).
 - **Ergebnis in einem Satz:** In den gelesenen Quellen steht die Formel nicht; die nächste Vorarbeit (Bai 2026) hat für `v < q` eine schwächere Schranke derselben Familie, und der Rahmen „Vereinigung von Nebenklassen eines linearen Codes“ steht bereits bei Sitjar (2026). **Kein Neuheitsanspruch**; die Prüfung ist nicht vollständig (§5).
 

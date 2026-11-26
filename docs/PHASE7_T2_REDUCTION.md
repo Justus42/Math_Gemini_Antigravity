@@ -1,6 +1,6 @@
 # Phase 7: Rückführung auf Stärke 2, die Fälle `q = 5, 7, 8, 9` (`docs/PHASE7_T2_REDUCTION.md`)
 
-Stand: 2026-11-26, ca. 16:10 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11`, §10 zu den längeren Läufen `q = 11, 13`, §11 zu `v < q`, §12 Korrektur, §13 zweite Läufe, §14 geschlossene Bauart für `v < q` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
+Stand: 2026-11-26, ca. 17:20 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11`, §10 zu den längeren Läufen `q = 11, 13`, §11 zu `v < q`, §12 Korrektur, §13 zweite Läufe, §14 geschlossene Bauart für `v < q` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
 (Schritte 1 und 2 aus Geminis Phase-7-Plan). Vergleichsstand: `chrispbsmolen/ca-tools @ e673ab4`.
 
 **Rollenhinweis:** Diese Rechnung stammt vom Prüfer. Sie ist damit *nicht* fremdgeprüft. Antigravity soll
@@ -38,6 +38,19 @@ Argument, nach Anzahl `j` der gewählten Auswertungsspalten:
   Geraden kommt jedes Symbol in `a` vor. Das ist die Paarüberdeckung der Spalten `al = sigma` und `a` in `M(R)`.
 - `j = t - 2` plus `a` und `b`: zu jedem `(c, d)` und jeder Wertevorgabe auf `S` gibt es genau ein
   `(a_0, ..., a_{t-3})`. Nötig ist nur, dass jedes Paar in `(a, b)` vorkommt.
+
+Präzisierungen (nach Gegenlesen durch Gemini, 26.11.2026; am Argument ändert sich nichts):
+- Leere Fälle: `j = t` kommt nur für `t <= q` vor, `j = t - 1` nur für `t <= q + 1`; für `t = q + 2` bleibt allein
+  `j = t - 2` (alle `q` Auswertungsspalten plus `a` und `b`).
+- `P(x) = f_0(x) + la * prod_{s in S}(x - s)` ist als formales Polynom in `GF(q)[x]` gemeint, nicht reduziert modulo
+  `x^q - x`. Für `t = q + 1` ist `S = GF(q)` und das Produkt gleich `x^q - x`; es hat Grad `t - 1` und verschwindet
+  auf ganz `GF(q)`.
+- Richtung bei `j = t - 1`: Sei `f_0` der Interpolant vom Grad `<= t - 2` der Zielwerte auf `S`, `u` sein
+  Koeffizient bei `x^(t-2)`. Nach Voraussetzung gibt es einen Vertreter `(c, d, a, b)` mit `c + sigma*d = u` und dem
+  gewünschten `a` (bzw. `b`). Dann hat `f_0 + d * prod(x - s)` die obersten Koeffizienten `c` und `d`, und seine
+  unteren Koeffizienten legen die Zeile fest.
+- Bei `j = t - 2` ist `(a_0, ..., a_{t-3})` eindeutig: es interpoliert `y_x - c x^(t-2) - d x^(t-1)` auf den `t - 2`
+  Punkten von `S` (für `t = 2` das leere Tupel).
 
 **Aussage B (notwendig).** Für Primzahl `q` und `2 <= t <= q` gilt auch die Umkehrung, weil dann jedes
 `sigma` als Summe einer `(t-1)`-Menge auftritt.
@@ -240,6 +253,10 @@ Auswertungsspalten (`pi(z) = z` für `z < v`, sonst `0`); `a`, `b` unverändert.
 2. auf jeder Geraden `c + al*d = u` kommt jedes der `v` Symbole in `a` vor, ebenso in `b` (je `q * q * v`);
 3. jedes Paar `(a, b)` kommt vor (`v^2`).
 
+In Bedingung 2 läuft `u` über **alle** `q` Körperelemente, auch wenn die Zielwerte nur in `{0..v-1}` liegen: der
+Koeffizient `u` des Interpolanten ist ein beliebiges Körperelement. (Verlangt wird das für alle `u`; ob jedes `u`
+bei gegebenem `t` und `v` wirklich gebraucht wird, gehört zur ungeprüften Notwendigkeit.)
+
 Das ist Stärke 2 von `M(R)` mit gemischten Alphabeten. Argument wie in §3: die Zielwerte liegen in `{0..v-1}`,
 dort ist `pi` die Identität; bei `t` Auswertungsspalten braucht man das Polynom selbst (1.), bei `t - 1` plus `a`
 oder `b` eine ganze Gerade von `(c, d)` (2.), bei `t - 2` plus `a` und `b` nur das Paar (3.). Für `v = q` ist es
@@ -356,8 +373,16 @@ Für `v = q` ist das die Zahl aus Phase 6A (`w = q`). Für `v < q` ist `C(2v - q
 - `w + n <= d < w + 2n` („nur `b`“): `b = w + (d - w - n)` auf der ganzen Geraden, `a = c` für `c < v`, sonst `0`.
 - `d >= w + 2n` (nur für `v < q/2`): `(0, 0)`.
 
-Erzeugen: `python3 scripts/phase7_reps_vq.py Q V AUSGABE` (reines Python, keine Suche).
-Für `v = q` ist die Liste gleich der Phase-6A-Liste (geprüft für `q = 7`).
+Die Geraden passen: für `2v >= q` ist `w = 2v - q`, `n = q - v`, also `w + 2n = q`; für `2v < q` ist `w = 0`,
+`n = v`, also `w + 2n = 2v < q`. Alle Beschriftungen liegen in `{0..v-1}`. Zwei Vertreter am selben Punkt
+entstehen nur für `c < d < w`; sie sind verschieden, weil `c != d`.
+
+Erzeugen: `python3 scripts/phase7_reps_vq.py Q V AUSGABE` (reines Python, keine Suche; bricht ab, wenn `Q` keine
+Primzahlpotenz ist).
+Für `v = q` ist die Liste als **Menge** gleich der Phase-6A-Liste (geprüft für `q = 7`), aber anders sortiert.
+Die daraus gebauten Arrays haben deshalb dieselben Zeilen in anderer Reihenfolge und **einen anderen SHA-256**
+als die Dateien aus `scripts/gen_general_tqv.py`. Für `v = q` bleiben `gen_general_tqv.py` bzw. die Löserlisten
+maßgeblich; `phase7_reps_vq.py` ist für `v < q` gedacht.
 
 ### 14.3 Argument (Bedingungen 1–3 aus §11.1)
 
@@ -376,6 +401,11 @@ tragen muss, liefert alle Paare mit diesem Symbol ohne Zusatz.
 ### 14.4 Belegart
 
 - Aussage 14.1 allgemein: **Argument** (14.3 zusammen mit Aussage A' aus §11.1, die selbst Argument ist).
+  Gegengelesen von Gemini am 26.11.2026 (§2, §3, §11.1, §14 und die drei Skripte; Urteil: Kette vollständig, Text
+  und Code stimmen überein, fünf Präzisierungen, alle eingepflegt). Gemini hat das Projekt mitgeplant; das ist
+  **kein unbeteiligtes Modell** im Sinn von `RULES.md` 2d. Eine Prüfung durch ein drittes Modell steht aus.
+- Randfälle **nachgezählt** (eigener Zähler): alle `q = 2..5`, alle `v`, alle `t = 2..q+2` (`50` Arrays) sowie
+  `(q, v, t) = (7,6,8), (7,6,9), (7,5,8)`.
 - Bedingungen 1–3 **nachgezählt** (`phase7_lift.py --check-m`): alle `99` Paare `(q, v)` mit
   `q in {4, 5, 7, 8, 9, 11, 13, 16, 17, 19}`, `2 <= v <= q`.
 - Arrays **nachgezählt**: die 20 Zellen der Tabelle unten und `(6, 13, 10)`, außerdem `(t, 7, 4)` für
