@@ -53,7 +53,7 @@ Colbourn, Kéri, Rivas Soriano, Schlage-Puchta: Satz 3.2 (eine Zusatzspalte, `q^
 
 ### 2.4 Wer hält die Tabellenwerte an den 48 Zellen mit `v < q`?
 
-Etiketten in `ca_frame.csv @ e673ab4` (Zeile mit dem kleinsten `N` bei `k' >= k`): 16-mal „orthogonal array fuse …“ (teils mit Nachoptimierung), 11-mal Nachoptimierung oder Simulated Annealing auf Tabellen-Arrays, 9-mal zwei­zeilige CPHF (Bai), 6-mal Bais `poly2` mit Pencil-Überdeckung, 2-mal „extended OA (Colbourn) special fuse“, je 1-mal Sonstiges. Keine dieser Zeilen nennt eine Bauart mit zwei freien Spalten oder die Zahl `C(2v - q, 2)`. Alle 76 Scan-Zellen haben in der Tabelle größere Werte ([`docs/PHASE7_VQ_SCAN.md`](PHASE7_VQ_SCAN.md)).
+Etiketten in `ca_frame.csv @ e673ab4` (Zeile mit dem kleinsten `N` bei `k' >= k`): 17-mal „orthogonal array fuse …“ (teils mit Nachoptimierung), 12-mal Nachoptimierung oder Simulated Annealing auf Tabellen-Arrays, 9-mal zweizeilige CPHF, 7-mal Bais `poly2` mit Pencil-Überdeckung (teils ausgedünnt), 2-mal „extended OA (Colbourn) special fuse“, 1-mal elliptisches Zwei-Block-Array. Keine dieser Zeilen nennt eine Bauart mit zwei freien Spalten oder die Zahl `C(2v - q, 2)`. Alle 76 Scan-Zellen haben in der Tabelle größere Werte ([`docs/PHASE7_VQ_SCAN.md`](PHASE7_VQ_SCAN.md)).
 
 ### 2.5 Weitere Treffer der Suche (anderer Parameterbereich)
 
