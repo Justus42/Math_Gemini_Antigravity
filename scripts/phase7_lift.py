@@ -16,6 +16,11 @@ Usage:
   phase7_lift.py --q 5 --reps data/phase7/R_q5_m34.txt --check-m
   phase7_lift.py --q 5 --reps data/phase7/R_q5_m34.txt --t 5 --out CA_4250_5_7_5.txt
   phase7_lift.py --q 5 --known --check-m          # the m = q^2 + C(q,2) solution of Phase 6A
+  phase7_lift.py --q 11 --v 10 --reps data/phase7/R_q11_v10_m158.txt --check-m --t 3 --out CA_1738_3_13_10.txt
+
+Reduced alphabet (--v V with V < q, docs/PHASE7_T2_REDUCTION.md section 11): a and b take the symbols
+0..V-1, the evaluation columns are mapped by pi (pi(z) = z for z < V, else 0) after the lift, and M(R)
+is checked as a mixed-level table (q symbols in the evaluation columns, V symbols in a and b).
 """
 import argparse
 import itertools
@@ -26,7 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen_general_tqv import GeneralGF  # noqa: E402
 
 
-def read_reps(path, q):
+def read_reps(path, q, v=None):
     reps = []
     with open(path) as fh:
         for line in fh:
@@ -34,16 +39,19 @@ def read_reps(path, q):
             if not line:
                 continue
             c, d, a, b = (int(z) for z in line.split())
-            assert all(0 <= z < q for z in (c, d, a, b)), line
+            assert all(0 <= z < q for z in (c, d)), line
+            assert all(0 <= z < (q if v is None else v) for z in (a, b)), line
             reps.append((c, d, a, b))
     assert len(set(reps)) == len(reps), "duplicate representative"
     return reps
 
 
-def known_reps(q):
-    """Phase 6A solution: (c, d, d, min(c, d)) for all c, d; (c, d, c, d) for c < d."""
-    return [(c, d, d, min(c, d)) for c in range(q) for d in range(q)] + \
-           [(c, d, c, d) for d in range(q) for c in range(d)]
+def known_reps(q, v=None):
+    """Phase 6A solution: (c, d, pi(d), pi(min(c, d))) for all c, d; (c, d, c, d) for c < d < v."""
+    v = q if v is None else v
+    pi = [z if z < v else 0 for z in range(q)]
+    return [(c, d, pi[d], pi[min(c, d)]) for c in range(q) for d in range(q)] + \
+           [(c, d, c, d) for d in range(v) for c in range(d)]
 
 
 def m_rows(reps, q, field):
@@ -51,16 +59,18 @@ def m_rows(reps, q, field):
     return [[add[c][mul[al][d]] for al in range(q)] + [a, b] for (c, d, a, b) in reps]
 
 
-def uncovered_pairs(rows, q):
+def uncovered_pairs(rows, q, v=None):
     k = len(rows[0])
+    size = [q] * (k - 2) + [q if v is None else v] * 2
     miss = 0
     for i, j in itertools.combinations(range(k), 2):
-        miss += q * q - len({(r[i], r[j]) for r in rows})
+        miss += size[i] * size[j] - len({(r[i], r[j]) for r in rows})
     return miss
 
 
-def lift(reps, q, t, field):
+def lift(reps, q, t, field, v=None):
     add, mul = field.add, field.mul
+    pi = list(range(q)) if v is None else [z if z < v else 0 for z in range(q)]
     pw = [[1] * q]
     for _ in range(1, t):
         pw.append([mul[pw[-1][x]][x] for x in range(q)])
@@ -72,13 +82,14 @@ def lift(reps, q, t, field):
                 s = 0
                 for e in range(t):
                     s = add[s][mul[co[e]][pw[e][x]]]
-                row.append(s)
+                row.append(pi[s])
             yield row + [a, b]
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--q", type=int, required=True)
+    ap.add_argument("--v", type=int, help="alphabet size, 2 <= v <= q (default: q)")
     ap.add_argument("--reps")
     ap.add_argument("--known", action="store_true")
     ap.add_argument("--check-m", action="store_true")
@@ -86,11 +97,14 @@ def main():
     ap.add_argument("--out")
     args = ap.parse_args()
     q = args.q
+    v = args.v if args.v is not None and args.v != q else None
+    if v is not None and not 2 <= v < q:
+        sys.exit("need 2 <= v <= q")
     field = GeneralGF(q)
-    reps = known_reps(q) if args.known else read_reps(args.reps, q)
-    print(f"q={q} m={len(reps)}")
+    reps = known_reps(q, v) if args.known else read_reps(args.reps, q, v)
+    print(f"q={q} m={len(reps)}" + ("" if v is None else f" v={v}"))
     if args.check_m:
-        unc = uncovered_pairs(m_rows(reps, q, field), q)
+        unc = uncovered_pairs(m_rows(reps, q, field), q, v)
         print(f"M(R): {len(reps)} rows, {q + 2} columns, uncovered pairs = {unc}")
         if unc:
             sys.exit(1)
@@ -99,10 +113,10 @@ def main():
             sys.exit("need 2 <= t <= q + 2")
         n = 0
         with open(args.out, "w") as fh:
-            for row in lift(reps, q, args.t, field):
+            for row in lift(reps, q, args.t, field, v):
                 fh.write(" ".join(map(str, row)) + "\n")
                 n += 1
-        print(f"wrote CA candidate N={n} t={args.t} k={q + 2} v={q} -> {args.out} (verify separately)")
+        print(f"wrote CA candidate N={n} t={args.t} k={q + 2} v={q if v is None else v} -> {args.out} (verify separately)")
 
 
 if __name__ == "__main__":
