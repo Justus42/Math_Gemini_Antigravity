@@ -236,5 +236,25 @@ Für den expliziten `--self-test` bei `v = 11` und `v = 13` wurde ausschließlic
 
 *(Außenmeldungs-Sperre bleibt aktiv: keine Einreichung bei `chrispbsmolen/ca-tools` und kein Push nach `Justus42/ca-tools` vor Abschluss der Prüfung zu PR `#88` und vollständiger Checkliste `RULES.md` Punkt 2.)*
 
+---
 
+## 11. Phase 5E (Schritt 0) — Abschluss von Option A (`k = q + 3`, ungerade `q in {7, 9, 11, 13}`)
 
+Gemäß der Tabellen-Vorab-Prüfregel (`RULES.md` §4) wurde vor jedem Bau- oder Suchauftrag die Arithmetik des `CA(7203)`-Aufbaus (zwei `AG(2, q)`-Färbungen mit geteilten `t = 3`-Blöcken `N_E = CAN(3, q + 2, q)`) für ungerade `q in {7, 9, 11, 13}` gegen den Live-Stand `chrispbsmolen/ca-tools/table/ca_frame.csv @ 0b79e3f` (`2026-11-26T05:32:10Z`) gegengeprüft:
+
+- **Disjunkte Blocking-Sets (`c = (q - 1)/2`, `r = (q + 1)/2` Restfarben):**
+  $$N_{\text{disj}} \ge q^4 + r N_E + r\left(q^3 - \frac{r N_E}{q}\right).$$
+- **Zwei-Pencil-Variante (`c = (q + 1)/2` Farben mit Ursprung `(0, 0)`, `r_p = (q - 1)/2` Restfarben, `(q - 1) q^2` Vertex-Reparaturen):** wegen der Symmetrie `r(q - r) = r_p(q - r_p)` gilt algebraisch exakt
+  $$N_{\text{pencil}} \ge q^4 + (q - 1) q^2 + r_p N_E + r_p\left(q^3 - \frac{r_p N_E}{q}\right) = N_{\text{disj}} - q^2.$$
+
+| `q` | Zielzelle `(4, q + 3, q)` | `N_E = CAN(3, q + 2, q)` (`ca_frame @ 0b79e3f`) | `ca_frame @ 0b79e3f` (`k = q + 3`) | Untergrenze Zwei-Pencil (`N_disj − q^2`) | Untergrenze Disjoint (`r = (q+1)/2`) | Delta Zwei-Pencil vs. Tabelle |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `7` | `(4, 10, 7)` | `472` (`CITED`) | `4459` (`CITED`, `k = 15`) | `>= 4533,14` (`4534`) | `>= 4582,14` (`4583`) | **`+74` (`+1,66 %`)** |
+| `9` | `(4, 12, 9)` | `1089` (`VERIFIED`) | `12393` (`CITED`, `k = 17`) | `>= 12545` | `>= 12626` | **`+152` (`+1,23 %`)** |
+| `11` | `(4, 14, 11)` | `1991` (`VERIFIED`) | `27544` (`CITED`, `k = 14`) | `>= 27936` | `>= 28057` | **`+392` (`+1,42 %`)** |
+| `13` | `(4, 16, 13)` | `3289` (`VERIFIED`) | `54925` (`CITED`, `k = 21`) | `>= 54397` | `>= 54566` | `−528` (`−0,96 %`) |
+
+**Befund & Abschluss von Option A (Belegart: rechnerische Vorab-Prüfung gegen `ca_frame.csv @ 0b79e3f`, abgeschlossen):**
+- Für `q = 7, 9, 11` liegen bereits beide optimistischen Untergrenzen (`>= 4533/4534`, `>= 12545`, `>= 27936`) strikt **über** `table/ca_frame.csv @ 0b79e3f`.
+- Für `q = 13` verbleibt selbst unter vollständig kollisionsfreier Packung und vor jeglichen `(col_{q+1}, col_{q+2})`-Paar-Reparaturzeilen ein Abstand von höchstens **`0,96 %`** (`−528` Zeilen; `−0,65 %` bzw. `−359` Zeilen bei disjunkten Blocking-Sets).
+- **Option A (`k = q + 3` auf ungeraden `q`) wird hiermit ohne Bau- oder Such-Sprint abgeschlossen.**

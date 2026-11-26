@@ -270,3 +270,39 @@ timeout --kill-after=10s 240 $BIN --input <S>/start_q13_r1.txt   --v 13 --thread
 *(Für `CA_42722` lagen aus PR `#17` §6 bereits 2 `--target-n 42722`-Läufe mit `timeout 280` vor [`217,21 / 214,93 s`]; mit den beiden Läufen hier [`timeout 240`, `202,58 / 202,18 s`] liegen `4` byte-identische `--target-n 42722`-Läufe vor.)*
 
 
+
+---
+
+# Anhang — Phase 5E: Deterministische Bauart `N(q) = q^4 + (q(q - 1)/2) q^2` (`CA_9477`, `CA_21296`, `CA_41743`)
+
+- **Datum (UTC):** `2026-11-26`
+- **Branch:** `exp/phase5e-minus3q2-structure` (Basis `origin/main` @ `431328b`, nach Merge von PR `#20`)
+- **Generator:** [`scripts/gen_t4_minus3q2.py`](../../scripts/gen_t4_minus3q2.py) (Pure Python `std`-only, suchfrei, kein Solver, `--variant transitive`)
+- **Live-Abgleich `chrispbsmolen/ca-tools`:** Commit `0b79e3fb71af992bc1d5638ade0c1f972a43a12d` (`0b79e3f`, `2026-11-26T05:32:10Z`)
+- **Hardware:** `Intel(R) Xeon(R) CPU @ 2.30GHz`; `python3` `3.12.16`; `verifiers/ca_verify` lokal aus `verifiers/ca_verify.c` kompiliert.
+- **Bestehende Dateien:** Alle `10` bestehenden Array-Dateien in `results/t4_nearbush/` blieben vollständig unverändert (`CA_9558`, `CA_21900`, `CA_42722` verbleiben als historische Referenzen).
+
+## 8. Dual-Verifikation, 2×-Determinismus & Negativkontrollen (Phase 5E)
+
+| Datei (`results/t4_nearbush/`) | Zelle `(4, k, v)` | `ca-tools @ 0b79e3f` | Delta | Erstlauf / Repro (`cmp -s`) | SHA-256 | `ca_verify` (direkt auf Datei) | `verify_independent.py` (direkt auf Datei) | Negativkontrolle (`N - 1` Zeilen, Scratch) |
+| --- | :---: | :---: | :---: | :---: | --- | :---: | :---: | --- |
+| `CA_9477_4_11_9.txt` | `(4, 11, 9)` | `9801` (`VER`) | **`−324`** | `0,048 s` / `0,048 s` (`PASS`) | `eeea94544ed885cf2110733f4cd74b998c87d944dae8af535718bc267d431b30` | `rc=0`, `0,01 s` (`330 × 6561`) | `rc=0`, `0,9140 s` (`2.165.130` Interakt.) | `ca rc=1`, `py rc=1` (`120` fehlende Tupel in `120/330` 4-Mengen) |
+| `CA_21296_4_13_11.txt` | `(4, 13, 11)` | `21901` (`VER`) | **`−605`** | `0,123 s` / `0,115 s` (`PASS`) | `cb9a4c5e431f1eb1652f70b0626bd981eaaa0c529f1267fad346847f703401a3` | `rc=0`, `0,03 s` (`715 × 14641`) | `rc=0`, `4,2043 s` (`10.468.315` Interakt.) | `ca rc=1`, `py rc=1` (`220` fehlende Tupel in `220/715` 4-Mengen) |
+| `CA_41743_4_15_13.txt` | `(4, 15, 13)` | `42757` (`VER`) | **`−1014`** | `0,247 s` / `0,250 s` (`PASS`) | `e8435eb665b9c627982239675bc93f21334ac40d4e8d781cb3592e768233d9a5` | `rc=0`, `0,10 s` (`1365 × 28561`) | `rc=0`, `17,9351 s` (`38.985.765` Interakt.) | `ca rc=1`, `py rc=1` (`364` fehlende Tupel in `364/1365` 4-Mengen) |
+
+*(Zusätzliche Gate-0-Positivkontrollen im Scratch-Verzeichnis mit demselben Generator: `q = 7` → `CA(3430; 4, 9, 7)` [`d29b5155…`, `0,014/0,015 s`, `DUAL_PASS`, Negativkontrolle `56` Lücken]; `q = 8` → `CA(5888; 4, 10, 8)` [`2e4bf66b…`, `0,033/0,031 s`, `DUAL_PASS`].)*
+
+### 8.1 Reproduktions- und Prüfkommandos
+
+```bash
+timeout --kill-after=10s 60  python3 scripts/gen_t4_minus3q2.py --q 9  --variant transitive --out results/t4_nearbush/CA_9477_4_11_9.txt
+timeout --kill-after=10s 120 python3 scripts/gen_t4_minus3q2.py --q 11 --variant transitive --out results/t4_nearbush/CA_21296_4_13_11.txt
+timeout --kill-after=10s 120 python3 scripts/gen_t4_minus3q2.py --q 13 --variant transitive --out results/t4_nearbush/CA_41743_4_15_13.txt
+
+timeout --kill-after=10s 30  ./verifiers/ca_verify results/t4_nearbush/CA_9477_4_11_9.txt 4 9
+timeout --kill-after=10s 60  python3 verifiers/verify_independent.py results/t4_nearbush/CA_9477_4_11_9.txt 4 9 -n 9477 -k 11
+timeout --kill-after=10s 30  ./verifiers/ca_verify results/t4_nearbush/CA_21296_4_13_11.txt 4 11
+timeout --kill-after=10s 90  python3 verifiers/verify_independent.py results/t4_nearbush/CA_21296_4_13_11.txt 4 11 -n 21296 -k 13
+timeout --kill-after=10s 45  ./verifiers/ca_verify results/t4_nearbush/CA_41743_4_15_13.txt 4 13
+timeout --kill-after=10s 180 python3 verifiers/verify_independent.py results/t4_nearbush/CA_41743_4_15_13.txt 4 13 -n 41743 -k 15
+```
