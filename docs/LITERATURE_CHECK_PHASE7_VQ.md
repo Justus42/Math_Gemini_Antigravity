@@ -84,6 +84,20 @@ Folgen für die Einordnung:
 
 Berichtigungen zum Opus-Bericht: Dort steht die Liste als `(c, d, c, c)`; gemeint ist der Leitkoeffizient, also `(c, d, d, d)` (die andere Lesart verletzt `M(R)`, nachgezählt). Der Wert `1925` bei `(3, 13, 11)` stammt aus der Löserliste mit `175` statt `176` Blöcken (`q = 11`, PR `#27`), nicht aus PR `#25`.
 
+### 2.7 Nachtrag 26.11.2026, ca. 20:40 MEZ: Zenodo-Seiten und Einordnung
+
+Abgerufen (Seiteninhalt über das Abrufwerkzeug, je eine Seite):
+
+| Record | Angabe auf der Seite |
+| --- | --- |
+| Bai, Preprint `10.5281/zenodo.23787051` | Version `1.0`, veröffentlicht 30.10.2026; eine PDF-Datei; Formel für `(q+1)/2 <= v <= q` wie in §2.1; für `v < q` nur die Teilfusion, keine weitere geschlossene Formel |
+| Bai, Ablage `10.5281/zenodo.23787055` | Version `1.0`, 30.10.2026 (erstellt und geändert am selben Tag); `records.csv` mit 301 Einträgen gegen die Tabelle vom 29.10.2026 |
+| Sitjar, Archiv `10.5281/zenodo.24205260` | Version `v1.10`, 13.11.2026; Beschreibung nennt Nebenklassen-Vereinigungen und Nachoptimierung, keine Bauart für `q + 2` Spalten |
+
+Einschränkung: Das Feld „Versions“ war auf allen drei abgerufenen Seiten leer (vermutlich nachgeladen). Dass es **keine** neueren Fassungen gibt, ist damit nicht belegt; belegt ist nur, was die Seite selbst als Version nennt. Nicht abgerufen: Bais Begleit-Preprint `10.5281/zenodo.23787053`, die Dateien der Ablagen, Sitjars Preprint-Record.
+
+Einordnung als Verfeinerung von CKRS Lemma 3.3: vorgeschlagen im Opus-Bericht, hier nachgezählt (§2.6), von GPT-6.2 Sol auf Grundlage von §2.6 als sachgerecht beurteilt ([`docs/openrouter/PHASE7_ARGUMENT_REVIEW_gpt-6.2-sol.md`](openrouter/PHASE7_ARGUMENT_REVIEW_gpt-6.2-sol.md), Glied 6). Justus hat der Beschreibung am 26.11.2026 zugestimmt. Zu beachten: „Verfeinerung“ meint dasselbe Bauprinzip mit anderer Beschriftung und Verteilung der Zusatzblöcke, **nicht** eine Teilmenge des CKRS-Arrays; bei `q = 2` gibt es keine Ersparnis.
+
 ## 3. Ergebnis und Wortwahl
 
 - Die Formel aus §14 wurde in keiner gelesenen Quelle gefunden. Belegart: **Suche in den oben genannten Quellen, nicht vollständig**.
@@ -101,6 +115,6 @@ Berichtigungen zum Opus-Bericht: Dort steht die Liste als `(c, d, c, c)`; gemein
 
 ## 5. Grenzen und Restliste
 
-Nicht gelesen: die Zeitschriftenfassung von CKRS (2010); Colbourn (2004, 2008, 2014, 2015); Hartman (2005); Ji–Yin (2010); Li–Ji–Yin (2009) und Ji–Li–Yin (2012) (eine davon ist die Quelle der `4375`, §2.6); Hedayat–Sloane–Stufken; Chateauneuf–Kreher (2002); Colbourn–Lanus (2018); Nayeri–Colbourn–Konjevod (2013). Nicht geprüft: neuere Fassungen von Bais Preprint und Ablage auf Zenodo (die gelesene Fassung trägt das Datum 30.10.2026 und nennt §8 als neu in dieser Fassung), Sitjars Archiv ab Version 1.10, `aadwyer/CA_Database`, offene Issues von `ca-tools`. Der alphaXiv-Index liefert Top-Treffer, keine Vollliste.
+Nicht gelesen: die Zeitschriftenfassung von CKRS (2010); Colbourn (2004, 2008, 2014, 2015); Hartman (2005); Ji–Yin (2010); Li–Ji–Yin (2009) und Ji–Li–Yin (2012) (eine davon ist die Quelle der `4375`, §2.6); Hedayat–Sloane–Stufken; Chateauneuf–Kreher (2002); Colbourn–Lanus (2018); Nayeri–Colbourn–Konjevod (2013). Nur eingeschränkt geprüft (§2.7): ob es neuere Fassungen von Bais Preprint und Ablage und von Sitjars Archiv nach `v1.10` gibt; nicht geprüft: Bais Begleit-Preprint, `aadwyer/CA_Database`, offene Issues von `ca-tools`. Der alphaXiv-Index liefert Top-Treffer, keine Vollliste.
 
 Die ältere Restliste in [`docs/LITERATURE_CHECK_T4_NEARBUSH.md`](LITERATURE_CHECK_T4_NEARBUSH.md) §8.2 gilt weiter.

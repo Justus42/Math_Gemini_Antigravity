@@ -39,10 +39,15 @@ def read_reps(path, q, v=None):
             if not line:
                 continue
             c, d, a, b = (int(z) for z in line.split())
-            assert all(0 <= z < q for z in (c, d)), line
-            assert all(0 <= z < (q if v is None else v) for z in (a, b)), line
+            if not all(0 <= z < q for z in (c, d)):
+                sys.exit(f"representative out of range (c, d must be in 0..{q - 1}): {line}")
+            if not all(0 <= z < (q if v is None else v) for z in (a, b)):
+                sys.exit(f"representative out of range (a, b): {line}")
             reps.append((c, d, a, b))
-    assert len(set(reps)) == len(reps), "duplicate representative"
+    if len(set(reps)) != len(reps):
+        sys.exit("duplicate representative")
+    if not reps:
+        sys.exit("empty representative list")
     return reps
 
 
@@ -97,6 +102,10 @@ def main():
     ap.add_argument("--out")
     args = ap.parse_args()
     q = args.q
+    if not args.known and not args.reps:
+        sys.exit("need --reps FILE or --known")
+    if args.t is not None and not args.out:
+        sys.exit("--t needs --out FILE")
     v = args.v if args.v is not None and args.v != q else None
     if v is not None and not 2 <= v < q:
         sys.exit("need 2 <= v <= q")

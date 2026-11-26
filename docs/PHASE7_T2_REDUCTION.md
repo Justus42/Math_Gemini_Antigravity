@@ -1,6 +1,6 @@
 # Phase 7: Rückführung auf Stärke 2, die Fälle `q = 5, 7, 8, 9` (`docs/PHASE7_T2_REDUCTION.md`)
 
-Stand: 2026-11-26, ca. 17:20 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11`, §10 zu den längeren Läufen `q = 11, 13`, §11 zu `v < q`, §12 Korrektur, §13 zweite Läufe, §14 geschlossene Bauart für `v < q` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
+Stand: 2026-11-26, ca. 20:30 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11`, §10 zu den längeren Läufen `q = 11, 13`, §11 zu `v < q`, §12 Korrektur, §13 zweite Läufe, §14 geschlossene Bauart für `v < q` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
 (Schritte 1 und 2 aus Geminis Phase-7-Plan). Vergleichsstand: `chrispbsmolen/ca-tools @ e673ab4`.
 
 **Rollenhinweis:** Diese Rechnung stammt vom Prüfer. Sie ist damit *nicht* fremdgeprüft. Antigravity soll
@@ -21,6 +21,9 @@ sie nachbauen und nach den Repo-Regeln dual verifizieren, bevor etwas nach `resu
 - `M(R)`: je Vertreter eine Zeile mit den Spalten `c + al*d` für `al = 0, ..., q-1`, dann `a`, dann `b`.
 - `L_t(R)`: je Vertreter und je `(a_0, ..., a_{t-3})` die Zeile `(P(0), ..., P(q-1), a, b)` mit
   `P(x) = a_0 + ... + a_{t-3} x^(t-3) + c x^(t-2) + d x^(t-1)`. Das sind `|R| * q^(t-2)` Zeilen.
+- Konventionen: Die Nummern `0` und `1` stehen für die Körpernull und -eins (so in `GeneralGF`). Zeilen werden mit
+  Vielfachheit gezählt; ein Vertreter ist eine Koeffizientenvorgabe, verschiedene Vertreter können für `t > q`
+  dieselbe Zeile liefern.
 - Die Bauart aus Phase 6A ist `R = {(c, d, d, min(c,d))} ∪ {(c, d, c, d): c < d}` mit `|R| = q^2 + C(q,2)`.
   Gegenprobe: `phase7_lift.py --q 5 --known --t 5` liefert dieselbe Zeilenmenge wie
   `gen_general_tqv.py --t 5 --q 5 --v 5` (sortiert `sha256:49b6c01b…`).
@@ -254,7 +257,7 @@ Auswertungsspalten (`pi(z) = z` für `z < v`, sonst `0`); `a`, `b` unverändert.
 3. jedes Paar `(a, b)` kommt vor (`v^2`).
 
 In Bedingung 2 läuft `u` über **alle** `q` Körperelemente, auch wenn die Zielwerte nur in `{0..v-1}` liegen: der
-Koeffizient `u` des Interpolanten ist ein beliebiges Körperelement. (Verlangt wird das für alle `u`; ob jedes `u`
+Koeffizient `u` des Interpolanten liegt im Körper und ist nicht auf `{0..v-1}` beschränkt. (Verlangt wird das für alle `u`; ob jedes `u`
 bei gegebenem `t` und `v` wirklich gebraucht wird, gehört zur ungeprüften Notwendigkeit.)
 
 Das ist Stärke 2 von `M(R)` mit gemischten Alphabeten. Argument wie in §3: die Zielwerte liegen in `{0..v-1}`,
@@ -361,7 +364,10 @@ sind damit überholt.
 
 Für jede Primzahlpotenz `q`, jedes `2 <= v <= q` und `2 <= t <= q + 2` gibt es ein
 `CA((q^2 + C(w, 2)) * q^(t-2); t, q+2, v)` mit `w = max(0, 2v - q)`.
-Für `v = q` ist das die Zahl aus Phase 6A (`w = q`). Für `v < q` ist `C(2v - q, 2) < C(v, 2)`.
+Für `v = q` ist das die Zahl aus Phase 6A (`w = q`). Für `v < q` ist `C(max(0, 2v - q), 2) < C(v, 2)`.
+Zeilen werden mit Vielfachheit gezählt: für `t > q` können verschiedene Vertreter und Koeffizienten dieselbe Zeile
+liefern (Beispiel `q = v = 2`, `t = 4`); die angegebene Zeilenzahl ist dann eine obere Schranke für die Zahl
+verschiedener Zeilen. Vergleiche wie `c < d` betreffen nur die Nummern `0..q-1`, nicht die Körperstruktur.
 
 ### 14.2 Liste
 
@@ -403,7 +409,15 @@ tragen muss, liefert alle Paare mit diesem Symbol ohne Zusatz.
 - Aussage 14.1 allgemein: **Argument** (14.3 zusammen mit Aussage A' aus §11.1, die selbst Argument ist).
   Gegengelesen von Gemini am 26.11.2026 (§2, §3, §11.1, §14 und die drei Skripte; Urteil: Kette vollständig, Text
   und Code stimmen überein, fünf Präzisierungen, alle eingepflegt). Gemini hat das Projekt mitgeplant; das ist
-  **kein unbeteiligtes Modell** im Sinn von `RULES.md` 2d. Eine Prüfung durch ein drittes Modell steht aus.
+  **kein unbeteiligtes Modell** im Sinn von `RULES.md` 2d.
+  Geprüft von einem unbeteiligten Modell (GPT-6.2 Sol über OpenRouter, 26.11.2026, 20:13 MEZ; gelesen: dieses
+  Dokument und die drei Skripte): Glieder §2/§3 Aussage A, Aussage B, §11.1 Aussage A' ohne Befund; §14.2 und
+  §14.3 ohne Befund; zwei Nebenfehler, beide behoben (Ungleichung in §14.1 ohne `max`; `phase7_lift.py` brach
+  bei leerer Liste mit `IndexError` ab). Vermerk: [`docs/THIRD_MODEL_REVIEW_PHASE7.md`](THIRD_MODEL_REVIEW_PHASE7.md).
+  Ein zweiter Durchgang desselben Modells am korrigierten Stand (Wortlaut:
+  [`docs/openrouter/PHASE7_ARGUMENT_REVIEW_gpt-6.2-sol.md`](openrouter/PHASE7_ARGUMENT_REVIEW_gpt-6.2-sol.md)) urteilt für
+  alle Glieder „korrekt“ und hält die Beschreibung als Verfeinerung von CKRS (2010) Lemma 3.3 für sachgerecht.
+  Belegart bleibt **Argument**, jetzt von zwei Modellen gelesen; kein formaler Beweis.
 - Randfälle **nachgezählt** (eigener Zähler): alle `q = 2..5`, alle `v`, alle `t = 2..q+2` (`50` Arrays) sowie
   `(q, v, t) = (7,6,8), (7,6,9), (7,5,8)`.
 - Bedingungen 1–3 **nachgezählt** (`phase7_lift.py --check-m`): alle `99` Paare `(q, v)` mit
