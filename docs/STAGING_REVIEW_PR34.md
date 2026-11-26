@@ -47,3 +47,20 @@ Ohne Befund: Zahlen in `HOW.md` (Klassen `23`/`14`, `q`-Mengen, `m`-Werte, Forme
 ## 4. Nach der Korrektur zu wiederholen
 
 `claims.csv` ändert sich (Befunde 1 und 3). Danach `tools/check_submission.py` und `tools/consistency.py` erneut laufen lassen und die Links am neuen Commit prüfen. Die Arrays selbst müssen nicht neu geprüft werden, solange sie byte-gleich bleiben.
+
+## 5. Nachtrag: Korrektur und zweiter Werkzeuglauf (2026-11-26, 21:20–21:30 MEZ)
+
+Die Befunde 1–8 sind auf dem Branch `claude/stage-phase7-37-korrektur` behoben (Einzelheiten: [`docs/STAGING_PHASE7_37.md`](STAGING_PHASE7_37.md) §5). Auf der korrigierten Fassung (`HOW.md` `ca5e79b7…`, `claims.csv` `91aac891…`, Ordner `199.087.132 B`):
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| `37` Array-Dateien gegen `aca3fc6` | kein Diff |
+| `claims.csv` feldweise gegen `aca3fc6` | nur Commit in den Links und der Zusatz in `source_detail` (`31` Zeilen) |
+| Links | `23` verschiedene, alle am Commit `da59460` vorhanden |
+| `tools/check_submission.py … --constant-rows-minutes 0.05` | `PASS`, `37/37` `verified` und `exceeds_table`, `0` Probleme, `Credit check: No flags`, Prüfzeit `370 s`, `rc = 0` |
+| `tools/consistency.py --check --pr --base e673ab4` | Komplettlauf, `0 problems`, `rc = 0`, `255 s` |
+| `ca-tools` | `main` um 21:22 MEZ unverändert `e673ab4`, höchste PR-Nummer `90` |
+
+Berichtigung: Die Prüfung in §1 endete gegen 21:17 MEZ; in der ersten Fassung dieses Vermerks und im Eintrag `P7-PRUEFUNG-PR34` des Laufprotokolls stand 21:25.
+
+Einschränkung: Die Korrekturen stammen vom Prüfer. Der geänderte Text von `HOW.md` ist danach von niemandem sonst gelesen worden. Die Werkzeuge prüfen Form, Größen und Arrays, nicht den Inhalt. Die Links zeigen auf einen Commit dieses Branches; sie bleiben nur gültig, wenn der PR normal gemergt wird (kein Squash).

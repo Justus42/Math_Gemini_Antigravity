@@ -91,3 +91,21 @@ Alle `37` SHA-256 stimmen überein zwischen Datei auf Platte, kanonischem Hash a
 2. Allgemeines Beweisargument in `docs/PHASE7_T2_REDUCTION.md` ist noch nicht von einem unbeteiligten Drittmodell geprüft (`RULES.md` 2d; alle `37` Einzelarrays sind erschöpfend dual-verifiziert).
 3. Literaturprüfung ist nicht vollständig (`docs/LITERATURE_CHECK_PHASE7_VQ.md` §5; u. a. ältere Literatur, neuere Zenodo-Fassungen von Bai/Sitjar, Primärquelle für `(5, 7, 5) = 4375`).
 4. Keine Außenwirkung ausgelöst; externe Einreichung erfordert ausdrückliche Freigabe durch Justus.
+
+## 5. Nachtrag 2026-11-26, ab 21:20 MEZ: Korrektur nach Prüfung (Claude, Prüfer-Chat, Branch `claude/stage-phase7-37-korrektur`)
+
+Anlass: [`docs/STAGING_REVIEW_PR34.md`](STAGING_REVIEW_PR34.md) §3 (acht Befunde am Text). Die `37` Array-Dateien sind unverändert (kein Diff gegen `aca3fc6`). Geändert sind nur `HOW.md` und `claims.csv`:
+
+- Alle Blob-Links und die Angabe „pinned at commit“ zeigen jetzt auf `da59460e9b5c1d1ac235a5f484454352bca77cbe` (enthält `main @ 5afa407` und den Prüfvermerk); `23` verschiedene Links, alle an diesem Commit vorhanden.
+- `claims.csv`: in `31` Zeilen nennt `source_detail` zusätzlich `scripts/gen_general_tqv.py` (wird von `phase7_lift.py` und `phase7_reps_vq.py` importiert). Alle anderen Felder bis auf den Commit in den Links unverändert (feldweise verglichen).
+- `HOW.md`: CKRS-Zitat mit Vorbehalt (Nummerierung des Preprints, Lesart dieses Repos, „Verfeinerung“ erklärt); Löser-Modus je Liste und die Läufe ohne Verbesserung; beide Ausgangs-Arrays der Analyse; Verifikation mit genauer Angabe der Negativkontrollen und Links auf die Nachträge; „Open items“ auf dem Stand nach PR `#33`; neuer offener Punkt, dass die geschlossene Liste nicht überall kleinstmöglich ist (`(5, 4)`, `(7, 6)`).
+
+Damit sind die offenen Punkte 1 und 2 aus §4 erledigt (Komplettlauf von `consistency.py`: siehe Prüfvermerk; Drittmodell: [`docs/THIRD_MODEL_REVIEW_PHASE7.md`](THIRD_MODEL_REVIEW_PHASE7.md)). Die Größen- und Hash-Angaben zu `HOW.md`, `claims.csv` und zum Gesamtordner in §1 gelten für den Stand `aca3fc6`; neu:
+
+| Datei | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `HOW.md` | `12797` | `ca5e79b778d8d677002a74afcf0adf90e8b77803d836f2764f9215e562fcc1f2` |
+| `claims.csv` | `44587` | `91aac891a1001ce247c8590334cb0934556689039166103ae9f66199fe06c9b1` |
+| Ordner (`39` Dateien) | `199087132` | `189,8643 MiB <= 200 MiB` |
+
+Einschränkung: Die Korrekturen hat der Prüfer selbst geschrieben. Der geänderte Text ist danach von niemandem sonst gelesen worden; die Werkzeugläufe prüfen Form, Größen und Arrays, nicht den Inhalt des Textes.
