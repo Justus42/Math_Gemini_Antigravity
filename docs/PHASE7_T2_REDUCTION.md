@@ -1,6 +1,6 @@
 # Phase 7: Rückführung auf Stärke 2, die Fälle `q = 5, 7, 8, 9` (`docs/PHASE7_T2_REDUCTION.md`)
 
-Stand: 2026-11-26, ca. 11:35 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
+Stand: 2026-11-26, ca. 13:50 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11`, §10 zu den längeren Läufen `q = 11, 13`, §11 zu `v < q`, §12 Korrektur nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
 (Schritte 1 und 2 aus Geminis Phase-7-Plan). Vergleichsstand: `chrispbsmolen/ca-tools @ e673ab4`.
 
 **Rollenhinweis:** Diese Rechnung stammt vom Prüfer. Sie ist damit *nicht* fremdgeprüft. Antigravity soll
@@ -188,3 +188,131 @@ findet, ist **offen**.
 schwere Gerade mit `(q+1)/2` Schichten. Ohne weitere Kniffe ergibt das wieder `q^2 + C(q,2)`. Die Ersparnis
 entsteht, weil an einigen Punkten der schweren Geraden eine Schicht fehlt und die betroffenen Symbole auf den
 anderen Geraden mitgedeckt werden.
+
+## 10. Nachtrag: längere Läufe `q = 11, 13` (2026-11-26, 12:00–13:01 MEZ, neuer Prüfer-Chat)
+
+Auftrag (b) aus der Übergabe. Vorab festgelegt: Positivkontrolle `fixknown`, je `q` **ein** Lauf `hint` mit
+Limit `1800 s`, Abbruch am Zeitlimit. Skript unverändert (`scripts/phase7_solve_cpsat.py`, OR-Tools `9.15.6755`,
+2 Worker, `seed = 1`), Maschine mit 2 Kernen.
+
+| `q` | Positivkontrolle | Lauf (`hint`, `1800 s`) | Belegart |
+| --- | --- | --- | --- |
+| `11` | `176` erfüllt das Modell (`0,1 s`) | **`m = 175`** (`data/phase7/R_q11_m175.txt`) | bestes gefundenes `m`, Optimalität offen |
+| `13` | `247` erfüllt das Modell (`0,2 s`) | `247` (keine Verbesserung) | **Suche erfolglos im Zeitlimit (`1800 s`); nichts ausgeschlossen** |
+
+Der `q = 13`-Lauf teilte sich in den ersten etwa 15 Minuten die zwei Kerne mit Prüfläufen niedriger Priorität
+(`nice 19`); das Budget ist deshalb etwas kleiner als nominell.
+
+| Zelle | `ca-tools @ e673ab4` | Phase 6A (176 Blöcke) | 175 Blöcke | SHA-256 |
+| --- | --- | --- | --- | --- |
+| `(3, 13, 11)` | `1991` | `1936` | **`1925`** | `94bfc0a39c0fd523ef5474125487cdb7577148bce1097bf064b2a1b405cff764` |
+| `(4, 13, 11)` | `21901` | `21296` | **`21175`** | `ca50246466727ad7c7980fc344c3a237da6b4f3ac465d6e736af61c09ac526a1` |
+| `(5, 13, 11)` | `240911` | `234256` | **`232925`** | `5377d6557520b44d651499f47cb31dff443aecacb6b2906cf0be4076d3b94cea` |
+| `(6, 13, 11)` | `2650021` | `2576816` | **`2562175`** | `aef0efb9869c21c2c883dd63222a93719cad5a3c6a179178e294d5696b6aefc1` |
+
+Prüfung (alle vier Arrays): neuer eigener Zähler `PASS`; `verifiers/ca_verify.c` `PASS`; `t = 3, 4, 5` zusätzlich
+`verify_independent.py` `PASS` und byte-gleich in einem eigenen Nachbau (eigene Körperarithmetik, Horner-Schema);
+`t = 6` nur mit dem Repo-Skript erzeugt. Negativkontrollen: Liste ohne letzten Vertreter → `M(R)` 65 Lücken,
+`t = 3` 2431 fehlende Tupel; Arrays `t = 3, 4, 5` ohne letzte Zeile → `FAIL` (221 / 520 / 897).
+`CA_2562175_6_13_11.txt` hat `66,4 MiB` (über der `50 MiB`-Grenze von `ca-tools` für Dateien im PR).
+
+```
+python3 scripts/phase7_lift.py --q 11 --reps data/phase7/R_q11_m175.txt --check-m --t 4 --out CA_21175_4_13_11.txt
+```
+
+**Folge für Paket 1 (PR `#24`):** Auch die `q = 11`-Arrays im Staging (`1936`, `21296`, `234256`) sind nicht mehr
+das Beste aus dieser Bauart. Überblick gesparte Blöcke bei `v = q`: `q = 5`: 1, `7`: 2, `8`: 1, `9`: 1, `11`: 1
+(`1800 s`; `300 s` fand nichts), `13`: 0 (`1800 s`). Die Laufzeit bestimmt das Ergebnis mit; ein Trend in `q` ist
+daraus nicht ablesbar.
+
+## 11. Verkleinerte Alphabete `v < q` (2026-11-26, 13:01–13:48 MEZ)
+
+Auftrag (c) aus der Übergabe.
+
+### 11.1 Modell
+
+Vertreter `(c, d, a, b)` mit `c, d` in `GF(q)` und `a, b` in `{0, ..., v-1}`. `M(R)` wie in §2, jetzt gemischt:
+`q` Symbole in den Spalten `c + al*d`, `v` Symbole in `a` und `b`. `L_t^pi(R)`: Lift wie in §2, danach `pi` auf den
+Auswertungsspalten (`pi(z) = z` für `z < v`, sonst `0`); `a`, `b` unverändert.
+
+**Aussage A' (hinreichend).** `L_t^pi(R)` ist ein `CA(|R| * q^(t-2); t, q+2, v)` für `2 <= t <= q + 2`, wenn gilt:
+1. jeder Punkt `(c, d)` kommt in `R` vor (`q^2` Bedingungen);
+2. auf jeder Geraden `c + al*d = u` kommt jedes der `v` Symbole in `a` vor, ebenso in `b` (je `q * q * v`);
+3. jedes Paar `(a, b)` kommt vor (`v^2`).
+
+Das ist Stärke 2 von `M(R)` mit gemischten Alphabeten. Argument wie in §3: die Zielwerte liegen in `{0..v-1}`,
+dort ist `pi` die Identität; bei `t` Auswertungsspalten braucht man das Polynom selbst (1.), bei `t - 1` plus `a`
+oder `b` eine ganze Gerade von `(c, d)` (2.), bei `t - 2` plus `a` und `b` nur das Paar (3.). Für `v = q` ist es
+das Modell aus §5. Untere Schranke im Modell: `|R| >= q^2` wegen 1.
+
+Belegart: **Argument**; **nachgezählt** für alle Listen in der Tabelle unten (`t` wie angegeben). Ob die
+Bedingungen auch notwendig sind, ist nicht geprüft.
+
+Skripte: `scripts/phase7_solve_cpsat_vq.py` (neu), `scripts/phase7_lift.py --v V` (erweitert; die Hashes für
+`v = q` sind unverändert, geprüft an `0fb696c8…` und `3c84f9ab…`).
+
+### 11.2 Läufe
+
+Vorab festgelegt: Positivkontrolle = Phase-6A-Liste mit `q^2 + C(v,2)` Vertretern; je `(q, v)` ein Lauf `hint`;
+Limits `120 / 180 / 300 / 300 / 300 / 600 s`, zusammen `30` Minuten; Abbruch am Zeitlimit.
+
+| `q` | `v` | Phase 6A `q^2 + C(v,2)` | Positivkontrolle | Limit | gefunden | Ersparnis | nachgezählt |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `5` | `3` | `28` | erfüllt | `120 s` | **`25`** (`= q^2`, im Modell bestmöglich) | `3` | `t = 3, 4, 5` |
+| `5` | `4` | `31` | erfüllt | `180 s` | **`27`** | `4` | `t = 3, 4, 5` |
+| `7` | `6` | `64` | erfüllt | `300 s` | **`58`** | `6` | `t = 3, 4, 5` |
+| `8` | `7` | `85` | erfüllt | `300 s` | **`79`** | `6` | `t = 3, 4` |
+| `9` | `8` | `109` | erfüllt | `300 s` | **`104`** | `5` | `t = 3, 4` |
+| `11` | `10` | `166` | erfüllt | `600 s` | **`158`** | `8` | `t = 3, 4, 5, 6` |
+
+Belegart überall: bestes gefundenes `m`, Optimalität offen (Ausnahme `(5, 3)`: `25 = q^2` ist die untere Schranke
+des Modells). Der Löser lieferte keine brauchbare eigene Schranke. Nachgezählt heißt: eigener Zähler und
+`verifiers/ca_verify.c` `PASS`; Negativkontrolle (Liste ohne letzten Vertreter, `t = 3`) je `FAIL`.
+Listen: `data/phase7/R_q<q>_v<v>_m<m>.txt`.
+
+Die Arrays zu `q <= 9` sind nicht kleiner als die Tabelle (es fehlen je nach Zelle `5` bis `29` weitere Blöcke).
+
+### 11.3 `q = 11`, `v = 10`: vier Zellen
+
+| Zelle | `ca-tools @ e673ab4` | Phase 6A (166 Blöcke) | 158 Blöcke | SHA-256 |
+| --- | --- | --- | --- | --- |
+| `(3, 13, 10)` | `1760` | `1826` (nicht kleiner) | **`1738`** | `33c9a4987fa7d080452d81cd129423bbd66355a7325fc14f743a0c79352567c7` |
+| `(4, 13, 10)` | `20383` | `20086` | **`19118`** | `1a961a744d45a19c9c1a1ee0c0401a9baaf05ab96c395c4643eb8e5816cd6cc0` |
+| `(5, 13, 10)` | `224844` | `220946` | **`210298`** | `89a8ec851c49d3a3804eb37ed3e1dea8d8300102c3f17e8d2f421fc5d9c4d793` |
+| `(6, 13, 10)` | `2483623` | `2430406` | **`2313278`** | `c21c9f71e1c28597d083a08bc37ca21ac0f44cf663b439414cb6173129a9d59b` |
+
+`(3, 13, 10)` ist eine Zelle, die Phase 6A nicht erreicht hatte. Prüfung (alle vier): eigener Zähler `PASS`,
+`verifiers/ca_verify.c` `PASS`, byte-gleich im eigenen Nachbau; `t = 3, 4, 5` zusätzlich `verify_independent.py`
+`PASS`. Negativkontrollen: Arrays ohne letzte Zeile → `FAIL` (116 / 203 / 6 / 1 fehlende Tupel); Liste ohne
+letzten Vertreter → `M(R)` 65 Lücken. `CA_2313278_6_13_10.txt` hat `57,4 MiB` (über `50 MiB`).
+
+```
+python3 scripts/phase7_lift.py --q 11 --v 10 --reps data/phase7/R_q11_v10_m158.txt --check-m --t 3 --out CA_1738_3_13_10.txt
+sha256sum CA_1738_3_13_10.txt   # 33c9a4987fa7d080452d81cd129423bbd66355a7325fc14f743a0c79352567c7
+```
+
+### 11.4 Einordnung
+
+- Für `v < q` ist die Konstante `C(v,2)` aus Phase 6A deutlich weiter vom Besten entfernt als für `v = q`
+  (Ersparnis `3` bis `8` Blöcke gegen `0` bis `2`).
+- Einfacher Grund, als **Argument** (ein Fall nachgezählt: `q = 7, v = 4`, `m = 49`, `t = 3, 4`): Auf den Geraden
+  `d = s`, `s < v`, setze `(a, b) = (s, s)`; dann sind 1. und 2. erfüllt, und die `q - v` übrigen Geraden `d >= v`
+  sind frei beschriftbar. Sie können die `v(v-1)` gemischten Paare tragen. Also `|R| = q^2`, sobald
+  `q(q - v) >= v(v - 1)`. Für `v` nahe `q` reicht das nicht; die Löserlisten nutzen dort mehr als diesen Kniff.
+  Keine Bauregel für `v = q - 1` abgeleitet.
+- Weitere `(q, v)` mit Phase-6A-Treffern laut `docs/GENERAL_TQV_SCAN.md`: `(13, 12)`, `(16, 14)`, `(16, 15)`,
+  `(17, 14..16)`, `(19, 18)`, `(23, 20..22)`, `(25, 20)`, `(25, 21)`, `(25, 24)`. **Nicht gerechnet.** Modellgröße
+  `q^2 v^2`: `24336` Variablen bei `(13, 12)`, ab `q = 16` über `50000`.
+- Literatur zu `v < q` in dieser Bauart: **nicht geprüft**.
+
+## 12. Korrektur zur Zahl der Prüfprogramme
+
+`verifiers/ca_verify.c` und `ca_verify.c` aus `ca-tools @ e673ab4` sind dieselbe Datei
+(SHA-256 `689441c99288ef94ec6b2209cd61d88e00f567dd7290f8b260a562d056ab54d1`). Wo oben beide getrennt genannt
+sind (§3 „vier Programme“, §5, §8, §9), zählen sie als **ein** Programm. Unabhängig sind: dieses C-Programm,
+`verify_independent.py`, der jeweilige eigene Zähler.
+
+Nachprüfung der elf Arrays aus §5, §8, §9 im neuen Chat (neuer Zähler, neuer Nachbau): alle elf SHA-256 byte-gleich
+aus Repo-Skript und Nachbau; alle elf `PASS` (Zähler, `ca_verify.c`); Negativkontrollen (letzte bzw. mittlere
+Zeile entfernt) alle `FAIL`; alle elf kleiner als `ca-tools @ e673ab4`. Das ist weiter eine Prüfung durch den
+Prüfer selbst, **keine Fremdprüfung**.
