@@ -83,3 +83,37 @@ timeout --kill-after=10s 30 ./verifiers/ca_verify results/general_tqv/CA_85293_5
 timeout --kill-after=10s 30 ./verifiers/ca_verify results/general_tqv/CA_39715_4_15_12.txt 4 12 && timeout --kill-after=10s 90 python3 verifiers/verify_independent.py results/general_tqv/CA_39715_4_15_12.txt 4 12 -n 39715 -k 15
 timeout --kill-after=10s 30 ./verifiers/ca_verify results/general_tqv/CA_376832_6_10_8.txt 6 8 && timeout --kill-after=10s 90 python3 verifiers/verify_independent.py results/general_tqv/CA_376832_6_10_8.txt 6 8 -n 376832 -k 10
 ```
+
+---
+
+## 4. Phase 6B-1 — Mittlere Zellen (`<= 10 MB`, `est_py_s <= 180 s`, `2026-11-26`)
+
+- **Branch:** `exp/phase6b1-general-tqv-medium` (Basis `origin/main` @ `9062018`, nach Merge von PR `#22` @ `fff093c`)
+- **Tabellen-Referenz (`chrispbsmolen/ca-tools`):** Live-Abgleich via `gh api` am `2026-11-26` unverändert auf Commit `e673ab45758a3959710c662a34837f79f6add689` (`e673ab4`, `2026-11-26T06:17:26Z`).
+- **Auswahl gegen alle drei Kriterien (`N_pred < N_eff`, `<= 10 MB`, `est_py_s <= 180 s`):** genau `3` Zellen aus [`docs/GENERAL_TQV_SCAN.md`](../../docs/GENERAL_TQV_SCAN.md): `#18 (5, 13, 10)` (`5,48 MB`, `est_py_s = 88,91 s`), `#19 (5, 13, 11)` (`6,07 MB`, `est_py_s = 94,26 s`) und `#21 (4, 19, 17)` (`5,37 MB`, `est_py_s = 148,8 s`). (`#20 (6, 11, 9)` ausgeschlossen wegen `16,11 MB > 10 MB`; `#22 (4, 21, 18)` und `#23 (4, 21, 19)` ausgeschlossen wegen `est_py_s = 347,1 s` bzw. `359,2 s > 180 s`.)
+- **Gate 0 vor Batch-Start (`timeout --kill-after=10s 30`):** `scripts/gen_general_tqv.py --t 5 --q 7 --v 7` in Scratch (`0,056 s`) gegen `results/general_tqv/CA_24010_5_9_7.txt` (`13f1c8da1aaa37d1c4235285d581d05cc6d6d667884e7a7c13d099feddb79ce6`): `cmp -s` **PASS** (byte-identisch).
+- **Laufzeit- & Budget-Ausweis (`600 s` Zielbudget, strikt von klein nach groß):**
+  - **Erstlauf-Summe Generierung (`2` Zellen):** `1,941 s` Wall-Clock (`0,890 s + 1,051 s`; Generator-intern `1,201 s`)
+  - **Reproduktions-Summe Generierung (2. Lauf, `cmp -s` `2/2` PASS):** `1,866 s` Wall-Clock (`0,876 s + 0,990 s`; Generator-intern `1,143 s`)
+  - **Dual-Verifikation Summe:** `ca_verify` `10,593 s` (`2/2` `rc=0`), `verify_independent.py` `280,124 s` (`2/2` `rc=0`)
+  - **Negativkontrollen Summe (`N - 1` Zeilen in Scratch):** `ca_verify` `9,048 s` (`2/2` `rc=1`), `verify_independent.py` `281,101 s` (`2/2` `rc=1`)
+  - **Aktive Pipeline-Summe (`#18` + `#19`):** `586,706 s` (`243,624 s + 343,082 s <= 600 s`)
+  - **Brutto-Wall-Clock (Start `#18` bis Ende `#19`, inkl. `47,691 s` Leerlauf zwischen Shell-Aufrufen):** `634,397 s`
+  - **Abweichungen (transparent protokolliert):** (1) Die Negativkontrolle mit `verifiers/verify_independent.py` (READ-ONLY) prüft alle `1.287` Spaltenteilmengen ohne Abbruch nach dem ersten fehlenden Tupel und benötigte `116,416 s` bzw. `164,685 s`, weshalb `timeout --kill-after=10s 240` statt `60` verwendet wurde. (2) Vor Zelle `#21 (4, 19, 17)` wurde sauber gestoppt, da das Restbudget aus `600 s` für eine weitere volle Pipeline (~`350–450 s`) nicht mehr ausreichte; `(4, 19, 17)` verbleibt als Phase 6B-2.
+  - **Status der 2 neuen Dateien:** **lokal deterministisch 2× byte-identisch, `DUAL_PASS` und Negativkontrolle `FAIL`** (Drittprüfung auf zweiter Maschine steht noch aus; Vergleiche streng als *„kleiner als `ca-tools` am Commit `e673ab4`“*).
+
+| # | Datei (`results/general_tqv/`) | Zelle `(t, k, v)` | `q` | `ca-tools @ e673ab4` | Delta | Erstlauf / Repro (`cmp -s`) | Größe | `ca_verify` (`t=60s`) | `verify_independent.py` (`t=240s`) | Negativkontrolle (`N - 1` Zeilen, `ca t=30s`, `py t=240s`) | SHA-256 |
+| :---: | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | --- | --- |
+| 13 | `CA_220946_5_13_10.txt` | `(5, 13, 10)` | `11` | `224.844` (`VERIFIED`) | **`−3.898`** | `0,890 s` / `0,876 s` (`PASS`) | `5,48 MiB` (`5.744.596 B`) | `rc=0`, `4,102 s` | `rc=0`, `117,550 s` | `ca rc=1` (`3,790 s`), `py rc=1` (`116,416 s`, `missing 68/128700000 interactions across 68/1287 column sets`) | `882f13369eb1bab475c8c812e031657144cde700880b38a1d8d0c5b0a3075fd0` |
+| 14 | `CA_234256_5_13_11.txt` | `(5, 13, 11)` | `11` | `240.911` (`VERIFIED`) | **`−6.655`** | `1,051 s` / `0,990 s` (`PASS`) | `6,06 MiB` (`6.354.194 B`) | `rc=0`, `6,491 s` | `rc=0`, `162,574 s` | `ca rc=1` (`5,258 s`), `py rc=1` (`164,685 s`, `missing 495/207272637 interactions across 495/1287 column sets`) | `c525abfa2835d7f483eb0cc575e82723190c883e2b60936fb599cfa99e222c71` |
+
+### Reproduktions- und Prüfkommandos (Phase 6B-1)
+
+```bash
+timeout --kill-after=10s 60 python3 scripts/gen_general_tqv.py --t 5 --q 11 --v 10 --out results/general_tqv/CA_220946_5_13_10.txt
+timeout --kill-after=10s 60 python3 scripts/gen_general_tqv.py --t 5 --q 11 --v 11 --out results/general_tqv/CA_234256_5_13_11.txt
+
+timeout --kill-after=10s 60 ./verifiers/ca_verify results/general_tqv/CA_220946_5_13_10.txt 5 10 && timeout --kill-after=10s 240 python3 verifiers/verify_independent.py results/general_tqv/CA_220946_5_13_10.txt 5 10 -n 220946 -k 13
+timeout --kill-after=10s 60 ./verifiers/ca_verify results/general_tqv/CA_234256_5_13_11.txt 5 11 && timeout --kill-after=10s 240 python3 verifiers/verify_independent.py results/general_tqv/CA_234256_5_13_11.txt 5 11 -n 234256 -k 13
+```
+
