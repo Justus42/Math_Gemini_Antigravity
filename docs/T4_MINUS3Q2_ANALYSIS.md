@@ -20,10 +20,10 @@
   - **X. Bai (Preprint vom `30.10.2026`, `doi:10.5281/zenodo.23787051`, `polychrome-bai2026`; Daten `doi:10.5281/zenodo.23787055`, `deposit-bai2026`):** `poly2`-Rahmen zur Erweiterung des Bush-`OA(q^4)` um eine Zusatzspalte `col_{q+1}` über `AG(2, q)`-Färbungen mit Pencil-Cover (`Kor. 5.3`: `N = q^4 + ((q^2 - 1)/2) q^2` für ungerades `q`; `Prop. 5.4`: `N = q^4 + (q^2/2) q^2` für gerades `q`).
 - **Beitrag in Phase 5E:**
   1. Suchfreie Sezierung der in Phase 5B-2C per `t4_postop` gefundenen Arrays `CA(3430; 4, 9, 7)` und `CA(9558; 4, 11, 9)`.
-  2. Extraktion des zugrundeliegenden algebraischen Mechanismus (*Horizontallinien-Vervollständigung `d = const` mit entkoppeltem `col_∞`* in Zusatz-`OA(q^2)`-Slices) sowie Nachweis der zugehörigen Jamison-Budgetschranke `b_m + 2 e_m >= 2q - 1` (globale Untergrenze `E >= q(q - 1)/2` Zusatz-Slices).
+  2. Extraktion des zugrundeliegenden algebraischen Mechanismus (*Horizontallinien-Vervollständigung `d = const` mit entkoppeltem `col_∞`* in Zusatz-`OA(q^2)`-Slices) sowie Nachweis der zugehörigen **modellinternen** Jamison-Budgetschranke `b_m + 2 e_m >= 2q - 1` (Untergrenze `E >= q(q - 1)/2` Zusatz-Slices innerhalb des `OA(q^4) + q^2`-Slice-Modells; keine allgemeine CA-Untergrenze).
   3. Geschlossene, suchfreie Konstruktion `col_{q+1}(c, d) = min(c, d)` + Zusatz-Slices `{(c, d, col_∞ = c, col_{q+1} = d) : 0 <= c < d < q}` mit exakter Zeilenanzahl
      $$N(q) = q^4 + \binom{q}{2} q^2 = q^4 + \frac{q^3(q - 1)}{2} = \frac{q^3(3q - 1)}{2},$$
-     die die Jamison-Schranke für jede Primzahlpotenz `q >= 4` mit Gleichheit erreicht und Bais `Kor. 5.3` / `Prop. 5.4` deterministisch um `floor(q/2) * q^2` Zeilen unterbietet (nicht nur `−3 q^2`).
+     die die modellinterne Jamison-Schranke für jede Primzahlpotenz `q >= 4` mit Gleichheit erreicht und Bais Ebenenfärbungs-/Kostenmodellgrenzen (`Kor. 5.3` / `Prop. 5.4`, keine allgemeinen CA-Untergrenzen) deterministisch um `floor(q/2) * q^2` Zeilen unterbietet (nicht nur `−3 q^2`).
 - **Neuheitsvorbehalt (Regel 4):** Da die externe Literatur-Restliste ([`docs/LITERATURE_CHECK_T4_NEARBUSH.md`](LITERATURE_CHECK_T4_NEARBUSH.md) §8.2: arXiv 2023–2026, Colbourn–Lanus 2018 Volltext, `tns-research` v1.7–v1.9) nicht vollständig abgeschlossen ist, werden alle Größen streng als **„kleiner als `ca-tools` am Commit `0b79e3f`“** ausgewiesen (keine Neuheits- oder Rekordbehauptung).
 
 ---
@@ -52,18 +52,19 @@ Für ein Array aus dem vollen Bush-`OA(q^4)` (Faserfärbung `B_m subset AG(2, q)
 1. **`col_∞`-Bedingung (`{x_0, x_1, col_∞, col_{q+1}}`):** `{d : (c, d) in B_m} U {ci : (c, d, ci) in E_m} = GF(q)`. Insbesondere gilt `q - u_m <= e_m`, wobei `u_m = |{d : (c, d) in B_m}|` die Zahl der von `B_m` getroffenen Horizontallinien ist.
 2. **Nicht-horizontale Geraden (`{x_0, x_1, x_2, col_{q+1}}`):** Da die zweite dividierte Differenz auf `{x_0, x_1, x_2}` gleich `c + S d` (`S = x_0 + x_1 + x_2`) ist, muss `P_m = B_m U {(c, d) : (c, d, ci) in E_m}` alle `q^2` nicht-horizontalen Geraden `c + S d = r` von `AG(2, q)` treffen.
 
-**Satz (Jamison-Budget für `OA(q^4) + q^2`-Slices):**
-Ergänzt man `P_m` auf jeder der `q - u_m <= e_m` von `B_m` verfehlten Horizontallinien um genau `1` Punkt, so entsteht ein affines Blocking-Set `S_m subset AG(2, q)`. Nach Jamison (1977) / Brouwer–Schrijver (1978) gilt `|S_m| >= 2q - 1`, also
+**Satz (modellinterne Jamison-Budget-Schranke für `OA(q^4) + q^2`-Slices):**
+Innerhalb des eingeschränkten Modells *vollständiges Bush-`OA(q^4)` auf Spalten `0..q` plus reine polynomielle `q^2`-Zusatz-Slices* gilt: Ergänzt man `P_m` auf jeder der `q - u_m <= e_m` von `B_m` verfehlten Horizontallinien um genau `1` Punkt, so entsteht ein affines Blocking-Set `S_m subset AG(2, q)`. Nach Jamison (1977) / Brouwer–Schrijver (1978) gilt `|S_m| >= 2q - 1`, also
 $$b_m + 2 e_m \ge |P_m| + (q - u_m) \ge |S_m| \ge 2q - 1 \quad \forall m \in \mathbb{F}_q.$$
-Summation über alle `q` Symbole mit `sum_m b_m = q^2` liefert die scharfe globale Untergrenze:
+Summation über alle `q` Symbole mit `sum_m b_m = q^2` liefert die modellinterne Untergrenze:
 $$E = \sum_{m=0}^{q-1} e_m \ge \frac{q(2q - 1) - q^2}{2} = \frac{q(q - 1)}{2} \implies N \ge q^4 + \frac{q(q - 1)}{2} q^2.$$
+*(Abgrenzung: Sowohl Bais Prop. 4.1 / Prop. 5.4 als auch diese Budget-Schranke sind ausschließlich Aussagen innerhalb des jeweiligen Ebenenfärbungs-/Slice-Kostenmodells — **keine** allgemeine Covering-Array-Untergrenze. `q^4 + C(q, 2) q^2` unterbietet Bais Modellgrenze für alle `q >= 7` [algebraisch für alle Primzahlpotenzen `q >= 2`], und allgemeine Covering Arrays ohne feste `OA(q^4)`-Basis unterbieten teils auch `q^4 + C(q, 2) q^2`, wie in Abschnitt 5 an `q = 4` [`340 < 352`], `q = 5` [`825 < 875`] und `q = 16` [`83519 < 96256`] sichtbar ist.)*
 
 **Sezierung der konkreten Arrays im Jamison-Budget:**
 - **Bais Pencil-Cover (`Kor. 5.3`) & Parabel-Startarrays:** Beide starten bei `E = (q^2 - 1)/2` und tragen exakt `waste = sum_m (b_m + 2 e_m - (2q - 1)) = q - 1` (`(q - 1)/2` überschüssige `q^2`-Slices):
   - Im Parabel-Startarray liegt die gesamte Redundanz `q - 1` auf dem Parabel-Symbol `m_*` (`b = q, e = q - 1 -> b + 2e = 3q - 2`).
   - Im Pencil-Cover (`Kor. 5.3`) verteilt sie sich als `+1` auf jede der `(q - 1)/2` Pencil-Paar-Farben (`b = 2q - 2, e = 1 -> 2q`) und `+1` auf jede der `(q - 1)/2` leeren Farben (`b = 0, e = q -> 2q`).
-- **`CA(3430; 4, 9, 7)` (`q = 7`, `2q - 1 = 13`):** `t4_postop` löst die Parabel auf `m_* = 3` zugunsten der Horizontallinie `d = 0` auf (`4` Bush-Punkte `c in {0, 4, 5, 6}` + `3` Extra-Slices `(1,0,6), (2,0,2), (3,0,3)` mit entkoppeltem `col_∞ in {2, 3, 6}`) und drückt `m = 2` auf `11` Bush- + `1` Extra-Slice `(1, 4, 3)`. **Jedes der `7` Symbole erreicht exakt `b_m + 2 e_m = 13` (`waste = 0`, `E = 21 = 7·6/2`, globales Jamison-Minimum erreicht).**
-- **`CA(9558; 4, 11, 9)` (`q = 9`, `2q - 1 = 17`):** Derselbe Horizontallinien-Mechanismus auf `m_* = 4` (`d = 0`: `2` Bush-Punkte `c in {0, 2}` + `7` Extra-Slices `c in {1, 3..8}` mit entkoppeltem `col_∞`, davon `1` Slice auf `(1,0)` mit `81/81` `(a,b)`-Paaren und gemischtem `col_∞`), jedoch bleibt `t4_postop` mit **`waste = 2`** (`m = 1: b=18, e=0` und `m = 4: b=4, e=7`) hängen — genau **`+1` `q^2`-Slice (`+81` Zeilen)** über dem Jamison-Minimum `E = 36` (`N = 9477`)!
+- **`CA(3430; 4, 9, 7)` (`q = 7`, `2q - 1 = 13`):** `t4_postop` löst die Parabel auf `m_* = 3` zugunsten der Horizontallinie `d = 0` auf (`4` Bush-Punkte `c in {0, 4, 5, 6}` + `3` Extra-Slices `(1,0,6), (2,0,2), (3,0,3)` mit entkoppeltem `col_∞ in {2, 3, 6}`) und drückt `m = 2` auf `11` Bush- + `1` Extra-Slice `(1, 4, 3)`. **Jedes der `7` Symbole erreicht exakt `b_m + 2 e_m = 13` (`waste = 0`, `E = 21 = 7·6/2`, modellinternes Jamison-Minimum erreicht).**
+- **`CA(9558; 4, 11, 9)` (`q = 9`, `2q - 1 = 17`):** Derselbe Horizontallinien-Mechanismus auf `m_* = 4` (`d = 0`: `2` Bush-Punkte `c in {0, 2}` + `7` Extra-Slices `c in {1, 3..8}` mit entkoppeltem `col_∞`, davon `1` Slice auf `(1,0)` mit `81/81` `(a,b)`-Paaren und gemischtem `col_∞`), jedoch bleibt `t4_postop` mit **`waste = 2`** (`m = 1: b=18, e=0` und `m = 4: b=4, e=7`) hängen — genau **`+1` `q^2`-Slice (`+81` Zeilen)** über dem modellinternen Jamison-Minimum `E = 36` (`N = 9477`)!
 
 ### 2.3 Explizite Beantwortung der beiden Strukturfragen (Schritt A)
 
@@ -86,7 +87,7 @@ Zeilen besteht aus zwei Blöcken:
 - *4-Mengen ohne Spalte `*`:* vollständig abgedeckt durch das Bush-`OA(q^4; 4, q + 1, q)` in Block 1.
 - *4-Mengen `{x_0, x_1, ∞, *}`:* Für beliebiges `m in GF(q)` (Spalte `*`) und `y_∞ in GF(q)` (Spalte `∞`) liegt `(c, d) = (m, y_∞)` bei `y_∞ >= m` in Block 1 (`min(m, y_∞) = m`) und `(c, d) = (y_∞, m)` bei `y_∞ < m` in Block 2 (`col_∞ = y_∞`, `col_* = m`). Da `(a, b)` ganz `GF(q)^2` durchläuft, wird jedes `(y_0, y_1)` genau einmal getroffen.
 - *4-Mengen `{x_0, x_1, x_2, *}`:* Sei `S = x_0 + x_1 + x_2` und `r` die eindeutige zweite dividierte Differenz von `(y_0, y_1, y_2)`. Setze `d = m` und `c = r - S m`. Für `c >= m` erscheint `(c, m)` in Block 1 (`min(c, m) = m`), für `c < m` in Block 2 (`col_* = m`); die Variation von `(a, b) in GF(q)^2` deckt `(y_0, y_1, y_2)` eindeutig ab.
-- *Jamison-Optimalität:* Für jedes `m in {0..q - 1}` gilt `b_m = 2(q - m) - 1`, `e_m = m`, also `b_m + 2 e_m = 2q - 1` (`waste = 0`). *(Eine vollständig balancierte Variante `--variant cyclic` für ungerades `q` mit `b_m = q`, `e_m = (q - 1)/2` erreicht exakt dieselbe Größe `N(q)`.)*
+- *Modellinterne Jamison-Optimalität (innerhalb des `OA(q^4) + q^2`-Slice-Modells, keine allgemeine CA-Untergrenze):* Für jedes `m in {0..q - 1}` gilt `b_m = 2(q - m) - 1`, `e_m = m`, also `b_m + 2 e_m = 2q - 1` (`waste = 0`). *(Eine vollständig balancierte Variante `--variant cyclic` für ungerades `q` mit `b_m = q`, `e_m = (q - 1)/2` erreicht exakt dieselbe Größe `N(q)`.)*
 
 ---
 
