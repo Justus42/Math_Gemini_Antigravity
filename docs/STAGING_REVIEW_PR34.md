@@ -1,7 +1,7 @@
 # Prüfvermerk des Prüfers zu PR `#34` (Staging des 37er-Pakets)
 
 - **Geprüft:** PR `#34`, Branch `chore/stage-phase7-37` @ `aca3fc6`, Ordner `staging/jeserigk-ckrs-coset-2026-11/` (`HOW.md` SHA-256 `930fc550…`, `claims.csv` SHA-256 `76cca2c1…`).
-- **Zeit:** 2026-11-26, 21:02–21:25 MEZ. Maschine des Prüfers (2 vCPU), nicht die Maschine von Antigravity.
+- **Zeit:** 2026-11-26, 21:02–21:17 MEZ. Maschine des Prüfers (2 vCPU), nicht die Maschine von Antigravity.
 - **Vergleichsstand:** `chrispbsmolen/ca-tools @ e673ab4`; `main` dort um 21:02 MEZ unverändert, höchste PR-Nummer `90` (`git ls-remote`, rein lesend).
 - **Nach außen:** nichts. Keine Einreichung, kein Push nach `Justus42/ca-tools`.
 
