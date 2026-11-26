@@ -39,10 +39,15 @@ def read_reps(path, q, v=None):
             if not line:
                 continue
             c, d, a, b = (int(z) for z in line.split())
-            assert all(0 <= z < q for z in (c, d)), line
-            assert all(0 <= z < (q if v is None else v) for z in (a, b)), line
+            if not all(0 <= z < q for z in (c, d)):
+                sys.exit(f"representative out of range (c, d must be in 0..{q - 1}): {line}")
+            if not all(0 <= z < (q if v is None else v) for z in (a, b)):
+                sys.exit(f"representative out of range (a, b): {line}")
             reps.append((c, d, a, b))
-    assert len(set(reps)) == len(reps), "duplicate representative"
+    if len(set(reps)) != len(reps):
+        sys.exit("duplicate representative")
+    if not reps:
+        sys.exit("empty representative list")
     return reps
 
 
