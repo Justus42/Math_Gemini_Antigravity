@@ -96,6 +96,18 @@ Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprot
 
 ## Meldung nach außen
 
+### Zweite Einreichung: `jeserigk-ckrs-coset-2026-11` (37 Arrays) — Branch gepusht, Pull Request noch nicht geöffnet
+
+- **Freigabe:** Justus, 26.11.2026, 22:42 MEZ, im Prüfer-Chat: Einreichung freigegeben, Push eines Branches nach `Justus42/ca-tools` durch Claude erlaubt (hebt für diesen Schritt die Grenze „kein Push nach `Justus42/ca-tools`“ auf). Der Pull Request bei `chrispbsmolen/ca-tools` wird von Justus geöffnet; Claude hat dort keinen Zugriff.
+- **Branch:** `Justus42/ca-tools`, `submit/jeserigk-ckrs-coset-2026-11`, Head `0acc8244f4506f795cc14e4d3b2f9c2c0228f412`, gepusht 26.11.2026, ca. 22:52 MEZ. Autor des Commits: `Justus42` (GitHub-noreply-Adresse wie bei PR `#88`), Committer: Claude, mit `Co-Authored-By`.
+- **Basis:** `chrispbsmolen/ca-tools` `main` @ `808945fb…` (`808945f`, Stand 22:24 MEZ; um 22:52 MEZ unverändert, höchste PR-Nummer `90`). `main` des Forks (`083a093`) nicht angefasst, kein Force-Push.
+- **Inhalt:** ausschließlich `submissions/jeserigk-ckrs-coset-2026-11/` (`39` Dateien: `37` Arrays, `claims.csv`, `HOW.md`; `199.087.972 B`), byte-gleich zu `staging/jeserigk-ckrs-coset-2026-11/` auf `main @ e7ab2dd`; auf dem Fork nachgeprüft (`39/39` Blob-Hash und Größe gleich).
+- **Prüfung auf genau diesem Baum vor dem Push:** `tools/check_submission.py --constant-rows-minutes 0.05` `PASS` (`37/37` `verified`, `exceeds_table`, `0` Probleme, `Credit check: No flags`, `394 s`); `tools/consistency.py --check --pr --base 808945f` Komplettlauf `0 problems` (`264 s`).
+- **Offen:** Pull Request öffnen (Justus), Prüfbericht der GitHub Actions abwarten, PR-Nummer hier nachtragen. Bis zum Prüfbericht keine weitere Meldung zur selben Bauart (Regel 7).
+- Der folgende Absatz „Sperrstatus“ unter PR `#88` ist für dieses Paket durch die Freigabe überholt.
+
+### Erste Einreichung: PR `#88`
+
 - **Pull Request:** https://github.com/chrispbsmolen/ca-tools/pull/88 (eigenständig eröffnet durch `Justus42`)
 - **Datum und Uhrzeit (UTC):** `2026-11-25T14:44:16Z` (**gemergt** am `2026-11-26T05:32:11Z` in `chrispbsmolen/ca-tools` @ `0b79e3fb71af992bc1d5638ade0c1f972a43a12d`; am `2026-11-26T06:17:26Z` @ `e673ab45758a3959710c662a34837f79f6add689` vollständig in `table/ca_frame.csv` / `table/ca_table.csv.gz` übernommen)
 - **Einreichungsordner:** `submissions/jeserigk-pgl-ccl-2026-11/` (`15` neue Dateien: `claims.csv`, `HOW.md`, 13 Pareto-Arrays über 23 Zellen; `0` geänderte oder gelöschte Dateien außerhalb)
