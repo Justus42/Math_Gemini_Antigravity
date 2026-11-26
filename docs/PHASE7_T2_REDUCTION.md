@@ -1,6 +1,6 @@
-# Phase 7: Rückführung auf Stärke 2, die Fälle `q = 5` und `q = 7` (`docs/PHASE7_T2_REDUCTION.md`)
+# Phase 7: Rückführung auf Stärke 2, die Fälle `q = 5, 7, 8, 9` (`docs/PHASE7_T2_REDUCTION.md`)
 
-Stand: 2026-11-26, ca. 10:55 MEZ (§8 zu `q = 7` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
+Stand: 2026-11-26, ca. 11:35 MEZ (§8 zu `q = 7`, §9 zu `q = 8, 9, 11` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
 (Schritte 1 und 2 aus Geminis Phase-7-Plan). Vergleichsstand: `chrispbsmolen/ca-tools @ e673ab4`.
 
 **Rollenhinweis:** Diese Rechnung stammt vom Prüfer. Sie ist damit *nicht* fremdgeprüft. Antigravity soll
@@ -16,7 +16,8 @@ sie nachbauen und nach den Repo-Regeln dual verifizieren, bevor etwas nach `resu
 
 ## 2. Definitionen
 
-- `q` Primzahl, `2 <= t <= q + 2`. Vertreter `(c, d, a, b)` aus `GF(q)^4`.
+- `q` Primzahlpotenz, `2 <= t <= q + 2`. Vertreter `(c, d, a, b)` aus `GF(q)^4`. Körper und Elementnummern
+  wie in `scripts/gen_general_tqv.py` (`GeneralGF`).
 - `M(R)`: je Vertreter eine Zeile mit den Spalten `c + al*d` für `al = 0, ..., q-1`, dann `a`, dann `b`.
 - `L_t(R)`: je Vertreter und je `(a_0, ..., a_{t-3})` die Zeile `(P(0), ..., P(q-1), a, b)` mit
   `P(x) = a_0 + ... + a_{t-3} x^(t-3) + c x^(t-2) + d x^(t-1)`. Das sind `|R| * q^(t-2)` Zeilen.
@@ -47,7 +48,7 @@ Argument, nach Anzahl `j` der gewählten Auswertungsspalten:
 | A für `q = 7`, `t = 3, 4`, Phase-6A-Liste und zyklische Liste | **nachgezählt** (eigenes Programm); Phase-6A-Liste bei `t = 5, 6` über die Arrays aus PR `#22` |
 | A allgemein | **Argument**, nicht formal geprüft |
 | B | **Argument**; gestützt durch Gegenproben (eine Zeile weniger: `M` und Lifts fallen gemeinsam durch) |
-| Primzahlpotenzen `q = 8, 9` | **nicht gerechnet** (Skript kann nur Primzahlen) |
+| A für `q = 8, 9`, `t = 3..6`, Phase-6A-Liste (`t = 4`) und neue Listen | **nachgezählt** (§9) |
 
 ## 4. Schritt 1: Die beiden 33er-Arrays der Tabelle sitzen nicht auf `K_t`
 
@@ -104,7 +105,7 @@ Für `q = 7` siehe §8.
 ## 7. Offen
 
 1. `q = 5`: Ist `33` möglich? (Exakter Lauf mit Symmetriebrechung oder längerem Budget.)
-2. `q = 7`: Ist `67` möglich? (`67` würde `(3,9,7) = 472` schlagen.) `q = 8, 9, 11, 13`: nicht gerechnet.
+2. `q = 7`: Ist `67` möglich? (`67` würde `(3,9,7) = 472` schlagen.) `q = 8, 9, 11`: siehe §9. `q = 13, 19`: nicht gerechnet.
 3. Struktur: In beiden Listen trägt eine Gerade `d = const` die Zusatzlast (`q = 5`: 12 von 34 Zeilen;
    `q = 7`: 25 von 68), auf den meisten übrigen ist `a` oder `b` konstant. Keine Bauregel abgeleitet.
 4. Literatur zu `(5, 7, 5)`: Quelle Ji-Li-Yin (`4375`) nicht gelesen; `4250` nur gegen die Tabelle verglichen.
@@ -141,3 +142,49 @@ sha256sum CA_3332_4_9_7.txt   # a221268ab90ce2c3d8901842966e44fb03ee4f1bdc919cfa
 **Folge für Paket 1 (PR `#24`):** Die drei `q = 7`-Arrays im Staging (`3430`, `24010`, `168070`) sind weiter
 kleiner als die Tabelle, aber nicht mehr das Beste aus dieser Bauart. Für `q = 8, 9, 11, 13, 19` ist dieselbe
 Frage offen (`q = 8, 9` brauchen Körperarithmetik; ab `q = 11` sind es `>= 14641` Variablen).
+
+## 9. Nachtrag `q = 8, 9, 11` (2026-11-26, 11:03–11:32 MEZ)
+
+Skripte auf Primzahlpotenzen erweitert (Körper `GeneralGF` aus `scripts/gen_general_tqv.py`). Gegenproben:
+SHA-256 für `q = 5` (`0fb696c8…`) und `q = 7` (`a221268a…`) unverändert; `--known` liefert für `q = 7, 8, 9`,
+`t = 4` dieselbe Zeilenmenge wie `gen_general_tqv.py`.
+
+Gates: Positivkontrolle je `q`, 5 Minuten je Lauf, `q = 8, 9` je zwei Läufe, `q = 11` ein Lauf.
+
+| `q` | Phase 6A | Lauf 1 (`hint`, 300 s) | Lauf 2 (`hintfile`, 300 s) | Belegart |
+| --- | --- | --- | --- | --- |
+| `8` | `92` | **`91`** | `91` (andere Liste, gleiche Größe) | bestes gefundenes `m`, Optimalität offen |
+| `9` | `117` | **`116`** | `116` | bestes gefundenes `m`, Optimalität offen |
+| `11` | `176` | `176` | nicht gelaufen | **Suche erfolglos im Zeitlimit (300 s); nichts ausgeschlossen** |
+
+| Zelle | `ca-tools @ e673ab4` | Phase 6A | neu | SHA-256 |
+| --- | --- | --- | --- | --- |
+| `(4, 10, 8)` | `6101` | `5888` | **`5824`** | `58de207c…0316bbe` |
+| `(5, 10, 8)` | `49128` | `47104` | **`46592`** | `927c206a…dafb370` |
+| `(6, 10, 8)` | `393018` | `376832` | **`372736`** | `7e051655…f99a6e6` |
+| `(3, 11, 9)` | `1089` | `1053` | **`1044`** | `91b86580…a46f0fa` |
+| `(4, 11, 9)` | `9801` | `9477` | **`9396`** | `3c84f9ab…ff28096` |
+| `(5, 11, 9)` | `88209` | `85293` | **`84564`** | `adc1b180…3c137bd` |
+| `(6, 11, 9)` | `793881` | `767637` | **`761076`** | `aaee4a1d…03b8f74` |
+
+`(3, 10, 8)`: `728` ist nicht kleiner als die Tabelle (`512`).
+
+Prüfung: alle acht Arrays (`q = 8`, `t = 3..6`; `q = 9`, `t = 3..6`) `PASS` mit `ca-tools`-`ca_verify`;
+`q = 8` zusätzlich alle vier mit `verifiers/ca_verify.c`; `q = 9` mit `verifiers/ca_verify.c` für `t = 3, 4`;
+eigenes Zählprogramm für `q = 8` (`t = 3, 4, 5`) und `q = 9` (`t = 3, 4`); `verify_independent.py` nur
+`(4, 10, 8)`. Negativkontrollen (`t = 4`, eine Zeile weniger) für `q = 8` und `q = 9`: `FAIL`.
+
+```
+python3 scripts/phase7_lift.py --q 8 --reps data/phase7/R_q8_m91.txt --check-m --t 4 --out CA_5824_4_10_8.txt
+python3 scripts/phase7_lift.py --q 9 --reps data/phase7/R_q9_m116.txt --check-m --t 4 --out CA_9396_4_11_9.txt
+```
+
+**Überblick gesparte Blöcke:** `q = 5`: 1, `q = 7`: 2, `q = 8`: 1, `q = 9`: 1, `q = 11`: 0 (ein Lauf). Alle Werte
+stammen aus zeitbegrenzten Läufen; ob die Ersparnis mit `q` wächst oder der Löser bei größerem `q` nur weniger
+findet, ist **offen**.
+
+**Beobachtung zur Struktur (`q = 5, 7`; nicht bewiesen, nur an den zwei Listen abgelesen):** Die Geraden
+`d = const` zerfallen in `(q-1)/2` Geraden mit konstantem `a`, `(q-1)/2` Geraden mit konstantem `b` und eine
+schwere Gerade mit `(q+1)/2` Schichten. Ohne weitere Kniffe ergibt das wieder `q^2 + C(q,2)`. Die Ersparnis
+entsteht, weil an einigen Punkten der schweren Geraden eine Schicht fehlt und die betroffenen Symbole auf den
+anderen Geraden mitgedeckt werden.

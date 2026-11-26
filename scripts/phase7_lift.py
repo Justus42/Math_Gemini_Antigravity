@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Phase 7: strength-2 reduction for arrays built from cosets of the kernel code K_t.
 
-Pure Python (std-only). No solver, no search, no randomness. Prime q only.
+Pure Python (std-only). No solver, no search, no randomness. Any prime power q; the field is
+GeneralGF from scripts/gen_general_tqv.py (same element labels 0..q-1 as the Phase 6A generator).
 
 Setting (see docs/PHASE7_T2_REDUCTION.md):
   A representative is a tuple (c, d, a, b) in GF(q)^4.
@@ -18,11 +19,11 @@ Usage:
 """
 import argparse
 import itertools
+import os
 import sys
 
-
-def is_prime(n):
-    return n >= 2 and all(n % p for p in range(2, int(n ** 0.5) + 1))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gen_general_tqv import GeneralGF  # noqa: E402
 
 
 def read_reps(path, q):
@@ -45,8 +46,9 @@ def known_reps(q):
            [(c, d, c, d) for d in range(q) for c in range(d)]
 
 
-def m_rows(reps, q):
-    return [[(c + al * d) % q for al in range(q)] + [a, b] for (c, d, a, b) in reps]
+def m_rows(reps, q, field):
+    add, mul = field.add, field.mul
+    return [[add[c][mul[al][d]] for al in range(q)] + [a, b] for (c, d, a, b) in reps]
 
 
 def uncovered_pairs(rows, q):
@@ -57,12 +59,21 @@ def uncovered_pairs(rows, q):
     return miss
 
 
-def lift(reps, q, t):
-    pw = [[pow(x, e, q) for e in range(t)] for x in range(q)]
+def lift(reps, q, t, field):
+    add, mul = field.add, field.mul
+    pw = [[1] * q]
+    for _ in range(1, t):
+        pw.append([mul[pw[-1][x]][x] for x in range(q)])
     for (c, d, a, b) in reps:
         for low in itertools.product(range(q), repeat=t - 2):
             co = list(low) + [c, d]
-            yield [sum(co[e] * pw[x][e] for e in range(t)) % q for x in range(q)] + [a, b]
+            row = []
+            for x in range(q):
+                s = 0
+                for e in range(t):
+                    s = add[s][mul[co[e]][pw[e][x]]]
+                row.append(s)
+            yield row + [a, b]
 
 
 def main():
@@ -75,12 +86,11 @@ def main():
     ap.add_argument("--out")
     args = ap.parse_args()
     q = args.q
-    if not is_prime(q):
-        sys.exit("prime q only")
+    field = GeneralGF(q)
     reps = known_reps(q) if args.known else read_reps(args.reps, q)
     print(f"q={q} m={len(reps)}")
     if args.check_m:
-        unc = uncovered_pairs(m_rows(reps, q), q)
+        unc = uncovered_pairs(m_rows(reps, q, field), q)
         print(f"M(R): {len(reps)} rows, {q + 2} columns, uncovered pairs = {unc}")
         if unc:
             sys.exit(1)
@@ -89,7 +99,7 @@ def main():
             sys.exit("need 2 <= t <= q + 2")
         n = 0
         with open(args.out, "w") as fh:
-            for row in lift(reps, q, args.t):
+            for row in lift(reps, q, args.t, field):
                 fh.write(" ".join(map(str, row)) + "\n")
                 n += 1
         print(f"wrote CA candidate N={n} t={args.t} k={q + 2} v={q} -> {args.out} (verify separately)")

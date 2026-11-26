@@ -5,7 +5,8 @@ NOT std-only: needs Google OR-Tools (pip install ortools). Runs with a wall-cloc
 workers, so a run that stops at the limit is NOT byte-reproducible; only the representative list
 it writes is the result, and that list is checked by scripts/phase7_lift.py and the verifiers.
 
-Variables: one 0/1 variable per (c, d, a, b) in GF(q)^4 (prime q).
+Variables: one 0/1 variable per (c, d, a, b) in GF(q)^4 (any prime power q; field = GeneralGF from
+scripts/gen_general_tqv.py).
 Conditions: for every pair of columns of M(R) and every pair of symbols, at least one chosen row.
 WLOG (0, 0, 0, 0) is chosen (rename the symbols in columns a and b).
 
@@ -17,17 +18,22 @@ Usage:
   phase7_solve_cpsat.py Q SECONDS hintfile FILE   # minimise m, start from a representative list
 """
 import itertools
+import os
 import sys
 import time
 
 from ortools.sat.python import cp_model
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gen_general_tqv import GeneralGF  # noqa: E402
 
 q = int(sys.argv[1])
 limit = float(sys.argv[2])
 mode = sys.argv[3] if len(sys.argv) > 3 else "min"
 arg = int(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4].isdigit() else None
 T = list(itertools.product(range(q), repeat=4))
-rows = {t: [(t[0] + al * t[1]) % q for al in range(q)] + [t[2], t[3]] for t in T}
+_F = GeneralGF(q)
+rows = {t: [_F.add[t[0]][_F.mul[al][t[1]]] for al in range(q)] + [t[2], t[3]] for t in T}
 k = q + 2
 model = cp_model.CpModel()
 x = {t: model.NewBoolVar("x%d_%d_%d_%d" % t) for t in T}
