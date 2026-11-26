@@ -164,20 +164,24 @@ Deterministische Prüfung ohne Suche (`timeout --kill-after=10s 60 python3 scrip
 - **`PR #36`:** `11` Claims, für `v = 8` ausschließlich `CA(6101; 4, 10, 8)`.
 - **Bai-Ablage `doi:10.5281/zenodo.23787055` (Version `1.0` vom `30.10.2026`, `records.csv` gelesen):** `(4, 9, 7) = 3557`, `(4, 10, 8) = 6101`, `(4, 11, 9) = 9801`, `(4, 13, 11) = 21901`, `(4, 15, 13) = 42757`, kein Eintrag für `(4, 11, 8)`; `(5, 10, 8) = 49136`, `(6, 10, 8) = 393088`.
 - **`1.008` Claims + `237` `EXTERNAL`-Einträge:** kein Wert `<=` unseren `6` `t = 4`-Größen bzw. den Track-2-Vorhersagen `47.104` / `376.832`.
+- **Colbourn & Lanus (2018), ADAM 1 `#P2.03`, `doi:10.26493/2590-9770.1220.3a1` (Volltext gelesen, PDF vom Nutzer, Angabe von Claude, `2026-11-26`) — erledigt:**
+  - Keine Konstruktion für `k = q + 2`, kein OA-plus-Spalte, keine Schranke `q^t + C(v, 2) * q^(t - 2)`; das Paper behandelt ausschließlich CPHF/SCPHF per Computersuche (`>= 2` Hash-Zeilen).
+  - Lemma 1.2: ein `SCPHF(n; k, q, t)` ergibt `CA(n(q^t - q) + q; t, k, q)`; mit Einschränkung `<t - 1>` auf `2` Zeilen ergibt sich `2 q^t - q^(t - 1)` (Rechnung des Prüfers), was stets größer ist als `q^t + C(q, 2) * q^(t - 2)`.
+  - Herkunft von `7680` auf `(4, 11, 8)` (Tabellenzeile `k = 15`): Tabelle 7, `q = 8, n = 2, <3>`, `15` Spalten (`2 * 8^4 - 8^3 = 7680`); analog `12393` (`q = 9`, `17` Spalten) und `54925` (`q = 13`, `21` Spalten).
 
 ### 8.2 Weiter offen
 1. Systematische arXiv-Suche (2023–2026).
-2. Colbourn–Lanus (2018) im Volltext (Herkunft `7680` auf `(4, 11, 8)` — **Vermerk: PDF wird vom Nutzer besorgt**).
-3. `tns-research`-Zenodo-Ablagen direkt (`v1.7`–`v1.9`).
-4. Existenz der Parabel-Packung für `q = 11, 13` (Empfehlung Drittprüfer: vollständiger SAT/CP-Löser statt Heuristik, damit auch ein Negativbefund als Beleg gilt).
-5. **Offene Literatur-Restliste zur allgemeinen Konstruktion `q^t + C(v, 2) * q^(t - 2)` (`k = q + 2`, beliebige Stärke `t` und `2 <= v <= q`, ergänzt `2026-11-26`):**
+2. `tns-research`-Zenodo-Ablagen direkt (`v1.7`–`v1.9`).
+3. Existenz der Parabel-Packung für `q = 11, 13` (Empfehlung Drittprüfer: vollständiger SAT/CP-Löser statt Heuristik, damit auch ein Negativbefund als Beleg gilt).
+4. **Offene Literatur-Restliste zur allgemeinen Konstruktion `q^t + C(v, 2) * q^(t - 2)` (`k = q + 2`, beliebige Stärke `t` und `2 <= v <= q`, aktualisiert `2026-11-26`):**
+   - Colbourn–Lanus–Sarkar (2018)
    - Hartman (2005)
    - Ji & Yin (2010)
    - Colbourn (2004 / 2015)
    - Hedayat–Sloane–Stufken (Bush-Arrays mit `q + 2` Spalten)
    - Chateauneuf–Kreher (2002)
-   - Colbourn–Lanus (2018) *(Vermerk: PDF wird vom Nutzer besorgt)*
 
-Bis zum Abschluss der offenen Punkte gilt nach Regel 4 weiterhin die Wortwahl „kleiner als `ca-tools` am Commit `<SHA>`“ (für `t = 4 NEAR_BUSH` @ `d739412`, für `general_tqv` @ `e673ab4`).
+Diese Punkte bleiben transparent als offen dokumentiert (für lokales Staging ohne Neuheitsanspruch kein Blockade-Gate mehr, vorbehaltlich ausdrücklicher Nutzerfreigabe vor jeder externen Einreichung). Es gilt nach Regel 4 weiterhin durchgehend die Wortwahl „kleiner als `ca-tools` am Commit `<SHA>`“ ohne Neuheitsanspruch.
+
 
 

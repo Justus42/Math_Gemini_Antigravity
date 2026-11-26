@@ -22,8 +22,24 @@
 
 ---
 
-## 2. Abgrenzung & offene Punkte
+## 2. Prüfbefunde zu PR `#23` (Phase 6B-1, Angabe von Claude, `2026-11-26`, `ca-tools @ e673ab4`)
 
-1. **Geprüfte Dateien (`results/general_tqv/`, Phase 6A):** Die `12` Dateien aus PR `#22` (`fff093c`) gelten auf Grundlage der Fremd-Reproduktion auf zweiter Maschine als **rechnerunabhängig bestätigt** (`12/12` byte-identisch, `12/12` gültig nach drei Programmen inkl. eigenem Programm des Prüfers; `verify_independent.py` wurde lokal auf `12/12` und beim Drittprüfer auf `10/12` ausgeführt).
-2. **Neuere Dateien (Phase 6B-1 ff.):** Arrays, die nach PR `#22` in `results/general_tqv/` ergänzt werden, sind von diesem Prüfvermerk **nicht** abgedeckt und stehen bis zu einer eigenen Fremd-Reproduktion weiterhin als lokal deterministisch 2× byte-identisch aus.
-3. **Externe Literaturprüfung & Einreichungs-Sperre:** Die externe Literaturprüfung zur allgemeinen Formel `q^t + C(v, 2) * q^(t - 2)` (siehe [`docs/LITERATURE_CHECK_T4_NEARBUSH.md`](LITERATURE_CHECK_T4_NEARBUSH.md) §8.2) ist noch nicht abgeschlossen. Die externe Einreichungs-Sperre für das gesamte `q^t + C(v, 2) * q^(t - 2)`-Paket bleibt aktiv.
+| Prüfpunkt | Ergebnis (Angabe Drittprüfer) | Detail |
+| --- | :---: | --- |
+| **Fremd-Reproduktion Phase 6B-1** | **`2/2` byte-identisch** | `CA_220946_5_13_10.txt` (`882f1336…`) und `CA_234256_5_13_11.txt` (`c525abfa…`) auf zweiter Maschine mit `scripts/gen_general_tqv.py` byte-identisch erzeugt. |
+| **Unabhängiger Nachbau** | **`2/2` byte-identisch** | Beide Dateien sind byte-identisch zum unabhängigen Nachbau des Drittprüfers. |
+| **Gültigkeit nach Verifiern** | **`2/2` gültig (3 Programme)** | Beide Arrays gültig nach `verifiers/ca_verify`, `ca-tools ca_verify` und eigenem Prüfprogramm des Drittprüfers. |
+| **Negativkontrolle** | **`2/2 FAIL`** | Nach Zeilenentnahme melden die Prüfprogramme für beide Dateien `FAIL`. |
+
+### Ergänzender Vermerk zu `t = 4`-Generator-Ausgaben (`(4, 9, 7)` und `(4, 10, 8)`)
+- Die Generator-Ausgaben `scripts/gen_general_tqv.py --t 4 --q 7 --v 7` (`CA_3430_4_9_7.txt`, `sha256 d29b5155…`) und `scripts/gen_general_tqv.py --t 4 --q 8 --v 8` (`CA_5888_4_10_8.txt`, `sha256 2e4bf66b…`) wurden bereits in PR `#21` von Claude mit `4` Prüfprogrammen auf zweiter Maschine geprüft (sowie die `3` `t = 4`-Generator-Arrays `CA_9477_4_11_9.txt`, `CA_21296_4_13_11.txt`, `CA_41743_4_15_13.txt`; siehe [`docs/THIRD_PARTY_VERIFICATION_T4_NEARBUSH.md`](THIRD_PARTY_VERIFICATION_T4_NEARBUSH.md)).
+- **Gesamtstand Paket 1:** **`19/19`** einheitliche `gen_general_tqv.py`-Arrays (`5` `t = 4`-Generator-Arrays + `12` Phase-6A-Arrays + `2` Phase-6B-1-Arrays) sind auf zweiter Maschine bestätigt.
+
+---
+
+## 3. Abgrenzung & offene Punkte
+
+1. **Geprüfte Dateien (`19/19` einheitliche `gen_general_tqv.py`-Arrays):** Alle `14` Dateien in `results/general_tqv/` (`12` Phase 6A + `2` Phase 6B-1) sowie die `5` `t = 4`-Generator-Ausgaben (`q = 7, 8, 9, 11, 13`) gelten auf Grundlage der Fremd-Reproduktion auf zweiter Maschine als **rechnerunabhängig bestätigt**.
+2. **Abgrenzung zu `results/t4_nearbush/`:** Für `(4, 9, 7)` (`d5860ade…`, Post-Op) und `(4, 10, 8)` (`7d72bc89…`, `Q_g`) liegen in `results/t4_nearbush/` ältere Varianten mit anderem SHA-256; im Paket-1-Staging werden ausschließlich die einheitlichen `gen_general_tqv.py`-Ausgaben (`d29b5155…` bzw. `2e4bf66b…`) verwendet.
+3. **Literaturstatus & Freigabe:** Colbourn & Lanus (2018) ist im Volltext geprüft (siehe [`docs/LITERATURE_CHECK_T4_NEARBUSH.md`](LITERATURE_CHECK_T4_NEARBUSH.md) §8.1); ältere Literatur (`Hartman 2005`, `Ji & Yin 2010`, `Colbourn 2004/2015`, `Hedayat–Sloane–Stufken`, `Chateauneuf–Kreher 2002`, `Colbourn–Lanus–Sarkar 2018`) bleibt transparent als offen dokumentiert. Eine externe Einreichung erfolgt weiterhin erst nach ausdrücklicher Freigabe durch Justus.
+
