@@ -96,7 +96,7 @@ Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprot
 
 ## Meldung nach außen
 
-### Zweite Einreichung: `jeserigk-ckrs-coset-2026-11` (37 Arrays) — Pull Request `#91` offen
+### Zweite Einreichung: `jeserigk-ckrs-coset-2026-11` (37 Arrays) — Pull Request `#91` offen, Prüfbericht PASS `37/37`
 
 - **Pull Request:** https://github.com/chrispbsmolen/ca-tools/pull/91, geöffnet von Justus am 26.11.2026 zwischen 22:53 und 23:03 MEZ (Angabe Justus). Über `git ls-remote` bestätigt (23:04 MEZ): `refs/pull/91/head` = `0acc8244…`, also genau der geprüfte Commit; `main` dort weiter `808945f`. Die PR-Seite und den Prüfbericht konnte der Prüfer nicht lesen (kein API-Zugriff, Seitenabruf abgelehnt). **Nachzutragen:** Im vorgeschlagenen PR-Text fehlten E-Mail-Adresse und Affiliation, die Regel 5 von `submissions/README.md` im PR-Text oder per Mail an den Maintainer verlangt (beides steht in `HOW.md`; Hinweis von Gemini, am Regeltext geprüft). Justus ergänzt die Zeile in der PR-Beschreibung.
 
@@ -105,7 +105,9 @@ Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprot
 - **Basis:** `chrispbsmolen/ca-tools` `main` @ `808945fb…` (`808945f`, Stand 22:24 MEZ; um 22:52 MEZ unverändert, höchste PR-Nummer `90`). `main` des Forks (`083a093`) nicht angefasst, kein Force-Push.
 - **Inhalt:** ausschließlich `submissions/jeserigk-ckrs-coset-2026-11/` (`39` Dateien: `37` Arrays, `claims.csv`, `HOW.md`; `199.087.972 B`), byte-gleich zu `staging/jeserigk-ckrs-coset-2026-11/` auf `main @ e7ab2dd`; auf dem Fork nachgeprüft (`39/39` Blob-Hash und Größe gleich).
 - **Prüfung auf genau diesem Baum vor dem Push:** `tools/check_submission.py --constant-rows-minutes 0.05` `PASS` (`37/37` `verified`, `exceeds_table`, `0` Probleme, `Credit check: No flags`, `394 s`); `tools/consistency.py --check --pr --base 808945f` Komplettlauf `0 problems` (`264 s`).
-- **Offen:** Angaben nach Regel 5 in der PR-Beschreibung ergänzen (Justus), Prüfbericht der GitHub Actions abwarten und hier nachtragen. Bis zum Prüfbericht keine weitere Meldung zur selben Bauart (Regel 7).
+- **Prüfbericht der GitHub Actions (27.11.2026, ca. 00:35 MEZ):** `Result: PASS. 37 of 37 claims passed.`, alle `37` `verified` und `exceeds_table`, `Credit check: No flags`, Gesamtzeit `88,8 min` (Stempel `ca_verify 808945f`). Kommentar: https://github.com/chrispbsmolen/ca-tools/pull/91#issuecomment-7205657566. Vom Prüfer um 00:43 MEZ gelesen (Seitenabruf) und mit dem von Justus geschickten Wortlaut abgeglichen: `37/37` Zeilen, „previous best“ je Zelle gleich dem lokalen Lauf, die `7` sichtbaren SHA-256 gleich den lokalen. Die lange Laufzeit stammt aus der Zusatzrechnung „constant rows“ (bis `10 min` je Array, bei `8` Arrays ausgeschöpft), nicht aus der Verifikation.
+- **Regel 5:** Name, Affiliation und E-Mail stehen in der PR-Beschreibung (von Justus ergänzt, am 27.11. um 00:43 MEZ auf der Seite gelesen).
+- **Offen:** Der Bericht vermerkt je Zeile, dass `builds_on` eine neue Methode nennt und der Maintainer sie vor dem Merge bestätigt. PR `#91` ist offen, nicht gemergt (`main` dort um 00:43 MEZ weiter `808945f`). Den Lauf „Consistency“ konnte der Prüfer nicht einsehen. Nach dem Merge: Merge-Commit und Tabellen-Commit hier nachtragen. Rückfragen des Maintainers: Antwort entwerfen, Justus sendet. Bis zum Prüfbericht keine weitere Meldung zur selben Bauart (Regel 7).
 - Der folgende Absatz „Sperrstatus“ unter PR `#88` ist für dieses Paket durch die Freigabe überholt.
 
 ### Erste Einreichung: PR `#88`
