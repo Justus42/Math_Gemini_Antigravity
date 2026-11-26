@@ -1,6 +1,6 @@
-# Phase 7: Rückführung auf Stärke 2 und der Fall `q = 5` (`docs/PHASE7_T2_REDUCTION.md`)
+# Phase 7: Rückführung auf Stärke 2, die Fälle `q = 5` und `q = 7` (`docs/PHASE7_T2_REDUCTION.md`)
 
-Stand: 2026-11-26, ca. 10:25 MEZ. Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
+Stand: 2026-11-26, ca. 10:55 MEZ (§8 zu `q = 7` nachgetragen). Autor: Claude (Prüfer-Chat), auf Wunsch von Justus als eigene Rechnung
 (Schritte 1 und 2 aus Geminis Phase-7-Plan). Vergleichsstand: `chrispbsmolen/ca-tools @ e673ab4`.
 
 **Rollenhinweis:** Diese Rechnung stammt vom Prüfer. Sie ist damit *nicht* fremdgeprüft. Antigravity soll
@@ -98,13 +98,46 @@ sha256sum CA_4250_5_7_5.txt   # 0fb696c821d25467be4d6625b37f81d0cb7956afb47350ed
 | `(5, 7, 5)` | `4375` (`CITED`, Ji-Li-Yin) | `4375` | **`4250`** | erreicht |
 | `(6, 7, 5)` | `15625` (`CITED`, OA) | `21875` | `21250` | nicht erreichbar |
 
-Folgerung: Die Konstante `C(q,2)` in `q^t + C(q,2) * q^(t-2)` ist für `q = 5` nicht bestmöglich. Ob das
-für `q >= 7` auch gilt, ist **nicht gerechnet**. Jeder gesparte Block bei `q = 7` (`<= 69` statt `70`)
-würde die eigenen Arrays `(4,9,7)`, `(5,9,7)`, `(6,9,7)` unterbieten; `<= 67` schlägt `(3,9,7) = 472`.
+Folgerung: Die Konstante `C(q,2)` in `q^t + C(q,2) * q^(t-2)` ist für `q = 5` nicht bestmöglich.
+Für `q = 7` siehe §8.
 
 ## 7. Offen
 
 1. `q = 5`: Ist `33` möglich? (Exakter Lauf mit Symmetriebrechung oder längerem Budget.)
-2. `q = 7`: Gibt es eine Liste mit `<= 69` Vertretern? (2401 Variablen, 1764 Bedingungen.)
-3. Struktur der 34er-Liste: 18 Punkte `(c,d)` einfach, 5 doppelt, 2 dreifach belegt. Keine Bauregel erkannt.
+2. `q = 7`: Ist `67` möglich? (`67` würde `(3,9,7) = 472` schlagen.) `q = 8, 9, 11, 13`: nicht gerechnet.
+3. Struktur: In beiden Listen trägt eine Gerade `d = const` die Zusatzlast (`q = 5`: 12 von 34 Zeilen;
+   `q = 7`: 25 von 68), auf den meisten übrigen ist `a` oder `b` konstant. Keine Bauregel abgeleitet.
 4. Literatur zu `(5, 7, 5)`: Quelle Ji-Li-Yin (`4375`) nicht gelesen; `4250` nur gegen die Tabelle verglichen.
+
+## 8. Nachtrag `q = 7` (2026-11-26, 10:34–10:45 MEZ)
+
+Modell: 2401 Variablen, 1764 Paarbedingungen (784 verschiedene). Gates wie in §5: Positivkontrolle, 5 Minuten
+je Lauf, zwei Suchläufe.
+
+| Lauf | Aufruf | Dauer | Ergebnis |
+| --- | --- | --- | --- |
+| Positivkontrolle | `7 60 fixknown` | `< 1 s` | Phase-6A-Liste (70) erfüllt das Modell |
+| Minimierung, Start bei 70 | `7 300 hint` | `300 s` (Limit) | **`m = 68` gefunden** |
+| Minimierung, Start bei 68 | `7 300 hintfile R_q7_m68.txt` | `300 s` (Limit) | keine Verbesserung (`68`) |
+
+**Belegart: bestes gefundenes `m = 68`; ob `67` möglich ist, ist offen.**
+
+| Zelle | `ca-tools @ e673ab4` | Phase 6A (70 Blöcke) | 68 Blöcke | SHA-256 |
+| --- | --- | --- | --- | --- |
+| `(3, 9, 7)` | `472` | `490` | `476` (nicht kleiner) | — |
+| `(4, 9, 7)` | `3556` | `3430` | **`3332`** | `a221268a…ede972` |
+| `(5, 9, 7)` | `25039` | `24010` | **`23324`** | `f84786fd…2c9cf` |
+| `(6, 9, 7)` | `175273` | `168070` | **`163268`** | `3b6030f0…5f1c12e` |
+
+Prüfung: alle vier Arrays (`t = 3..6`) `PASS` mit `verifiers/ca_verify.c`, `ca-tools`-`ca_verify` und eigenem
+Zählprogramm; `verify_independent.py` für `t = 3, 4` (`t = 5, 6` dort nicht gelaufen). Negativkontrolle
+(`t = 4`, eine Zeile weniger): `FAIL`.
+
+```
+python3 scripts/phase7_lift.py --q 7 --reps data/phase7/R_q7_m68.txt --check-m --t 4 --out CA_3332_4_9_7.txt
+sha256sum CA_3332_4_9_7.txt   # a221268ab90ce2c3d8901842966e44fb03ee4f1bdc919cfa7e31845ea6ede972
+```
+
+**Folge für Paket 1 (PR `#24`):** Die drei `q = 7`-Arrays im Staging (`3430`, `24010`, `168070`) sind weiter
+kleiner als die Tabelle, aber nicht mehr das Beste aus dieser Bauart. Für `q = 8, 9, 11, 13, 19` ist dieselbe
+Frage offen (`q = 8, 9` brauchen Körperarithmetik; ab `q = 11` sind es `>= 14641` Variablen).

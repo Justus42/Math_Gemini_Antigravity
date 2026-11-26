@@ -13,6 +13,8 @@ Usage:
   phase7_solve_cpsat.py Q SECONDS fixknown        # positive control: Phase 6A solution is feasible
   phase7_solve_cpsat.py Q SECONDS min             # minimise m
   phase7_solve_cpsat.py Q SECONDS atmost M        # decide: is there a solution with <= M rows?
+  phase7_solve_cpsat.py Q SECONDS hint            # minimise m, start from the Phase 6A solution
+  phase7_solve_cpsat.py Q SECONDS hintfile FILE   # minimise m, start from a representative list
 """
 import itertools
 import sys
@@ -23,7 +25,7 @@ from ortools.sat.python import cp_model
 q = int(sys.argv[1])
 limit = float(sys.argv[2])
 mode = sys.argv[3] if len(sys.argv) > 3 else "min"
-arg = int(sys.argv[4]) if len(sys.argv) > 4 else None
+arg = int(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4].isdigit() else None
 T = list(itertools.product(range(q), repeat=4))
 rows = {t: [(t[0] + al * t[1]) % q for al in range(q)] + [t[2], t[3]] for t in T}
 k = q + 2
@@ -51,6 +53,15 @@ elif mode == "atmost":
 else:
     model.Minimize(total)
     model.Add(x[(0, 0, 0, 0)] == 1)
+    start = None
+    if mode == "hint":
+        start = known
+    elif mode == "hintfile":
+        with open(sys.argv[4]) as fh:
+            start = {tuple(int(z) for z in ln.split("#")[0].split()) for ln in fh if ln.split("#")[0].strip()}
+    if start is not None:
+        for t in T:
+            model.AddHint(x[t], 1 if t in start else 0)
 solver = cp_model.CpSolver()
 solver.parameters.max_time_in_seconds = limit
 solver.parameters.num_search_workers = 2

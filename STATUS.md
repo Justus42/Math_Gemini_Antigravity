@@ -6,7 +6,8 @@ Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprot
 ## Phase 7 (Schritte 1–2, Rechnung Claude, 2026-11-26)
 
 - Rückführung auf Stärke 2: [`docs/PHASE7_T2_REDUCTION.md`](docs/PHASE7_T2_REDUCTION.md). `q = 5`: **34** statt 35 Blöcke gefunden → `CA(4250; 5, 7, 5)` (`−125` vs. `ca-tools @ e673ab4` = `4375`). Belegart: bestes gefundenes `m`, Optimalität offen (`<= 33`: `UNKNOWN` nach `300 s`).
-- Nicht fremdgeprüft (Rechnung des Prüfers). Nachbau, Dual-Verifikation und Ablage in `results/` durch Antigravity stehen aus. `q = 7` nicht gerechnet.
+- `q = 7`: **68** statt 70 Blöcke gefunden → `CA(3332; 4, 9, 7)`, `CA(23324; 5, 9, 7)`, `CA(163268; 6, 9, 7)` (kleiner als `ca-tools @ e673ab4` und als die eigenen Phase-6A-Arrays). Belegart: bestes gefundenes `m`, Optimalität offen. Die drei `q = 7`-Arrays in Paket 1 sind damit nicht mehr das Beste aus dieser Bauart.
+- Nicht fremdgeprüft (Rechnung des Prüfers). Nachbau, Dual-Verifikation und Ablage in `results/` durch Antigravity stehen aus. `q = 8, 9, 11, 13, 19` nicht gerechnet.
 
 ## 0. Governance- & Branch-Status
 
