@@ -468,4 +468,7 @@ größere `q` auch gilt, ist **offen**.
   davon `48` mit `v < q`. `20` Zellen hatte Phase 6A nicht erreicht.
 - Jede `v < q`-Zelle aus Phase 6A wird durch die Bauart unterboten. Betroffen in `results/general_tqv/` und im
   Staging von PR `#24`: `CA_9766_3_21_18`, `CA_20086_4_13_10`, `CA_39715_4_15_12`, `CA_220946_5_13_10`.
-- Literatur zu dieser Bauart: **nicht geprüft**.
+- Literatur: [`docs/LITERATURE_CHECK_PHASE7_VQ.md`](LITERATURE_CHECK_PHASE7_VQ.md). Formel in den gelesenen Quellen nicht
+  gefunden, Prüfung nicht vollständig. Direkte Vorarbeit ist CKRS (2010), Lemma 3.3: in der Schreibweise von §2 die
+  Liste `{(c, d, d, d) : (c, d) != (0, 0)} ∪ {(0, 0, x, y) : x != y}` mit `q^2 + q(q-1) - 1` Vertretern
+  (nachgezählt für `q = 3..11`).

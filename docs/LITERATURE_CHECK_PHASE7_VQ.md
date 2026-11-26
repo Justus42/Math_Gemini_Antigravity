@@ -2,7 +2,8 @@
 
 - **Stand:** 2026-11-26, ca. 16:55 MEZ. **Autor:** Claude (Prüfer-Chat). Prüfvermerk nach `RULES.md` „Meldung nach außen“ 2c.
 - **Gegenstand:** `CAN(t, q+2, v) <= (q^2 + C(max(0, 2v - q), 2)) * q^(t-2)` ([`docs/PHASE7_T2_REDUCTION.md`](PHASE7_T2_REDUCTION.md) §14) und die Nebenklassen-Listen für `v = q` (§5–§10).
-- **Ergebnis in einem Satz:** In den gelesenen Quellen steht die Formel nicht; die nächste Vorarbeit (Bai 2026) hat für `v < q` eine schwächere Schranke derselben Familie, und der Rahmen „Vereinigung von Nebenklassen eines linearen Codes“ steht bereits bei Sitjar (2026). **Kein Neuheitsanspruch**; die Prüfung ist nicht vollständig (§5).
+- **Nachtrag 26.11.2026, ca. 17:45 MEZ:** §2.6 (CKRS 2010 im Volltext gelesen; Lemma 3.3 ist in der Schreibweise dieses Repos derselbe Bautyp; Herkunft der `4375`), §4 neu geordnet, §5 gekürzt. Anlass: Zweitrecherche in einem getrennten Opus-Chat (Bericht von Justus übergeben), hier nachgeprüft.
+- **Ergebnis in einem Satz:** In den gelesenen Quellen steht die Formel nicht; der Bautyp steht der Sache nach schon bei CKRS (2010, Lemma 3.3) mit mehr Zusatzblöcken, Bai (2026) hat für `v < q` eine schwächere Schranke, und der Rahmen „Vereinigung von Nebenklassen eines linearen Codes“ steht bei Sitjar (2026). **Kein Neuheitsanspruch**; die Prüfung ist nicht vollständig (§5).
 
 ## 1. Was gelesen wurde
 
@@ -47,7 +48,7 @@ Folge: Der Rahmen von Phase 7 (Vertreterliste `R`, Nebenklassen des Kerns `K_t`,
 
 Eine allgemeine Formel für `k = q + 2` oder für `v < q` enthält Sitjars Arbeit nicht; ihre Einträge an den hier betroffenen Zellen sind Nachoptimierungen von Bais Arrays.
 
-### 2.3 CKRS (2010), nach Bais Darstellung und `table/references.csv`
+### 2.3 CKRS (2010), nach Bais Darstellung und `table/references.csv` (überholt durch §2.6)
 
 Colbourn, Kéri, Rivas Soriano, Schlage-Puchta: Satz 3.2 (eine Zusatzspalte, `q^t + (q - 1) q^(t-1)`), Lemma 3.3 (`q^(t-2)` Zeilen weniger), Lemma 3.1 (Fusion, zwei Zeilen je entferntem Symbol). **Volltext nicht gelesen**; die Angaben stammen aus Bais Abschnitten 1, 2 und 11 und aus [`docs/GENERAL_TQV_PROOF.md`](GENERAL_TQV_PROOF.md) §4.
 
@@ -63,6 +64,26 @@ Etiketten in `ca_frame.csv @ e673ab4` (Zeile mit dem kleinsten `N` bei `k' >= k`
 
 Keine davon betrifft `k = q + 2` mit Zeilenzahl nahe `q^t`.
 
+### 2.6 Nachtrag: CKRS (2010) im Volltext, direkte Vorarbeit
+
+Gelesen: Autoren-Preprint (Server der Universität Rostock, über das alphaXiv-Werkzeug; Seiten 1–5, 7, 9, 23, 25–35). Nummerierung nach dem Preprint; die Zeitschriftenfassung ist nicht abgeglichen.
+
+- **Lemma 3.1 (Fusion):** ein Symbol weniger, zwei Zeilen weniger (in einem Sonderfall der Stärke 2 drei).
+- **Satz 3.2, Ungleichung (8):** `CAN(s+1, n+1, q) <= CAN(s+1, n, q) + q(q-1) * CAN(s-1, n-1, q)`. Bauart: die letzte Spalte wird verdoppelt; für jedes Paar `x != y` kommt ein Block hinzu, in dem die beiden Spalten konstant `x` und `y` tragen. Die Autoren merken an, dass sich das verbessern lassen sollte, wenn die Zusatzblöcke Teile des Grundarrays schon abdecken, und führen einen solchen Fall aus:
+- **Lemma 3.3** (`q` Primzahlpotenz, `s <= q`): `CAN(s, q+2, q) <= q^s + q(q-1) q^(s-2) - q^(s-2)`. Bauart: Reed–Solomon-Array mit Spalte `∞` = Leitkoeffizient; `∞` wird verdoppelt; die Zusatzblöcke sind die Polynome vom Grad `< s-2` mit den beiden Spalten `(x, y)`, `x != y`; die Polynome vom Grad `< s-2` im Grundarray sind dann überflüssig.
+
+**In der Schreibweise dieses Repos** (Vertreter `(c, d, a, b)`, §2 des Phase-7-Dokuments) ist das die Liste
+`{(c, d, d, d) : (c, d) != (0, 0)} ∪ {(0, 0, x, y) : x != y}` mit `q^2 + q(q-1) - 1` Vertretern. Belegart: **nachgezählt** — die Liste erfüllt `M(R)` für `q = 3, 4, 5, 7, 8, 9, 11`, und die Lifts für `q = 5`, `t = 3, 4, 5` sind gültige Arrays mit `220`, `1100`, `5500` Zeilen, genau die Zahl aus Lemma 3.3. Die Zuordnung selbst ist eine Lesart dieses Repos (zuerst im Opus-Bericht), keine Aussage der Autoren.
+
+Folgen für die Einordnung:
+- Die Familie „Nebenklassen des Codes der Polynome vom Grad `<= t-3`, zwei Zusatzspalten, die nur von den beiden obersten Koeffizienten abhängen“ steht der Sache nach schon bei CKRS (2010). Phase 6A und Phase 7 sind Verfeinerungen davon.
+- Eigener Schritt gegenüber Lemma 3.3: die zweite Spalte ist nicht mehr die Kopie von `∞` (Phase 6A: `min(c, d)`; Phase 7: beide Spalten frei), und die Zusatzblöcke sitzen nicht alle am Punkt `(0, 0)`, sondern an verschiedenen Punkten der Ebene. Dadurch `C(q, 2)` statt `q(q-1) - 1` Zusatzblöcke bei `v = q`, und `C(max(0, 2v - q), 2)` bei `v < q`.
+- Für `v < q` und `k = q + 2` enthält CKRS nur Fusion und Augmentation, keine eigene Formel (gelesene Seiten).
+
+**Herkunft der `4375` bei `(5, 7, 5)`:** In der Tabelle von CKRS steht `CAN(5, 7, 5) <= 4375` mit einem Quellenkürzel, das laut Legende auf Literaturstelle [32] zeigt (Li, Ji, Yin, Des. Codes Cryptogr. 50 (2009)); `ca-tools` nennt „Ji-Li-Yin“. Die Zahlen folgen dem Muster `(v + 2) * v^4`: bei CKRS `1536`, `4375`, `10368` für `v = 4, 5, 6`, in `ca-tools` `4375`, `10368`, `120000`, `860625`, `4473063` für `v = 5, 6, 10, 15, 21` (alle bei `t = 5`, `k = 7`). Das ist eine andere Familie (fest `k = 7`, auch für `v` ohne Primzahlpotenz). Dass `4375` zugleich der Phase-6A-Wert bei `q = 5` ist, liegt daran, dass `q^5 + C(q, 2) q^3 = q^4 (3q - 1)/2` und `(3q - 1)/2 = q + 2` nur für `q = 5` gilt. Belegart: **Zahlenmuster in zwei Tabellen; die Quelle selbst ist nicht gelesen**, und welche der beiden Arbeiten (2009 oder 2012) die Konstruktion enthält, ist offen.
+
+Berichtigungen zum Opus-Bericht: Dort steht die Liste als `(c, d, c, c)`; gemeint ist der Leitkoeffizient, also `(c, d, d, d)` (die andere Lesart verletzt `M(R)`, nachgezählt). Der Wert `1925` bei `(3, 13, 11)` stammt aus der Löserliste mit `175` statt `176` Blöcken (`q = 11`, PR `#27`), nicht aus PR `#25`.
+
 ## 3. Ergebnis und Wortwahl
 
 - Die Formel aus §14 wurde in keiner gelesenen Quelle gefunden. Belegart: **Suche in den oben genannten Quellen, nicht vollständig**.
@@ -72,13 +93,14 @@ Keine davon betrifft `k = q + 2` mit Zeilenzahl nahe `q^t`.
 ## 4. Herkunft, wie sie in `HOW.md` stehen sollte (Vorschlag, Entscheidung offen)
 
 1. Bush (1952): Polynomauswertung, `OA(q^t; t, q+1, q)`.
-2. CKRS (2010): Zusatzspalte mit Reparaturzeilen; Fusion.
-3. Bai (2026, `polychrome-bai2026`): Zusatzspalte als Färbung von `AG(2, q)`, blockierende Mengen, Alphabet-Einschränkung für `v < q`, Pencil-Überdeckung.
-4. Sitjar (2026): Vereinigung von Nebenklassen eines linearen Codes (Lemma 1), für die Löserlisten bei `v = q`.
-5. Eigener Schritt: zwei frei beschriftete Spalten über den `q` Auswertungsspalten, Rückführung auf Stärke 2, Liste mit `q^2 + C(max(0, 2v - q), 2)` Vertretern.
+2. **CKRS (2010), Satz 3.2 und Lemma 3.3: direkte Vorarbeit** (verdoppelte Spalte `∞`, Zusatzblöcke aus Polynomen niedrigen Grades für Paare `x != y`); Lemma 3.1 nur, falls Fusion benutzt wird.
+3. Bai (2026, `polychrome-bai2026`): Fasern als Geraden in `AG(2, q)`, blockierende Mengen, Alphabet-Einschränkung für `v < q`, Pencil-Überdeckung; dort eine Zusatzspalte auf allen `q + 1` Richtungen.
+4. Jamison (1977), Brouwer–Schrijver (1978): blockierende Mengen in `AG(2, q)`, soweit darauf Bezug genommen wird.
+5. Sitjar (2026): Vereinigung von Nebenklassen eines linearen Codes (Lemma 1), für die Löserlisten bei `v = q`.
+6. Eigener Schritt: zweite Spalte nicht als Kopie von `∞`, Zusatzblöcke über die Ebene verteilt, Rückführung auf Stärke 2, Liste mit `q^2 + C(max(0, 2v - q), 2)` Vertretern.
 
 ## 5. Grenzen und Restliste
 
-Nicht gelesen: CKRS (2010) im Volltext; Colbourn (2004, 2008, 2014, 2015); Hartman (2005); Ji–Yin (2010); Ji–Li–Yin (2012, Quelle des Tabellenwerts `4375` bei `(5, 7, 5)`); Hedayat–Sloane–Stufken; Chateauneuf–Kreher (2002); Colbourn–Lanus (2018); Nayeri–Colbourn–Konjevod (2013). Nicht geprüft: neuere Fassungen von Bais Preprint und Ablage auf Zenodo (die gelesene Fassung trägt das Datum 30.10.2026 und nennt §8 als neu in dieser Fassung), Sitjars Archiv ab Version 1.10, `aadwyer/CA_Database`, offene Issues von `ca-tools`. Der alphaXiv-Index liefert Top-Treffer, keine Vollliste.
+Nicht gelesen: die Zeitschriftenfassung von CKRS (2010); Colbourn (2004, 2008, 2014, 2015); Hartman (2005); Ji–Yin (2010); Li–Ji–Yin (2009) und Ji–Li–Yin (2012) (eine davon ist die Quelle der `4375`, §2.6); Hedayat–Sloane–Stufken; Chateauneuf–Kreher (2002); Colbourn–Lanus (2018); Nayeri–Colbourn–Konjevod (2013). Nicht geprüft: neuere Fassungen von Bais Preprint und Ablage auf Zenodo (die gelesene Fassung trägt das Datum 30.10.2026 und nennt §8 als neu in dieser Fassung), Sitjars Archiv ab Version 1.10, `aadwyer/CA_Database`, offene Issues von `ca-tools`. Der alphaXiv-Index liefert Top-Treffer, keine Vollliste.
 
 Die ältere Restliste in [`docs/LITERATURE_CHECK_T4_NEARBUSH.md`](LITERATURE_CHECK_T4_NEARBUSH.md) §8.2 gilt weiter.
