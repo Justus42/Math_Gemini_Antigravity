@@ -12,7 +12,8 @@ Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprot
 - **Arrays:** `CA(1017; 3, 11, 9)`, `CA(9153; 4, 11, 9)`, `CA(1870; 3, 13, 11)`, `CA(20570; 4, 13, 11)`, `CA(3094; 3, 15, 13)`, `CA(40222; 4, 15, 13)`, `CA(9747; 3, 21, 19)` dual-verifiziert in `results/phase8/`, dazu Nachbau und Zähler des Prüfers und Negativkontrolle ([`results/phase8/VERIFICATION_LOG_phase8.md`](results/phase8/VERIFICATION_LOG_phase8.md)). Alle sieben sind kleiner als die Tabelle am Commit `f682ba3` und kleiner als die eigenen Zeilen aus PR `#91` an denselben Zellen.
 - **Formel:** `|R| = q^2 + C(q,2) - q(1+j) + (q-5)/2 - j` (Primzahl `q ≡ 3 mod 4`, `j <= (q-15)/12`) ist Belegart „Argument“ plus nachgerechnete Zählung; im Tabellenbereich liefert sie größere Werte als die Listen ([`docs/PHASE8_UEBERSICHT.md`](docs/PHASE8_UEBERSICHT.md) §2).
 - **Offen am Gate:** Nachbau der Listen aus der Beschreibung, Dual-Verifikation für `t = 5, 6`, Literaturprüfung mit Prüfvermerk, Fremdprüfung des Arguments, Prüfung durch einen anderen Chat ([`docs/PHASE8_UEBERSICHT.md`](docs/PHASE8_UEBERSICHT.md) §5).
-- **Tabelleneintrag PR `#91`:** um 01:39 MEZ noch nicht in `table/ca_frame.csv` (`chrispbsmolen/ca-tools @ f682ba3`).
+- **Nachbau aus der Beschreibung (PR `#42`, Antigravity, Branch `exp/phase8-spec-repro`):** sieben Regel-Listen ohne Löser (`116, 172, 520, 516, 768, 746, 828` für `q = 9, 11, 19, 19, 23, 23` und `(q, v) = (25, 23)`). Gegenlauf des Phase-8-Chats (`P8-SPEC-REPRO-GEGENLAUF`, 27.11., 05:50 MEZ): Listen byte-gleich neu erzeugt, `M(R)` `0` Lücken `7/7`, `t = 3` dual-verifiziert `7/7`. Das sind Belege für die Beschreibung, keine Kandidaten für eine Meldung: Die Löserlisten in `data/phase8/` sind an denselben `q` kleiner oder gleich.
+- **Tabelleneintrag PR `#91`:** erledigt. `chrispbsmolen/ca-tools @ 697325b` (27.11., 03:08 MEZ) enthält die `37` Zeilen in `table/ca_frame.csv` (per `git fetch` nachgeprüft, 05:50 MEZ). An `13` Zellen ist der Vergleichswert für Phase 8 damit der eigene.
 
 ## Phase 7 (PR `#25`–`#32` gemergt + Lokales Staging `37`-Array-Paket, 2026-11-26)
 
@@ -107,7 +108,9 @@ Verbindliche Projektregeln siehe [`RULES.md`](RULES.md), vollständiges Laufprot
 
 ## Meldung nach außen
 
-### Zweite Einreichung: `jeserigk-ckrs-coset-2026-11` (37 Arrays) — Pull Request `#91` gemergt, Tabelleneintrag steht aus
+### Zweite Einreichung: `jeserigk-ckrs-coset-2026-11` (37 Arrays) — Pull Request `#91` gemergt, in der Tabelle seit `697325b` (27.11.2026, 03:08 MEZ)
+
+- **Tabelleneintrag (Nachtrag Claude, Phase-8-Chat, 27.11., 05:50 MEZ):** `37` Zeilen in `table/ca_frame.csv` am Commit `697325b`; Lauf `P8-TABELLE-697325B`. Die folgenden Punkte sind der Stand des Prüfer-Chats von 01:25 MEZ.
 
 - **Gemergt:** 27.11.2026, 01:13 MEZ (`2026-11-27T00:13:03Z`), Merge-Commit `fef4f72174691200c58121146683eba4b8618a0b` in `chrispbsmolen/ca-tools`; `0acc824` liegt in `main` dort (per `git fetch` nachgeprüft, 01:25 MEZ). `main` dort um 01:25 MEZ: `f682ba3`; die `37` Zeilen stehen noch **nicht** in `table/ca_frame.csv` und `table/ca_table.csv.gz` (bei PR `#88` folgte dieser Schritt etwa 45 Minuten nach dem Merge). Nachzutragen: Commit und Zeit des Tabelleneintrags.
 - **Übergabe:** Der Prüfer-Chat endet hier; Übergabe an den Phase-8-Chat in [`docs/UEBERGABE_PRUEFER_CHAT_2026-11-27.md`](docs/UEBERGABE_PRUEFER_CHAT_2026-11-27.md). Nach Angabe dieses Chats (nicht nachgeprüft, Listen nicht im Repo) sind `13` der `37` Zeilen durch neue Listen bei `v = q`, `q = 9, 11, 13, 17, 19`, bereits unterboten.
