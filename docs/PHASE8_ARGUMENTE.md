@@ -340,5 +340,23 @@ $$
 **Abgleich mit Rechnungen (kein Ersatz für die Prüfung):**
 
 - 1.2 (2): für alle Klassen bei den Primzahlen $q = 11, 13, 17, 19, 23, 29, 31, 37, 41, 43$ nachgerechnet (Lauf im Chat am 27.11., ca. 01:50 MEZ, mit der Beschreibung $\Delta$, $O = (0, -1/n_0)$, Punkte $(\pm e n_0 (d - d_0), d)$; nicht im Laufprotokoll). Für Primzahlpotenzen **nicht** gerechnet.
-- Zählformel aus 1.3 gegen gebaute Listen: `746` ($q = 23$, $j = 1$), `1190`, `1356`, `1942` ($q = 29, 31, 37$, $j = 2$), `722` ($(q, v) = (23, 22)$, $j = 1$) stimmen mit `data/phase8/` überein; Formel (a) als Zählung für alle Primzahlen $13 \le q < 520$ (Lauf `P8-FORMEL-ZAEHLUNG`).
+- Zählformel aus 1.3 gegen gebaute Listen: `746` ($q = 23$, $j = 1$), `1190`, `1356`, `1942` ($q = 29, 31, 37$, $j = 2$), `722` ($(q, v) = (23, 22)$, $j = 1$) stimmen mit `data/phase8/` überein (dort $n = 9, 11, 12, 13, 10$ und $G = 90, 154, 174, 216, 92$, am 06:05 MEZ aus den Listen abgelesen; bei $q = 37$ ist $n = 13$ kleiner als das größte zulässige $n = 15$, mit dem Formel (a) `1944` ergibt); Formel (a) als Zählung für alle Primzahlen $13 \le q < 520$ (Lauf `P8-FORMEL-ZAEHLUNG`).
 - Vorhersagen aus dem Text, nicht gebaut: `116` für $q = 9$ ($j = 0$, $n = 3$) und `828` für $(q, v) = (25, 23)$ ($j = 2$, $n = 11$); beide Teil des laufenden Nachbau-Auftrags an Antigravity.
+
+## Prüfung durch ein unbeteiligtes Modell, 2026-11-27, 06:03 MEZ
+
+**Was vorlag.** `openai/gpt-6.2-sol` über OpenRouter, Denkstufe `high`, Auftrag `docs/openrouter/PHASE8_ARGUMENTE_AUFTRAG.md`, dazu dieses Dokument im Stand des Commits `b71b035` und `docs/PHASE7_T2_REDUCTION.md`. Antwort im Wortlaut: `docs/openrouter/PHASE8_ARGUMENTE_REVIEW_gpt-6.2-sol.md` (Commit `7b7f631`). Das Modell hat kein Programm ausgeführt und weder Listen noch Skripte noch die Originalquellen der zitierten Sätze gesehen. Der Text oberhalb des Lesevermerks ist seit `b71b035` nicht mehr geändert.
+
+**Urteile.** 1.1, 1.2, 1.4 (Hilfssatz, Formel (a), Obergrenze, Untergrenze) und 1.5: korrekt. 1.3: korrekt mit kleiner Lücke. Kein Fehler gemeldet. Von Hand gerechnet laut Antwort: 1.2 und der Hilfssatz für $q = 3, 5, 7$; 1.5 für $q = 2, 3$; ein Gegenbeispiel zur alten Bedingung in 1.3 ($q = 7$, $v = 4$, $j = 0$, $n = 2$: $m(0) = 0$).
+
+**Vom Phase-8-Chat nachgerechnet (06:05 MEZ):** die Punktmengen der Handrechnung für $q = 7$, $n_0 = 3$ ($\Delta = \{1, 2, 3, 6\}$, $d_0 = 2$, $A_0(1) = \{\pm 1, \pm 3\}$) und das Gegenbeispiel ($x_b = 4 = v$, also $h_b = 0$, $h_a = 2$; bei $p = 0$ ist $-e^2$ kein Quadrat, beide Klassen entfallen). Beides stimmt. Die übrigen Handrechnungen der Antwort sind nicht nachgerechnet.
+
+**Offene Präzisierungen aus der Antwort (nicht eingearbeitet, damit der geprüfte Stand erhalten bleibt):**
+
+1. 1.1: Die zwei Fälle schließen sich nur aus, wenn Fall 2 ausdrücklich „keine volle Waagerechte“ verlangt.
+2. 1.3: die Zuordnung $e \mapsto a_e$ als Injektion nach $H_a$ ausdrücklich wählen; die $x_a + j$ Geraden außerhalb von $\Delta \cup \{0\}$ ausdrücklich aufteilen; die danach freien Punkte der reinen $b$-Geraden brauchen je einen Vertreter; für $n = 0$ lautet der Zusatzterm einheitlich $\max(0, n - 1)$.
+3. 1.4, Formel (a): Das „$+(2 + 2j)$“ betrifft $|R|$; die Streichungssumme ist im Fall $q \equiv 1 \pmod 4$ um $2 + 2j$ kleiner.
+4. Rahmen: $\pi$ aus Phase 7 sollte im Dokument selbst definiert sein.
+5. Lesevermerk: Beim Eintrag `1942` fehlte $n$; oben nachgetragen ($n = 13$).
+
+**Einordnung.** Das ist die Lesung eines unbeteiligten Sprachmodells, kein formaler Beweis und keine Rechnung. Regel 2d in `RULES.md` betrifft Arrays und bleibt für jede Meldung gesondert zu erfüllen. Belegart der Aussagen 1.1 bis 1.5: „Argument, von einem unbeteiligten Modell gelesen, kein Fehler gefunden“.
