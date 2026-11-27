@@ -13,7 +13,9 @@ Du hast an beidem nicht mitgewirkt. Deine Aufgabe ist, Fehler zu finden.
 3. Nenne stillschweigende Voraussetzungen und Randfälle (zum Beispiel `h_b = 0`, `n = 0`, `j` am Rand, kleine `q`,
    `v < q`).
 4. Prüfe, ob der Abschnitt „Rahmen“ die Bedingungen aus `docs/PHASE7_T2_REDUCTION.md` richtig wiedergibt.
-5. Behandle den „Lesevermerk“ als ungeprüfte Behauptung: Stimmen seine vier Anmerkungen?
+5. Behandle den „Lesevermerk“ als ungeprüfte Behauptung: Stimmen seine vier Anmerkungen? Die Anmerkungen 1 bis 3 sind
+   inzwischen in den Text eingearbeitet (siehe dort „Nachbesserung“). Prüfe, ob die Einarbeitung richtig ist und
+   ausreicht.
 6. Kein Urteil über Neuheit oder Bedeutung. Du führst kein Programm aus; sage ausdrücklich, was du nicht prüfen
    konntest.
 

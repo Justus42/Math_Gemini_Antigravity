@@ -1,6 +1,6 @@
 # Phase 8: Mathematische Argumente zur Konstruktion ohne Vollgeraden
 
-- **Status / Belegart (RULES.md §4 & §2d):** Informelles Argument. Ausgearbeitet von Gemini (Planerrolle) und gegengelesen vom Phase-8-Erzeugerchat (Claude). Eine Prüfung durch ein unbeteiligtes Drittmodell nach Regel 2d steht aus.
+- **Status / Belegart (`RULES.md`, Abschnitt „Meldung nach außen“: Regel 2d, Wortwahl nach Regel 4):** Informelles Argument. Ausgearbeitet von Gemini (Planerrolle) und gegengelesen vom Phase-8-Erzeugerchat (Claude). Eine Prüfung durch ein unbeteiligtes Drittmodell nach Regel 2d steht aus.
 - **Kein Neuheitsanspruch:** Die Aussagen ordnen ausschließlich die Blockzahl $m = |R|$ im Nebenklassen-Modell $K_t$ (Tabelle $M(R)$ gemischter Stärke 2) ein; eine Literaturprüfung nach Regel 2c steht gesondert aus.
 
 ---
@@ -106,12 +106,14 @@ In jedem Fall trifft $L_{\alpha, u}$ die Menge $A(e)$.
 
 Sei $q$ eine ungerade Primzahlpotenz, $2 \le v \le q$ und $j \ge 0$ eine ganze Zahl mit
 $$
-x_b := \frac{q+1}{2} + j \le \min(v, q - 1), \qquad x_a := q - 1 - x_b = \frac{q-3}{2} - j \le v.
+x_b := \frac{q+1}{2} + j \le \min(v - 1, q - 1), \qquad x_a := q - 1 - x_b = \frac{q-3}{2} - j.
 $$
 Setze $h_a := v - x_a$ (schwere $a$-Symbole $H_a$) und $h_b := v - x_b$ (schwere $b$-Symbole $H_b$). Für $v = q$ gilt $h_a = x_b + 1 = \frac{q+3}{2} + j$ und $h_b = q - x_b = \frac{q-1}{2} - j$, also $h_a - h_b = 2 + 2j$. Allgemein für $v \le q$ gilt
 $$
 h_a - h_b = x_b - x_a = 2 + 2j, \qquad h_b = v - \frac{q+1}{2} - j \le \frac{q-1}{2} - j \lt \frac{q+1}{2}.
 $$
+Die Bedingung $x_b \le v - 1$ bedeutet $h_b \ge 1$. Sie wird unten zweimal gebraucht: für die Kantenfärbung mit $h_b$ Farben und dafür, dass an jedem Punkt von $d = 0$ mindestens ein Vertreter liegt ($m(p) \ge h_b \ge 1$). Aus $x_b \le q - 1$ folgt $x_a \ge 0$; aus $h_a = h_b + 2 + 2j \ge 3$ folgt $x_a = v - h_a \lt v$.
+
 Wähle eine Menge $S \subseteq \mathbb{F}_q^\times / \{\pm 1\}$ mit $n := |S|$ unter der Packungsbedingung
 $$
 1 \le n \le \min\bigl(q - h_a,\; h_a,\; \tfrac{q-1}{2}\bigr)
@@ -146,7 +148,7 @@ $$
 |R| = q(v + x_b) - \sum_{p \in \mathbb{F}_q} \min\bigl(\mathrm{adel}(p),\; 2 + 2j\bigr) + (n - 1).
 $$
 
-**Argument.** Setze $m(p) := \max(|A_{\mathrm{req}}(p)|, h_b)$. Da stets $h_b \lt h_a$, lässt sich $A_{\mathrm{req}}(p)$ im Fall $|A_{\mathrm{req}}(p)| \lt h_b$ beliebig zu einer Teilmenge $A^*(p) \subseteq H_a$ der Größe $h_b$ erweitern; sonst setze $A^*(p) := A_{\mathrm{req}}(p)$. Dann ist $|A^*(p)| = m(p) \ge h_b$ für alle $p \in \mathbb{F}_q$.
+**Argument.** Setze $m(p) := \max(|A_{\mathrm{req}}(p)|, h_b)$. Da stets $h_b \lt h_a$, lässt sich $A_{\mathrm{req}}(p)$ im Fall $|A_{\mathrm{req}}(p)| \lt h_b$ beliebig zu einer Teilmenge $A^*(p) \subseteq H_a$ der Größe $h_b$ erweitern; sonst setze $A^*(p) := A_{\mathrm{req}}(p)$. Dann ist $|A^*(p)| = m(p) \ge h_b \ge 1$ für alle $p \in \mathbb{F}_q$.
 
 Betrachte den bipartiten Graphen $G = (H_a, \mathbb{F}_q; E)$ mit Kante $(a, p) \in E \iff a \in A^*(p)$ und $|E| = \sum_{p \in \mathbb{F}_q} m(p) = M_0$. Seine Knotengrade erfüllen:
 - $\deg_G(p) = m(p) \ge h_b$ für alle $p \in \mathbb{F}_q$;
@@ -166,7 +168,7 @@ Gesamtzählung: $x_a q$ Vertreter auf reinen $a$-Geraden, $x_b q + (n - 1)$ auf 
 
 ---
 
-## 1.4 Charakter-Summe, geschlossene Formel (a) und Asymptotik $7/5$ ($v = q$)
+## 1.4 Charakter-Summe, geschlossene Formel (a) und Asymptotik $7/5$ im Ein-$\Delta$-Skelett mit symmetrischen Klassen $A(e)$ um einen gemeinsamen Punkt $O$ ($v = q$)
 
 Sei $q$ eine ungerade Primzahlpotenz, $v = q$, $\chi: \mathbb{F}_q \to \{-1, 0, 1\}$ der quadratische Charakter ($\chi(0) = 0$) und $N_0 := \frac{q-1}{2}$.
 
@@ -197,15 +199,17 @@ Die Kappung $2 + 2j$ ist an allen $p \neq 0$ automatisch erreicht, sobald $\math
   $$
 - **$q \equiv 1 \pmod 4$:** $3j + 3 \le \frac{q-1}{4} \iff 0 \le j \le \frac{q-13}{12}$. Hier gilt $\mathrm{adel}(0) = 0$, sodass die Streichungssumme $(q - 1)(2 + 2j)$ statt $q(2 + 2j)$ beträgt — also exakt $+(2 + 2j)$ mehr als im Fall $q \equiv 3 \pmod 4$.
 
-### Scharfe Asymptotik $\frac{7}{5} q^2$ innerhalb des Ein-$\Delta$-Skeletts
-**Aussage 1.4.** *Für jede ungerade Primzahlpotenz $q \ge 11$ existiert im obigen Skelett (mit $v = q$) ein Parameter $j$ und eine Wahl $S$ mit*
+### Scharfe Asymptotik $\frac{7}{5} q^2$ innerhalb des Ein-$\Delta$-Skeletts mit symmetrischen Klassen $A(e)$ um einen gemeinsamen Punkt $O$
+**Aussage 1.4.** *Für jede ungerade Primzahlpotenz $q \ge 11$ existiert im Skelett aus 1.3 (mit $v = q$ und den Klassen $A(e)$ aus 1.2 um den gemeinsamen Punkt $O$) ein Parameter $j$ und eine Wahl $S$ mit*
 $$
 |R| \le \frac{7}{5} q^2 + \frac{1}{4\sqrt{2}}\, q^{3/2} + 2q.
 $$
-*Umgekehrt erfüllt jede Wahl von $j \ge 0$ und $S$ ($|S| = n \le \frac{q-3}{2} - j$) in diesem Skelett*
+*Umgekehrt erfüllt jede Wahl von $j \ge 0$ und $S$ ($|S| = n \le \frac{q-3}{2} - j$) in diesem Skelett mit diesen Klassen*
 $$
 |R| \ge \frac{7}{5} q^2 - \frac{3}{2} q.
 $$
+
+*Abgrenzung.* Beide Schranken gelten nur für diese Bauart. Verschobene Klassen, unsymmetrische Steigungspaare und Klassen aus Baer-Unterebenen sind nicht erfasst; die Untergrenze ist also kein Boden für das Modell $M(R)$ insgesamt.
 
 **Argument.**
 *Obergrenze (probabilistische Methode):* Setze $j := \lfloor (q - 11)/10 \rfloor \ge 0$, $n := \frac{q-3}{2} - j$, $C := 2 + 2j$, und wähle $S \subseteq \mathbb{F}_q^\times / \{\pm 1\}$ mit $|S| = n$ gleichverteilt zufällig. Für jedes feste $p \in \mathbb{F}_q^\times$ ist $X_p := \mathrm{adel}(p)$ hypergeometrisch verteilt mit Parametern $(N_0, K, n)$, wobei $K = \mathrm{adel}_{\mathrm{all}}(p) = \frac{q - 2 + \chi(-1)}{4}$.
@@ -314,7 +318,7 @@ $$
 
 ## Lesevermerk des Phase-8-Erzeugerchats (Claude), 2026-11-27, 02:16 MEZ
 
-**Einordnung.** Der Text oben stammt von Gemini und ist hier aus zwei eingefügten Teilen zusammengesetzt (Überlappung im Argument zu 1.4 zeilenweise gleich, einmal entfernt; sonst unverändert). Der Phase-8-Chat hat die Bauart entwickelt; seine Lesung ist **keine** Prüfung nach Regel 2d (`RULES.md`, Abschnitt „Meldung nach außen“). Belegart aller Aussagen 1.1–1.5 bleibt „Argument“.
+**Einordnung.** Der Text oben stammt von Gemini und ist hier aus zwei eingefügten Teilen zusammengesetzt (Überlappung im Argument zu 1.4 zeilenweise gleich, einmal entfernt; sonst unverändert bis auf die unten vermerkte Nachbesserung an drei Stellen). Der Phase-8-Chat hat die Bauart entwickelt; seine Lesung ist **keine** Prüfung nach Regel 2d (`RULES.md`, Abschnitt „Meldung nach außen“). Belegart aller Aussagen 1.1–1.5 bleibt „Argument“.
 
 **Gelesen und von Hand nachgerechnet, ohne Fehler gefunden:**
 
@@ -324,12 +328,14 @@ $$
 - 1.4: Hilfssatz mit der Substitution $t = \frac{1+x}{1-x}$; Formel (a) in beiden Restklassen; in der Obergrenze die Schritte $\mu \in [\frac n2 - \frac12, \frac n2]$, $\mathbb{E}[\min(X_p, C)] \ge \min(\mu, C) - \frac{\sigma_p}{2}$ und die Schlussabschätzung ($\frac75 q^2 + 1{,}6\,q - 2{,}1 + \frac{q^{3/2}}{4\sqrt2}$); in der Untergrenze $j^*$ und $j^* < \frac{q}{10}$.
 - 1.5: Grundungleichung $2|R| \ge 3q^2 + \alpha\beta + q|D_0| + E^* - \sum_{D_+} c_d r_d$ unabhängig hergeleitet; beide Unterfälle für $\Delta_{\mathrm{quad}} \le q$ nachgerechnet.
 
-**Anmerkungen:**
+**Anmerkungen** (1 bis 3 beziehen sich auf den Stand im Commit `f0d009e` und sind inzwischen eingearbeitet, siehe „Nachbesserung“):
 
 1. **1.3 braucht $h_b \ge 1$**, also $x_b \le v - 1$. Der Text lässt $x_b \le \min(v, q-1)$ zu. Bei $h_b = 0$ gibt es keine Farben, und die Punkte von $d = 0$ sind nicht mehr sicher belegt.
 2. **Die Untergrenze in 1.4 betrifft nur die Klassen $A(e)$ aus 1.2 mit gemeinsamem Punkt $O$.** Verschobene Klassen, unsymmetrische Steigungspaare (Listen `R_q11_m170.txt`, `R_q19_m513.txt`) und Klassen anderer Art bei Primzahlpotenzen (Baer-Unterebenen, Liste `R_q9_m113.txt`) sind nicht erfasst. „Boden des Skeletts“ ist in diesem Sinn zu lesen.
 3. In der Kopfzeile ist „RULES.md §4 & §2d“ ungenau; gemeint ist Regel 2d im Abschnitt „Meldung nach außen“.
 4. 1.5 benutzt keine nicht-waagerechte Gerade und gilt deshalb für jede ganze Zahl $q \ge 2$, wie im Text angegeben.
+
+**Nachbesserung, 2026-11-27, 05:59 MEZ.** Auf Angabe von Gemini (Verfasser) hat der Phase-8-Chat drei Stellen im Text oben geändert: Kopfzeile (Verweis auf `RULES.md`, Anmerkung 3); 1.3 (Bedingung $x_b \le \min(v - 1, q - 1)$ mit Begründung, dazu $m(p) \ge h_b \ge 1$ im Argument, Anmerkung 1); 1.4 (Überschriften, Wortlaut der Aussage und der Absatz „Abgrenzung“, Anmerkung 2). Sonst ist der Text unverändert. Die Änderungen sind selbst ungeprüft.
 
 **Abgleich mit Rechnungen (kein Ersatz für die Prüfung):**
 
