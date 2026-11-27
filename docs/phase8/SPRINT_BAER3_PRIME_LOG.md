@@ -91,3 +91,21 @@ Implementierung in reiner Standardbibliothek (`std`-only), Rechenzeit fuer alle 
   - Positivkontrolle auf Phase-6A-Multimenge (`m = 12`) mit derselben kanonischen Engine: **`PASS`** (`32` kanonische Loesungspaare).
   - Vollstaendige Aufzaehlung ueber alle `45` Punkt-Multimengen der Groesse `11` auf $\mathbb{F}_3^2$ (alle `9` mit einer 3-fachen + `36` mit zwei 2-fachen Multiplizitaeten, ohne affine Symmetriereduktion) × alle `28.501` kanonischen ternaeren Vektoren ($S(11, 3)$): `1.071` gueltige Einzelseiten, `13.410` Paartests, **`0` Loesungen** (`status=UNSAT_EXACT`, Laufzeit **`1,12 s`**).
   - Belegart: **vollstaendig durchgerechnet, `m = 11` fuer `p = 3` exakt ausgeschlossen $\Rightarrow \min |R|(3) = 12$** (schliesst den in `P8-U-EXAKT` nach `300 s` CP-SAT offenen Fall `q = 3`).
+
+---
+
+## Nachtrag Option A: Lifts & Dual-Verifikation in `/tmp/phase8_baer_v3/` (nicht committet)
+
+Alle `9` Arrays wurden mit `scripts/phase7_lift.py` (`--check-m` `0` Luecken) **2× byte-identisch** erzeugt (Run 1: `16,516 s`, Run 2: `14,879 s`), mit `verifiers/ca_verify` (POS & NEG: letzte Zeile entfernt) geprueft und fuer alle `8` Task-1-Arrays zusaetzlich mit `verifiers/verify_independent.py` (POS & NEG) dual-verifiziert (`verifiers/SHA256SUMS` `3/3 OK`, `test_verifiers.py` `23/23 PASS`).
+
+| Array (`/tmp/phase8_baer_v3/`) | `q, v, t, m` | Bytes | `SHA-256` | `ca_verify` POS / NEG | `verify_independent.py` POS / NEG | Status |
+| --- | --- | ---: | --- | --- | --- | --- |
+| `CA_972_3_11_9.txt` | `9, 9, 3, 108` | 21.384 | `a62790bb72e46e0dae80469ec9f2b741e404676ca72a76640223d6e4ee303d85` | `rc=0` (0,004 s) / `rc=1` (0,004 s) | `rc=0` (0,088 s) / `rc=1` (0,089 s) | **DUAL_PASS** |
+| `CA_8748_4_11_9.txt` | `9, 9, 4, 108` | 192.456 | `3008bb9bc4568cc1dbca70b81052a629a89ff89c40ee64d3c4bd5ca22a396a8f` | `rc=0` (0,011 s) / `rc=1` (0,013 s) | `rc=0` (0,954 s) / `rc=1` (0,986 s) | **DUAL_PASS** |
+| `CA_76288_4_18_14.txt` | `16, 14, 4, 298` | 3.093.248 | `e67727ccaa9a1ca70e49969f01cda02da8eb69b7aaea80806d9dc4ccf90a9b7c` | `rc=0` (0,480 s) / `rc=1` (0,484 s) | `rc=0` (76,11 s) / `rc=1` (75,41 s) | **DUAL_PASS** |
+| `CA_80896_4_18_15.txt` | `16, 15, 4, 316` | 3.367.168 | `84dc29a46202c1326dfad3cad5f3bff4f755b383ce5be38b8de0462e00679ebb` | `rc=0` (0,554 s) / `rc=1` (0,549 s) | `rc=0` (86,72 s) / `rc=1` (86,69 s) | **DUAL_PASS** |
+| `CA_17125_3_27_20.txt` | `25, 20, 3, 685` | 1.113.000 | `5b95db86df4d0141613b83bf261dbcfe98a4618a55ad6d1884d9b3ce5ec34e2e` | `rc=0` (0,177 s) / `rc=1` (0,176 s) | `rc=0` (11,09 s) / `rc=1` (11,28 s) | **DUAL_PASS** |
+| `CA_17250_3_27_21.txt` | `25, 21, 3, 690` | 1.138.525 | `b8325aa4b4f3b3108669ab593be33ebc823afbd3fc164fb3a713537efca50eed` | `rc=0` (0,201 s) / `rc=1` (0,202 s) | `rc=0` (11,81 s) / `rc=1` (11,81 s) | **DUAL_PASS** |
+| `CA_17700_3_27_22.txt` | `25, 22, 3, 708` | 1.187.075 | `be2beb22e229067524a18b3c3b337be824f9d5cff4a4f8e74fcbba8e480285b3` | `rc=0` (0,226 s) / `rc=1` (0,215 s) | `rc=0` (12,96 s) / `rc=1` (12,85 s) | **DUAL_PASS** |
+| `CA_18325_3_27_23.txt` | `25, 23, 3, 733` | 1.248.025 | `0fc3b3d69a8a03bcc2c53fe362b258d708781b33b5d0e9db74b763962d8e28f6` | `rc=0` (0,057 s) / `rc=1` (0,059 s) | `rc=0` (13,84 s) / `rc=1` (13,78 s) | **DUAL_PASS** |
+| `CA_494375_4_27_25.txt` | `25, 25, 4, 791` | 34.688.125 | `98c84010a0a91f862bfb1b94f6d9e80149441577c5605cb7070e453443dbf326` | `rc=0` (49,76 s) / `rc=1` (50,91 s) | **nicht gelaufen** (Shell-Cap) | **TEILCHECK** |
