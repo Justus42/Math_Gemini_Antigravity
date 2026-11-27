@@ -9,6 +9,8 @@ Ausführlich: [`docs/phase8/NOTIZ_1_KLASSEN_OHNE_GERADE.md`](phase8/NOTIZ_1_KLAS
 
 > **Nachtrag 27.11.2026, 02:16 MEZ:** Die Argumente zu den Aussagen 1, 2, 5, 6 und 7 sind inzwischen ausgeschrieben (Gemini), siehe [`docs/PHASE8_ARGUMENTE.md`](PHASE8_ARGUMENTE.md); dort auch die Vermutung aus Notiz 1 §3.1 als Aussage 1.5. Belegart bleibt „Argument“, bis ein unbeteiligtes Modell gelesen hat. Die Tabelle unten ist der Stand von 01:39 MEZ.
 
+> **Nachtrag 27.11.2026, 07:30 MEZ:** Zu Frage 3 und 4 aus §6 (Untergrenze im Modell, anderes Skelett) siehe [`docs/phase8/NOTIZ_3_UNTERGRENZE_BAER.md`](phase8/NOTIZ_3_UNTERGRENZE_BAER.md): eine Untergrenze `q^2 + q^(3/2) - 2q` für jede Liste (Argument) und eine Bauart für Quadratzahlen mit `q^2 + 2*q^(3/2) - 2q` Vertretern (gebaut für `q = 4..81`). Die Tabellen unten sind der Stand von 01:39 MEZ.
+
 ## 1. Was behauptet wird, je mit Belegart
 
 | # | Aussage | Belegart |

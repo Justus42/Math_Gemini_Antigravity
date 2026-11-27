@@ -7,3 +7,9 @@ Arbeitsstand, nicht aufgeräumt. Beschreibung der Bauart: `docs/phase8/NOTIZ_2_F
 - Prüfen: `python3 scripts/phase8/pruefe_listen.py ZAEHLER ARBEITSVERZEICHNIS` (aus dem Wurzelverzeichnis).
 
 Die Läufe haben Zeitlimits und sind nicht bytegenau wiederholbar; maßgeblich sind die Listen in `data/phase8/`.
+
+## Nachtrag 27.11.2026: Untergrenze und Baer-Gitter (`docs/phase8/NOTIZ_3_UNTERGRENZE_BAER.md`)
+
+- `baer_gitter.py Q F [--out DATEI]`: Liste für Quadratzahl `Q`, `F` Vollgeraden-Symbole je Seite; std-only, ohne Löser, bytegenau wiederholbar. `baer_gitter.py Q --klasse` prüft eine einzelne Baer-Klasse.
+- `untergrenze.py schranke Q ...` und `untergrenze.py listen DATEI ...`: Schranke `L(q)` und Lemma J an Listen.
+- `pruefe_baer.py ARBEITSVERZEICHNIS ZAEHLER Q:F:T[:py] ...` (aus dem Wurzelverzeichnis): Liste, Lift, Verifier, Negativkontrolle als Markdown-Zeile.
