@@ -1,0 +1,128 @@
+name: verify-phase8-baer
+
+# Dual-Verifikation der Baer-Gitter-Arrays q = 25, t = 4, k = 27 (docs/phase8/NOTIZ_3_UNTERGRENZE_BAER.md).
+# Nur lesend: kein Commit, kein Artefakt, keine Aussenwirkung. verifiers/ wird nicht veraendert.
+# verify_independent.py bricht bei Luecken nicht vorzeitig ab; die Negativkontrolle laeuft deshalb als eigener Job.
+
+on:
+  workflow_dispatch:
+    inputs:
+      v:
+        description: "Alphabet v (20..25) oder all"
+        required: true
+        default: "all"
+        type: choice
+        options: ["all", "20", "21", "22", "23", "24", "25"]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        env:
+          V_IN: ${{ inputs.v }}
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os
+          rows = {
+              20: (705, "86d020e57784278c8b8a0bc33f2479d470148776c09c2955aa856d175938ac13"),
+              21: (725, "e9593c2923aeeb7f8ef12711632302f1d0f4d63ade1e323091c910221e5bf0c3"),
+              22: (750, "088281e511c4cbc1502960f0f0bd502cf3f92ad8c7f36034f2ed39eb168759ee"),
+              23: (775, "ee99e18dd047de1d4f774c8fbec68cdb66cebf965c5a3241c7c50f8bde08026a"),
+              24: (800, "a63b91b093d33a53e7a27f3e28b0263dea3c16d9eb7e31750a8c1da700eac5cc"),
+              25: (825, "7c3208372873a106d9ef7512ef08ec810b96803d066168e5d60f064ae760c35e"),
+          }
+          sel = os.environ["V_IN"]
+          vs = sorted(rows) if sel == "all" else [int(sel)]
+          inc = [{"v": v, "m": rows[v][0], "sha": rows[v][1], "mode": mode}
+                 for v in vs for mode in ("pos", "neg")]
+          print("matrix=" + json.dumps({"include": inc}))
+          EOF
+
+  verify:
+    needs: plan
+    name: q25 t4 v${{ matrix.v }} ${{ matrix.mode }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      Q: 25
+      T: 4
+      K: 27
+      V: ${{ matrix.v }}
+      M: ${{ matrix.m }}
+      MODE: ${{ matrix.mode }}
+      SHA_SOLL: ${{ matrix.sha }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verifier unveraendert (SHA256SUMS) und Selbsttest
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          sha256sum -c verifiers/SHA256SUMS
+          gcc -O3 -march=native -pthread -o verifiers/ca_verify verifiers/ca_verify.c -lm
+          python3 verifiers/test_verifiers.py
+
+      - name: Eingabeliste pruefen
+        run: |
+          set -euo pipefail
+          LISTE="R_q${Q}_v${V}_baer_m${M}.txt"
+          cd data/phase8_baer
+          grep "  ${LISTE}\$" SHA256SUMS | sha256sum -c -
+          test "$(wc -l < "${LISTE}")" -eq "${M}"
+
+      - name: Lift nach /tmp und SHA-256 des Arrays
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ca
+          N=$(( M * Q * Q ))
+          python3 scripts/phase7_lift.py --q "${Q}" --v "${V}" \
+            --reps "data/phase8_baer/R_q${Q}_v${V}_baer_m${M}.txt" --check-m --t "${T}" --out /tmp/ca/CA.txt
+          test "$(wc -l < /tmp/ca/CA.txt)" -eq "${N}"
+          sha256sum /tmp/ca/CA.txt
+          echo "${SHA_SOLL}  /tmp/ca/CA.txt" | sha256sum -c -
+          if [ "${MODE}" = "neg" ]; then
+            head -n -1 /tmp/ca/CA.txt > /tmp/ca/IN.txt
+            echo "N_IN=$(( N - 1 ))" >> "$GITHUB_ENV"
+            echo "RC_SOLL=1" >> "$GITHUB_ENV"
+          else
+            cp /tmp/ca/CA.txt /tmp/ca/IN.txt
+            echo "N_IN=${N}" >> "$GITHUB_ENV"
+            echo "RC_SOLL=0" >> "$GITHUB_ENV"
+          fi
+
+      - name: ca_verify
+        run: |
+          set +e -uo pipefail
+          START=$(date +%s)
+          ./verifiers/ca_verify /tmp/ca/IN.txt "${T}" "${V}"
+          RC=$?
+          echo "ca_verify: Exit ${RC}, erwartet ${RC_SOLL}, $(( $(date +%s) - START )) s"
+          {
+            echo "| Verifier | v | Modus | Exit | Soll | Zeit |"
+            echo "|---|---|---|---|---|---|"
+            echo "| ca_verify | ${V} | ${MODE} | ${RC} | ${RC_SOLL} | $(( $(date +%s) - START )) s |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "${RC}" -eq "${RC_SOLL}"
+
+      - name: verify_independent.py
+        run: |
+          set +e -uo pipefail
+          START=$(date +%s)
+          python3 verifiers/verify_independent.py /tmp/ca/IN.txt "${T}" "${V}" -n "${N_IN}" -k "${K}"
+          RC=$?
+          echo "verify_independent.py: Exit ${RC}, erwartet ${RC_SOLL}, $(( $(date +%s) - START )) s"
+          {
+            echo "| Verifier | v | Modus | Exit | Soll | Zeit |"
+            echo "|---|---|---|---|---|---|"
+            echo "| verify_independent.py | ${V} | ${MODE} | ${RC} | ${RC_SOLL} | $(( $(date +%s) - START )) s |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "${RC}" -eq "${RC_SOLL}"
