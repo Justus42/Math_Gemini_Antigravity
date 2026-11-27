@@ -1,13 +1,9 @@
 # Auftrag: Prüfung von Notiz 3 zu Phase 8 (Untergrenze und Baer-Gitter)
 
-> **Entwurf vom 27.11.2026, 10:10 MEZ (Claude, Phase-8-Chat Nachfolger). NICHT abgeschickt.** Ein Aufruf über die
-> Bridge braucht die Freigabe von Justus in seinen Worten. Vorgesehen: ein unbeteiligtes Modell, Denkstufe `high`,
-> mit `docs/phase8/NOTIZ_3_UNTERGRENZE_BAER.md` im Stand des dann aktuellen Commits und als Hintergrund
-> `docs/PHASE7_T2_REDUCTION.md` (§2, §3, §11) sowie `docs/PHASE8_ARGUMENTE.md` (nur „Rahmen und Notation“).
-
 Du bekommst das Dokument `docs/phase8/NOTIZ_3_UNTERGRENZE_BAER.md` (verfasst von einem Sprachmodell, das die Bauart
 selbst entwickelt und gerechnet hat; §2.4 stammt von einem zweiten Sprachmodell) und als Hintergrund
-`docs/PHASE7_T2_REDUCTION.md` und den Abschnitt „Rahmen und Notation“ aus `docs/PHASE8_ARGUMENTE.md`.
+`docs/PHASE7_T2_REDUCTION.md` und `docs/PHASE8_ARGUMENTE.md` (davon ist nur der Abschnitt „Rahmen und Notation“
+Hintergrund; die Aussagen 1.1 bis 1.5 dort sind nicht Gegenstand dieses Auftrags).
 Du hast an nichts davon mitgewirkt. Deine Aufgabe ist, Fehler zu finden.
 
 1. Prüfe Schritt für Schritt und gib je Punkt ein Urteil: korrekt / korrekt mit Lücke (welche) / falsch (wo, mit
