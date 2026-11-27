@@ -1,6 +1,6 @@
 # Notiz 3: Untergrenze im Modell `M(R)` und das Baer-Gitter für Quadratzahlen
 
-- Stand: 2026-11-27, 07:32 MEZ. Autor: Claude (Phase-8-Chat, Nachfolger; Erzeugerrolle). Branch `claude/phase8-untergrenze-baer`.
+- Stand: 2026-11-27, 07:32 MEZ; **Nachtrag 10:20 MEZ** (§2.4 verschärfte Schranke, §8 Gegenlesen und Nachbau; Branch `claude/phase8-doku-reste`). Autor: Claude (Phase-8-Chat, Nachfolger; Erzeugerrolle). Erstfassung auf Branch `claude/phase8-untergrenze-baer` (PR `#44`).
 - Vergleichsstand: dieses Repo `main @ 6994817`; `chrispbsmolen/ca-tools @ 697325b` (27.11., 03:08 MEZ; nur `table/` geholt, rein lesend).
 - **Rolle:** Argument, Bauart und Rechnung stammen vom selben Chat. Nichts hier ist von einem unbeteiligten Modell oder Menschen gelesen oder nachgebaut. **Kein Neuheitsanspruch; die Literaturprüfung nach `RULES.md` Regel 2c fehlt** (§7).
 - **Außenwirkung:** keine. Kein Bridge-Aufruf. Keine Einreichung ohne Freigabe durch Justus.
@@ -9,7 +9,7 @@
 ## 1. Ergebnis
 
 1. **Untergrenze für jede Liste (Argument, §2):** Für jede Primzahlpotenz `q` und jede Vertreterliste `R`, deren `M(R)` Stärke 2 hat, gilt
-   `|R| >= q^2 + q*sqrt(q)*(sqrt(q) - 1)/(sqrt(q) + 1)`, also mindestens `q^2 + q^(3/2) - 2q`. Das Argument braucht nur den Satz von Jamison (Brouwer–Schrijver) über blockierende Mengen der affinen Ebene und Abzählen.
+   `|R| >= q^2 + q*sqrt(q)*(sqrt(q) - 1)/(sqrt(q) + 1)`, also mindestens `q^2 + q^(3/2) - 2q`. Das Argument braucht nur den Satz von Jamison (Brouwer–Schrijver) über blockierende Mengen der affinen Ebene und Abzählen. Eine kleine Verschärfung von Gemini gibt `|R| >= q^2 + (q^2 - q)/(sqrt(q) + 2)` (§2.4).
 2. **Für Quadratzahlen ist `7/5` nicht das Ende (gebaut, §3):** Für `q = n^2` gibt es eine Liste mit
    `|R| = q^2 + 2*q*sqrt(q) - 2q` bei `v = q` und `|R| = q^2 + q*sqrt(q) - 2q + sqrt(q)` bei `v = q - sqrt(q)`; dazwischen kostet jedes weitere Symbol `q` Vertreter. Ohne Löser gebaut und mit zwei Zählern geprüft für `q = 4, 9, 16, 25, 49, 64, 81`.
 3. Für Quadratzahlen liegt der Überschuss über `q^2` damit bei beiden Schranken in der Ordnung `q^(3/2)`; zwischen Untergrenze und Liste bleibt bei `v = q` ein Faktor von höchstens `2` im Term `q^(3/2)`.
@@ -40,7 +40,7 @@ Das Lemma gilt für jede Symbolklasse `A_s`, `B_s`, auch für solche mit voller 
 
 `L(q)` bezeichne die kleinste ganze Zahl über der Schranke: `L = 5, 11, 19, 30, 58, 75, 95, 141, 196, 295, 709` für `q = 2, 3, 4, 5, 7, 8, 9, 11, 13, 16, 25`.
 
-**Was die Schranke nicht ist.** Sie benutzt für Primzahlen den Satz von Blokhuis nicht und ist dort vermutlich weit weg: bei `q = 23` steht `602` gegen die Liste mit `746`. Für `v < q` gibt dasselbe Argument nichts über `q^2` hinaus.
+**Was die Schranke nicht ist.** Sie benutzt für Primzahlen den Satz von Blokhuis nicht und ist dort vermutlich weit weg: bei `q = 23` steht `602` (verschärft `604`) gegen die Liste mit `746`. Für `v < q` gibt dasselbe Argument nichts über `q^2` hinaus.
 
 ### 2.3 Belege
 
@@ -50,6 +50,23 @@ Das Lemma gilt für jede Symbolklasse `A_s`, `B_s`, auch für solche mit voller 
 | `|R| >= L(q)` an den `25` Listen mit `v = q` | `0` Verletzungen; kleinster Abstand `4` (`q = 5`: `34` gegen `30`) | gezählt |
 | Exaktes Minimum des Modells für `q = 2, 3, 4` | `q = 2`: Minimum `5 = L(2)` (`OPTIMAL`), die Schranke ist dort scharf. `q = 3`: `12` gefunden, `L(3) = 11`, nach `300 s` **nicht** entschieden. `q = 4`: `22` gefunden, `L(4) = 19`, nach `300 s` **nicht** entschieden | CP-SAT (`scripts/phase7_solve_cpsat.py Q 300 min`), Positivkontrolle `fixknown` (`5`, `12`, `22`) |
 | Satz U allgemein | – | **Argument**, von niemandem gegengelesen |
+
+### 2.4 Verschärfung von Schritt (c) (Gemini, 27.11.2026; vom Erzeuger nachgerechnet)
+
+**Aussage U'.** Unter den Voraussetzungen von Satz U gilt `|R| >= q^2 + (q^2 - q)/(sqrt(q) + 2)`.
+
+**Argument.** Wegen `p_d <= mu_d * nu_d <= q^2` liegt jedes `p_d` in `[0, q^2]`. Die Wurzel ist konkav, liegt also auf `[q, q^2]` über der Sekante durch `(q, sqrt(q))` und `(q^2, q)` mit Steigung `1/(q + sqrt(q))`. Zusammen mit `sqrt(p) >= p/sqrt(q)` auf `[0, q]` heißt das für alle `p` in `[0, q^2]`:
+`sqrt(p) >= p/sqrt(q) - max(0, p - q)/(sqrt(q) + 1)`.
+Summieren: `sum_d sqrt(p_d) >= q*sqrt(q) - E/(sqrt(q) + 1)`. Mit (b) also `|R| >= q^2 - q + q*sqrt(q) - E/(sqrt(q) + 1)`. Diese Ungleichung plus `1/(sqrt(q) + 1)` mal (a): `|R| * (sqrt(q) + 2) >= q^(5/2) + 3q^2 - q`, und das ist die Behauptung.
+
+Der Gewinn gegenüber Satz U ist `q*(sqrt(q) - 1)/((sqrt(q) + 1)*(sqrt(q) + 2))`, also weniger als `sqrt(q)`; die Größenordnung `q^2 + q^(3/2) - 2q` bleibt. `L'(q)` sei die kleinste ganze Zahl über der neuen Schranke:
+
+| `q` | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 11 | 13 | 16 | 17 | 19 | 23 | 25 | 27 | 49 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `L(q)` (Satz U) | 5 | 11 | 19 | 30 | 58 | 75 | 95 | 141 | 196 | 295 | 332 | 413 | 602 | 709 | 825 | 2659 |
+| `L'(q)` (Aussage U') | 5 | 11 | 19 | 30 | 59 | 76 | 96 | 142 | 197 | 296 | 334 | 415 | 604 | 711 | 827 | 2663 |
+
+Belegart: **informelles Argument** (Gemini), vom Erzeuger von Hand nachgerechnet; nach Regel 2d von keinem unbeteiligten Modell gelesen. Gezählt (`scripts/phase8/untergrenze.py listen`, Lauf `P8-U-VERSCHAERFUNG`): `0` Verletzungen in `72` Listen, davon `30` mit `v = q`; kleinster Abstand `4` (`q = 5`: `34` gegen `30`).
 
 ## 3. Das Baer-Gitter (`q = n^2`)
 
@@ -83,13 +100,13 @@ Belegart: Argument; dazu für jedes gebaute `q` gezählt (§3.3). Der Schluss vo
 
 Alle Listen: `python3 scripts/phase8/baer_gitter.py Q F --out DATEI` (std-only, ohne Löser, ohne Zufall). Prüfung je Liste mit dem eigenen Zähler im selben Skript (Punkte / Geradentreffer / Symbolpaare) und mit `scripts/phase7_lift.py --check-m` (für `v < q` mit `--v`).
 
-| `q` | `v = q - n` | … | … | … | … | `v = q` | bisher bei `v = q` | `L(q)` |
+| `q` | `v = q - n` | … | … | … | … | `v = q` | bisher bei `v = q` | `L'(q)` (§2.4) |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 4 | 18 | 20 | | | | 24 | 22 (Phase 6A) | 19 |
-| 9 | 93 | 99 | 108 | | | 117 | 113 (`data/phase8/`) | 95 |
-| 16 | 292 | 304 | 320 | 336 | | 352 | 376 (Phase 6A) | 295 |
-| 25 | 705 | 725 | 750 | 775 | 800 | 825 | 888 (`data/phase8_repro/`) | 709 |
-| 49 | 2653 | | | | | 2989 | – | 2659 |
+| 9 | 93 | 99 | 108 | | | 117 | 113 (`data/phase8/`) | 96 |
+| 16 | 292 | 304 | 320 | 336 | | 352 | 376 (Phase 6A) | 296 |
+| 25 | 705 | 725 | 750 | 775 | 800 | 825 | 888 (`data/phase8_repro/`) | 711 |
+| 49 | 2653 | | | | | 2989 | – | 2663 |
 | 64 | 4488 | | | | | 4992 | – | – |
 | 81 | 7137 | | | | | 7857 | – | – |
 
@@ -149,3 +166,9 @@ Zeit: festgelegt waren `45 min` insgesamt; gebraucht `53 min` (06:38–07:31 MEZ
 3. **Arrays:** `t = 4` bei `q = 25` für `v = 20..25` nur mit `ca_verify` und dem Zähler des Prüfers; `t = 5, 6` nicht erzeugt.
 4. **Nicht versucht:** Löser auf der Geraden `d = 0`; billigere Vollgeraden-Symbole bei `v = q`; Geminis Vorschlag mit sechs Baer-Klassen je Seite im alten Skelett (Lauf `P8-GEMINI-BAER`: seine Einzelklasse stimmt, die Überschläge `853` und `729` sind nicht gerechnet).
 5. Bei `q = 4`, `v = 2, 3` schlägt die Negativkontrolle „letzte Zeile entfernt“ nicht an: die Arrays haben dort überzählige Zeilen (`72` und `80` Zeilen gegen `12` und `33` in der Tabelle). Das ist kein Fehler der Verifier.
+
+## 8. Nachtrag 27.11.2026, 10:20 MEZ: Gegenlesen und Nachbau
+
+- **Gegenlesen durch Gemini (Planer, kein unbeteiligtes Modell):** kein Befund zu §2.1, §2.2 und §3; dazu ein direkter Nachweis der Geradentreffer für `a`- und `b`-Klassen ohne projektive Ebene (auch in Charakteristik `2`) und die Verschärfung in §2.4. Der Erzeuger hat beides nachgerechnet. Belegart bleibt „Argument“; die Prüfung nach Regel 2d steht aus (Auftrag vorbereitet in `docs/openrouter/PHASE8_NOTIZ3_AUFTRAG.md`, **nicht abgeschickt**).
+- **Blinder Nachbau durch Antigravity (PR `#45`, `scripts/phase8_baer_spec_repro.py`):** `20` Listen aus der Beschreibung in §3.1, die `18` gemeinsamen byte-gleich zu `data/phase8_baer/`; Einzelheiten im Lauf `P8-BAER-ABGLEICH-PR45`. Das belegt Beschreibung und Umsetzung auf einer zweiten Maschine, nicht die Mathematik unabhängig vom Erzeuger.
+- **Unverändert offen:** Literaturprüfung nach Regel 2c (§7.1), `verify_independent.py` für `t = 4` bei `q = 25`, `t = 5, 6`.

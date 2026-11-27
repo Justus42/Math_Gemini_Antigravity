@@ -11,7 +11,7 @@ Sei $q$ eine Primzahlpotenz, $2 \le v \le q$ und $V = \{0, \dots, v-1\}$. Eine V
 $$
 \bigl((c + \alpha d)_{\alpha \in \mathbb{F}_q},\; a,\; b\bigr).
 $$
-Nach Aussage A / A' (Phase 7, `docs/PHASE7_T2_REDUCTION.md`) erzeugt der Nebenklassen-Lift $L_t^\pi(R)$ ein $\mathrm{CA}(|R|\,q^{t-2};\, t, q+2, v)$ für alle $2 \le t \le q+2$, sobald $M(R)$ gemischte Stärke 2 besitzt (Alphabet $\mathbb{F}_q$ in den $q$ Auswertungsspalten, Alphabet $V$ in den Spalten $a, b$).
+Nach Aussage A / A' (Phase 7, `docs/PHASE7_T2_REDUCTION.md`) erzeugt der Nebenklassen-Lift $L_t^\pi(R)$ ein $\mathrm{CA}(|R|\,q^{t-2};\, t, q+2, v)$ für alle $2 \le t \le q+2$, sobald $M(R)$ gemischte Stärke 2 besitzt (Alphabet $\mathbb{F}_q$ in den $q$ Auswertungsspalten, Alphabet $V$ in den Spalten $a, b$). Dabei ist $\pi: \mathbb{F}_q \to V$ die Abbildung aus Phase 7 (`docs/PHASE7_T2_REDUCTION.md` §11): in den Elementnummern $0, \dots, q-1$ ist $\pi(z) = z$ für $z \lt v$ und $\pi(z) = 0$ sonst (für $v = q$ die Identität). Sie wird nach dem Lift nur auf die $q$ Auswertungsspalten angewandt.
 
 Die Stärke-2-Bedingung an $M(R)$ zerfällt in drei Bedingungen an $R$:
 1. **Punktabdeckung:** Jedes Paar $(c, d) \in \mathbb{F}_q^2$ kommt mindestens einmal als Projektion in $R$ vor (äquivalent zur Abdeckung aller Paare zwischen zwei beliebigen Auswertungsspalten $\alpha_1 \neq \alpha_2$).
@@ -30,7 +30,7 @@ Im Folgenden bezeichnet $\square_0 = \{x^2 : x \in \mathbb{F}_q\}$ die Menge der
 
 **Aussage 1.1.** *Sei $q$ eine Primzahlpotenz und $A \subseteq \mathbb{F}_q^2$ eine Punktmenge, die jede Gerade $L_{\alpha, u}$ ($\alpha, u \in \mathbb{F}_q$) trifft. Dann gilt eine der beiden Möglichkeiten:*
 1. *$A$ enthält eine vollständige waagerechte Gerade $H_{d^*} = \{(c, d^*) : c \in \mathbb{F}_q\}$ für ein $d^* \in \mathbb{F}_q$;*
-2. *oder $|A| \ge q + \sqrt{q}$ (Bruen), und falls $q$ eine Primzahl ist, sogar $|A| \ge \frac{3q+1}{2}$ (Blokhuis).*
+2. *oder $A$ enthält keine vollständige waagerechte Gerade; dann gilt $|A| \ge q + \sqrt{q}$ (Bruen), und falls $q$ eine Primzahl ist, sogar $|A| \ge \frac{3q+1}{2}$ (Blokhuis).*
 
 **Argument.** Bette $\mathrm{AG}(2, q) = \mathbb{F}_q^2$ in die projektive Ebene $\mathrm{PG}(2, q)$ mit Ferngerade $L_\infty$ ein. Die Parallelschar der waagerechten Geraden $H_d$ ($d \in \mathbb{F}_q$) schneidet $L_\infty$ in einem gemeinsamen Fernpunkt $P_\infty$. Setze $B := A \cup \{P_\infty\}$.
 
@@ -118,14 +118,15 @@ Wähle eine Menge $S \subseteq \mathbb{F}_q^\times / \{\pm 1\}$ mit $n := |S|$ u
 $$
 1 \le n \le \min\bigl(q - h_a,\; h_a,\; \tfrac{q-1}{2}\bigr)
 $$
-(für $v = q$ ist $q - h_a = x_a = \frac{q-3}{2} - j$; für $v \lt q$ lockert sich $q - h_a = x_a + (q - v)$).
+(für $v = q$ ist $q - h_a = x_a = \frac{q-3}{2} - j$; für $v \lt q$ lockert sich $q - h_a = x_a + (q - v)$). Wähle dazu eine injektive Zuordnung $e \mapsto a_e$ von $S$ nach $H_a$ (möglich wegen $n \le h_a$); im Folgenden steht $H_a \setminus S$ für $H_a \setminus \{a_e : e \in S\}$. Außerhalb von $\Delta \cup \{0\}$ liegen genau $q - 1 - \frac{q+1}{2} = x_a + j$ Geraden; $j$ davon werden reine $b$-Geraden, die übrigen $x_a$ reine $a$-Geraden.
 
 **Konstruktion von $R$:**
-1. **Reine $a$-Geraden ($x_a$ Geraden $d \notin \Delta \cup \{0\}$):** Je ein reines $a$-Symbol $a_d \in V \setminus H_a$; Vertreter $(c, d, a_d, \pi(c))$ für alle $c \in \mathbb{F}_q$ (wobei $\pi: \mathbb{F}_q \to V$ surjektiv ist). Dies deckt alle Paare $(a_d, b)$ für $b \in V$, die volle Gerade $H_d$ für $a_d$ und alle Punkte der Geraden.
+1. **Reine $a$-Geraden ($x_a$ Geraden $d \notin \Delta \cup \{0\}$):** Je ein reines $a$-Symbol $a_d \in V \setminus H_a$; Vertreter $(c, d, a_d, \pi(c))$ für alle $c \in \mathbb{F}_q$ (hier genügt irgendeine surjektive Abbildung $\mathbb{F}_q \to V$; die Abbildung $\pi$ aus dem Rahmen ist eine solche). Dies deckt alle Paare $(a_d, b)$ für $b \in V$, die volle Gerade $H_d$ für $a_d$ und alle Punkte der Geraden.
 2. **Reine $b$-Geraden ($x_b$ Geraden: $\Delta$ plus $j$ weitere Geraden $d \neq 0$):** Je ein reines $b$-Symbol $b_d \in V \setminus H_b$.
    - Auf $d = d_0$: am Punkt $O = (0, d_0)$ stehen die $n$ Vertreter $(0, d_0, a_e, b_{d_0})$ für $e \in S$; die übrigen $h_a - n$ schweren $a$-Symbole werden auf die $q - 1 \ge h_a - n$ Punkte $(c, d_0)$ ($c \neq 0$) verteilt (Rest beliebig mit Symbolen aus $H_a$).
    - Auf jedem $d \in \Delta \setminus \{d_0\}$: die $2n$ disjunkten Klassenpunkte $(\pm e n_0(d - d_0), d)$ erhalten $(c, d, a_e, b_d)$; die übrigen $h_a - n$ schweren $a$-Symbole passen ohne Mehrfachbelegung auf die verbleibenden $q - 2n$ Punkte, weil $h_a - n \le q - 2n \iff n \le q - h_a$.
    - Auf den $j$ übrigen reinen $b$-Geraden: alle $h_a \le q$ schweren $a$-Symbole kommen mindestens einmal vor.
+   - Jeder danach noch freie Punkt einer reinen $b$-Geraden erhält genau einen Vertreter $(c, d, a, b_d)$ mit einem beliebigen $a \in H_a$.
    Damit sind alle Paare $(a, b_d)$ für $a \in H_a$, alle vollen Geraden für die reinen $b$-Symbole, alle Punkte außerhalb $d = 0$ sowie die $\Delta$-Anteile aller Klassen $A(e)$ ($e \in S$) abgedeckt.
 3. **Schwere Gerade $d = 0$:** Auf $d = 0$ müssen abgedeckt werden:
    - jedes schwere $a$-Symbol aus $H_a \setminus S$ an allen $q$ Punkten (volle Gerade $H_0$);
@@ -164,7 +165,7 @@ Lege auf $d = 0$ für jede Kante $(a, p) \in E(G)$ den Vertreter $(p, 0, a, c(a,
 
 Gesamtzählung: $x_a q$ Vertreter auf reinen $a$-Geraden, $x_b q + (n - 1)$ auf reinen $b$-Geraden (Mehrfachbelegung nur bei $O$ mit $n \ge 1$ Vertretern) und $M_0 = q h_a - \sum_p \min(\mathrm{adel}(p), h_a - h_b)$ auf $d = 0$. Mit $x_a + h_a = v$ ergibt dies $(v + x_b)q - \sum_p \min(\mathrm{adel}(p), 2 + 2j) + (n - 1)$ (für $v = q$: $q^2 + q x_b - \sum_p \min(\mathrm{adel}(p), 2+2j) + (n-1)$). $\square$
 
-*(Anmerkung zum Randfall $n = 0$: Bei $n = 0$ entfällt die Mehrfachbelegung bei $O$, der Term $(n - 1)$ wird durch $0$ ersetzt.)*
+*(Anmerkung zum Randfall $n = 0$: Dann gibt es keine Klassen, der Punkt $O$ wird wie jeder andere Punkt von $d = d_0$ mit genau einem Vertreter belegt, und der Zusatzterm lautet einheitlich $\max(0, n - 1)$. Bei $v = q$ lässt der Rand $j = \frac{q-3}{2}$ nur $n = 0$ zu. Bei $v \lt q$ setzt 1.3 insbesondere $v \ge \frac{q+3}{2} + j$ voraus.)*
 
 ---
 
@@ -197,7 +198,7 @@ Die Kappung $2 + 2j$ ist an allen $p \neq 0$ automatisch erreicht, sobald $\math
   $$
   |R| = q^2 + q\left(\frac{q+1}{2} + j\right) - q(2 + 2j) + \left(\frac{q-5}{2} - j\right) = q^2 + \binom{q}{2} - q(1 + j) + \frac{q-5}{2} - j.
   $$
-- **$q \equiv 1 \pmod 4$:** $3j + 3 \le \frac{q-1}{4} \iff 0 \le j \le \frac{q-13}{12}$. Hier gilt $\mathrm{adel}(0) = 0$, sodass die Streichungssumme $(q - 1)(2 + 2j)$ statt $q(2 + 2j)$ beträgt — also exakt $+(2 + 2j)$ mehr als im Fall $q \equiv 3 \pmod 4$.
+- **$q \equiv 1 \pmod 4$:** $3j + 3 \le \frac{q-1}{4} \iff 0 \le j \le \frac{q-13}{12}$. Hier gilt $\mathrm{adel}(0) = 0$, sodass die Streichungssumme $(q - 1)(2 + 2j)$ statt $q(2 + 2j)$ beträgt — die Streichungssumme ist also um $2 + 2j$ kleiner und $|R|$ damit um genau $2 + 2j$ größer als im Fall $q \equiv 3 \pmod 4$.
 
 ### Scharfe Asymptotik $\frac{7}{5} q^2$ innerhalb des Ein-$\Delta$-Skeletts mit symmetrischen Klassen $A(e)$ um einen gemeinsamen Punkt $O$
 **Aussage 1.4.** *Für jede ungerade Primzahlpotenz $q \ge 11$ existiert im Skelett aus 1.3 (mit $v = q$ und den Klassen $A(e)$ aus 1.2 um den gemeinsamen Punkt $O$) ein Parameter $j$ und eine Wahl $S$ mit*
@@ -351,7 +352,7 @@ $$
 
 **Vom Phase-8-Chat nachgerechnet (06:05 MEZ):** die Punktmengen der Handrechnung für $q = 7$, $n_0 = 3$ ($\Delta = \{1, 2, 3, 6\}$, $d_0 = 2$, $A_0(1) = \{\pm 1, \pm 3\}$) und das Gegenbeispiel ($x_b = 4 = v$, also $h_b = 0$, $h_a = 2$; bei $p = 0$ ist $-e^2$ kein Quadrat, beide Klassen entfallen). Beides stimmt. Die übrigen Handrechnungen der Antwort sind nicht nachgerechnet.
 
-**Offene Präzisierungen aus der Antwort (nicht eingearbeitet, damit der geprüfte Stand erhalten bleibt):**
+**Präzisierungen aus der Antwort (am 27.11.2026, 10:20 MEZ eingearbeitet, siehe „Änderungsvermerk“ am Ende; der von `openai/gpt-6.2-sol` gelesene Text ist der Stand des Commits `b71b035`):**
 
 1. 1.1: Die zwei Fälle schließen sich nur aus, wenn Fall 2 ausdrücklich „keine volle Waagerechte“ verlangt.
 2. 1.3: die Zuordnung $e \mapsto a_e$ als Injektion nach $H_a$ ausdrücklich wählen; die $x_a + j$ Geraden außerhalb von $\Delta \cup \{0\}$ ausdrücklich aufteilen; die danach freien Punkte der reinen $b$-Geraden brauchen je einen Vertreter; für $n = 0$ lautet der Zusatzterm einheitlich $\max(0, n - 1)$.
@@ -360,3 +361,15 @@ $$
 5. Lesevermerk: Beim Eintrag `1942` fehlte $n$; oben nachgetragen ($n = 13$).
 
 **Einordnung.** Das ist die Lesung eines unbeteiligten Sprachmodells, kein formaler Beweis und keine Rechnung. Regel 2d in `RULES.md` betrifft Arrays und bleibt für jede Meldung gesondert zu erfüllen. Belegart der Aussagen 1.1 bis 1.5: „Argument, von einem unbeteiligten Modell gelesen, kein Fehler gefunden“.
+
+## Änderungsvermerk, 2026-11-27, 10:20 MEZ (Claude, Phase-8-Chat Nachfolger)
+
+Die fünf Präzisierungen aus der Lesung durch `openai/gpt-6.2-sol` sind in den Text oben eingearbeitet. Am Inhalt der Aussagen 1.1 bis 1.5 ändert sich nichts.
+
+1. **1.1:** Fall 2 der Aussage verlangt jetzt ausdrücklich „keine vollständige waagerechte Gerade“ (sonst erfüllt $A = \mathbb{F}_q^2$ beide Fälle).
+2. **1.3:** injektive Zuordnung $e \mapsto a_e$ nach $H_a$ und die Lesart von $H_a \setminus S$; Aufteilung der $x_a + j$ Geraden außerhalb von $\Delta \cup \{0\}$; ein Vertreter für jeden danach freien Punkt einer reinen $b$-Geraden; Randfall $n = 0$ mit Zusatzterm $\max(0, n - 1)$ und den Randbedingungen an $j$ und $v$.
+3. **1.4, Formel (a):** Das „$+(2 + 2j)$“ ist als Aussage über $|R|$ formuliert; die Streichungssumme ist um $2 + 2j$ kleiner.
+4. **Rahmen:** $\pi$ aus Phase 7 ist im Dokument definiert; in 1.3 ist vermerkt, dass dort jede surjektive Abbildung genügt.
+5. **Lesevermerk:** $n = 13$ beim Eintrag `1942` war schon am 27.11., 06:05 MEZ nachgetragen.
+
+Die Änderungen selbst sind von niemandem gegengelesen. Belegart der Aussagen bleibt: „Argument, von einem unbeteiligten Modell gelesen (Stand `b71b035`), kein Fehler gefunden“.
