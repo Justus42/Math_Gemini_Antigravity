@@ -13,3 +13,4 @@ Die Läufe haben Zeitlimits und sind nicht bytegenau wiederholbar; maßgeblich s
 - `baer_gitter.py Q F [--out DATEI]`: Liste für Quadratzahl `Q`, `F` Vollgeraden-Symbole je Seite; std-only, ohne Löser, bytegenau wiederholbar. `baer_gitter.py Q --klasse` prüft eine einzelne Baer-Klasse.
 - `untergrenze.py schranke Q ...` und `untergrenze.py listen DATEI ...`: Schranken `L(q)` (Satz U) und `L'(q)` (verschärft, Notiz 3 §2.4) und Lemma J an Listen; `listen` vergleicht seit dem 27.11., 10:10 MEZ mit `L'(q)`.
 - `pruefe_baer.py ARBEITSVERZEICHNIS ZAEHLER Q:F:T[:py] ...` (aus dem Wurzelverzeichnis): Liste, Lift, Verifier, Negativkontrolle als Markdown-Zeile.
+- `zellen.py PFAD/ca-tools/table/` (aus dem Wurzelverzeichnis): alle Zellen `t = 3..6`, an denen eine Phase-8-Liste kleiner ist als die Tabelle, als Markdown (`docs/PHASE8_UEBERSICHT.md` §4a).

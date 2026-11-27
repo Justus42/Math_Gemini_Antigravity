@@ -80,6 +80,73 @@ Die `37` Zeilen aus PR `#91` stehen noch nicht in der Tabelle; nach ihrem Eintra
 
 Nicht kleiner als die Tabelle: `(3, 19, 17)` (`7004` gegen `6778`), `(3, 25, 23)` (`17158` gegen `15612`), `(4, 25, 23)` (`394634` gegen `390621`), `(3, 25, 22)` (`16606` gegen `15517`). Für `v >= 26` hat die Tabelle keine Zellen. Die Tabellenwerte stammen aus `scripts/pruefer/tabelle.py` (`ca_frame.csv`, `ca_table.csv.gz`, `derived.csv`, Treppenregel) am Commit `f682ba3` (Lauf `P8-TABELLE-F682BA3`, 27.11., 01:39 MEZ): `17` Zellen kleiner, `4` nicht. Offene Pull Requests des Ziels sind dabei nicht durchgesehen; vor jeder Meldung nach Regel 2a und 2b neu.
 
+### 4a. Konsolidierter Stand gegen `ca-tools @ 697325b` (27.11.2026, 11:24 MEZ; Befund B3 des Prüfer-Chats)
+
+Die Tabelle in §4 ist der Stand von 01:39 MEZ gegen `f682ba3` mit einer Auswahl von `21` Zellen (`17` kleiner). Gegen `697325b` (enthält die `37` Zeilen aus PR `#91`; `main` dort am 27.11., 11:22 MEZ unverändert) und über **alle** Zellen `(t, q+2, v)`, `t = 3..6`, zu den Listen in `data/phase8/`, `data/phase8_repro/` und `data/phase8_baer/` (je `(q, v)` die kleinste Liste) ergibt `python3 scripts/phase8/zellen.py PFAD/ca-tools/table/`:
+
+- `104` Zellen mit Tabellenwert, davon **`55` kleiner**: `24` aus `data/phase8/` (nicht `17`), `27` aus `data/phase8_baer/`, `4` aus `data/phase8_repro/` (`q = 27`).
+- `12` der `55` sind dual-verifiziert und abgelegt (`7` in `results/phase8/`, `5` in `results/phase8_baer/`); die übrigen `43` sind Vorhersage. Für `(4, 27, 20..25)` liegen zusätzlich `ca_verify` und der Zähler des Prüfers vor; die Dual-Verifikation läuft über den Workflow `verify-phase8-baer`.
+- Die Zählung stimmt mit der des Prüfer-Chats überein (`24`, `55`); seine Datei liegt nicht im Repo.
+- Offene Pull Requests und Issues des Ziels sind dabei nicht durchgesehen (Regel 2b).
+
+| Zelle | Tabelle | Phase 8 | Liste | Stand |
+| --- | ---: | ---: | --- | --- |
+| `(3, 11, 9)` | 1044 | 1017 | `data/phase8/R_q9_m113.txt` | dual-verifiziert, abgelegt |
+| `(4, 11, 9)` | 9396 | 9153 | `data/phase8/R_q9_m113.txt` | dual-verifiziert, abgelegt |
+| `(5, 11, 9)` | 84564 | 82377 | `data/phase8/R_q9_m113.txt` | Vorhersage |
+| `(6, 11, 9)` | 761076 | 741393 | `data/phase8/R_q9_m113.txt` | Vorhersage |
+| `(3, 13, 11)` | 1925 | 1870 | `data/phase8/R_q11_m170.txt` | dual-verifiziert, abgelegt |
+| `(4, 13, 11)` | 21175 | 20570 | `data/phase8/R_q11_m170.txt` | dual-verifiziert, abgelegt |
+| `(5, 13, 11)` | 232925 | 226270 | `data/phase8/R_q11_m170.txt` | Vorhersage |
+| `(6, 13, 11)` | 2650021 | 2488970 | `data/phase8/R_q11_m170.txt` | Vorhersage |
+| `(3, 15, 13)` | 3211 | 3094 | `data/phase8/R_q13_m238.txt` | dual-verifiziert, abgelegt |
+| `(4, 15, 13)` | 41743 | 40222 | `data/phase8/R_q13_m238.txt` | dual-verifiziert, abgelegt |
+| `(5, 15, 13)` | 542659 | 522886 | `data/phase8/R_q13_m238.txt` | Vorhersage |
+| `(6, 15, 13)` | 9253764 | 6797518 | `data/phase8/R_q13_m238.txt` | Vorhersage |
+| `(4, 18, 14)` | 82432 | 81920 | `data/phase8_baer/R_q16_v14_baer_m320.txt` | dual-verifiziert, abgelegt |
+| `(5, 18, 14)` | 1419851 | 1310720 | `data/phase8_baer/R_q16_v14_baer_m320.txt` | Vorhersage |
+| `(6, 18, 14)` | 24137563 | 20971520 | `data/phase8_baer/R_q16_v14_baer_m320.txt` | Vorhersage |
+| `(5, 18, 15)` | 1419853 | 1376256 | `data/phase8_baer/R_q16_v15_baer_m336.txt` | Vorhersage |
+| `(6, 18, 15)` | 24137565 | 22020096 | `data/phase8_baer/R_q16_v15_baer_m336.txt` | Vorhersage |
+| `(6, 18, 16)` | 24137567 | 23068672 | `data/phase8_baer/R_q16_v16_baer_m352.txt` | Vorhersage |
+| `(4, 19, 17)` | 122825 | 119068 | `data/phase8/R_q17_m412.txt` | Vorhersage |
+| `(5, 19, 17)` | 2127329 | 2024156 | `data/phase8/R_q17_m412.txt` | Vorhersage |
+| `(6, 19, 17)` | 46771760 | 34410652 | `data/phase8/R_q17_m412.txt` | Vorhersage |
+| `(3, 21, 19)` | 10108 | 9747 | `data/phase8/R_q19_m513.txt` | dual-verifiziert, abgelegt |
+| `(4, 21, 19)` | 192052 | 185193 | `data/phase8/R_q19_m513.txt` | Vorhersage |
+| `(5, 21, 19)` | 3710719 | 3518667 | `data/phase8/R_q19_m513.txt` | Vorhersage |
+| `(6, 21, 19)` | 91485342 | 66854673 | `data/phase8/R_q19_m513.txt` | Vorhersage |
+| `(4, 25, 22)` | 390619 | 381938 | `data/phase8/R_q23_v22_m722.txt` | Vorhersage |
+| `(5, 25, 22)` | 9765619 | 8784574 | `data/phase8/R_q23_v22_m722.txt` | Vorhersage |
+| `(6, 25, 22)` | 244140619 | 202045202 | `data/phase8/R_q23_v22_m722.txt` | Vorhersage |
+| `(5, 25, 23)` | 9765621 | 9076582 | `data/phase8/R_q23_m746.txt` | Vorhersage |
+| `(6, 25, 23)` | 244140621 | 208761386 | `data/phase8/R_q23_m746.txt` | Vorhersage |
+| `(3, 27, 20)` | 17670 | 17625 | `data/phase8_baer/R_q25_v20_baer_m705.txt` | dual-verifiziert, abgelegt |
+| `(4, 27, 20)` | 456250 | 440625 | `data/phase8_baer/R_q25_v20_baer_m705.txt` | Vorhersage |
+| `(5, 27, 20)` | 12872657 | 11015625 | `data/phase8_baer/R_q25_v20_baer_m705.txt` | Vorhersage |
+| `(6, 27, 20)` | 296071749 | 275390625 | `data/phase8_baer/R_q25_v20_baer_m705.txt` | Vorhersage |
+| `(3, 27, 21)` | 19025 | 18125 | `data/phase8_baer/R_q25_v21_baer_m725.txt` | dual-verifiziert, abgelegt |
+| `(4, 27, 21)` | 523044 | 453125 | `data/phase8_baer/R_q25_v21_baer_m725.txt` | Vorhersage |
+| `(5, 27, 21)` | 12872659 | 11328125 | `data/phase8_baer/R_q25_v21_baer_m725.txt` | Vorhersage |
+| `(6, 27, 21)` | 296071751 | 283203125 | `data/phase8_baer/R_q25_v21_baer_m725.txt` | Vorhersage |
+| `(3, 27, 22)` | 19327 | 18750 | `data/phase8_baer/R_q25_v22_baer_m750.txt` | dual-verifiziert, abgelegt |
+| `(4, 27, 22)` | 531431 | 468750 | `data/phase8_baer/R_q25_v22_baer_m750.txt` | Vorhersage |
+| `(5, 27, 22)` | 12872661 | 11718750 | `data/phase8_baer/R_q25_v22_baer_m750.txt` | Vorhersage |
+| `(6, 27, 22)` | 296071753 | 292968750 | `data/phase8_baer/R_q25_v22_baer_m750.txt` | Vorhersage |
+| `(3, 27, 23)` | 19524 | 19375 | `data/phase8_baer/R_q25_v23_baer_m775.txt` | dual-verifiziert, abgelegt |
+| `(4, 27, 23)` | 531433 | 484375 | `data/phase8_baer/R_q25_v23_baer_m775.txt` | Vorhersage |
+| `(5, 27, 23)` | 12872663 | 12109375 | `data/phase8_baer/R_q25_v23_baer_m775.txt` | Vorhersage |
+| `(4, 27, 24)` | 531435 | 500000 | `data/phase8_baer/R_q25_v24_baer_m800.txt` | Vorhersage |
+| `(5, 27, 24)` | 14348901 | 12500000 | `data/phase8_baer/R_q25_v24_baer_m800.txt` | Vorhersage |
+| `(6, 27, 24)` | 387420483 | 312500000 | `data/phase8_baer/R_q25_v24_baer_m800.txt` | Vorhersage |
+| `(4, 27, 25)` | 531437 | 515625 | `data/phase8_baer/R_q25_v25_baer_m825.txt` | Vorhersage |
+| `(5, 27, 25)` | 14348903 | 12890625 | `data/phase8_baer/R_q25_v25_baer_m825.txt` | Vorhersage |
+| `(6, 27, 25)` | 387420485 | 322265625 | `data/phase8_baer/R_q25_v25_baer_m825.txt` | Vorhersage |
+| `(4, 29, 24)` | 707271 | 677970 | `data/phase8_repro/R_q27_v24_j2_n13_m930.txt` | Vorhersage |
+| `(5, 29, 24)` | 19531223 | 18305190 | `data/phase8_repro/R_q27_v24_j2_n13_m930.txt` | Vorhersage |
+| `(4, 29, 25)` | 707273 | 705672 | `data/phase8_repro/R_q27_v25_j2_n12_m968.txt` | Vorhersage |
+| `(5, 29, 25)` | 19531225 | 19053144 | `data/phase8_repro/R_q27_v25_j2_n12_m968.txt` | Vorhersage |
+
 ## 5. Was am Gate fehlt (aus der Übergabe §7.2, Stand je Punkt)
 
 1. Ins Repo: mit diesem Branch erledigt, sobald gemergt.
