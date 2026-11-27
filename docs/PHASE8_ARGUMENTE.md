@@ -312,7 +312,7 @@ $$
 
 ---
 
-## Lesevermerk des Phase-8-Erzeugerchats (Claude), 2026-11-27, 02:20 MEZ
+## Lesevermerk des Phase-8-Erzeugerchats (Claude), 2026-11-27, 02:16 MEZ
 
 **Einordnung.** Der Text oben stammt von Gemini und ist hier aus zwei eingefügten Teilen zusammengesetzt (Überlappung im Argument zu 1.4 zeilenweise gleich, einmal entfernt; sonst unverändert). Der Phase-8-Chat hat die Bauart entwickelt; seine Lesung ist **keine** Prüfung nach Regel 2d (`RULES.md`, Abschnitt „Meldung nach außen“). Belegart aller Aussagen 1.1–1.5 bleibt „Argument“.
 
