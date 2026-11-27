@@ -2,10 +2,11 @@
 """Phase 8: Untergrenze im Modell M(R) (docs/phase8/NOTIZ_3_UNTERGRENZE_BAER.md), std-only, keine Suche.
 
 Aufruf:
-  untergrenze.py schranke Q [Q ...]      L(q) = ceil(q^2 + q*sqrt(q)*(sqrt(q)-1)/(sqrt(q)+1))  (nur v = q)
+  untergrenze.py schranke Q [Q ...]      L(q) = ceil(q^2 + q*sqrt(q)*(sqrt(q)-1)/(sqrt(q)+1)) und die verschaerfte
+                                         Fassung L'(q) = ceil(q^2 + (q^2 - q)/(sqrt(q) + 2))  (nur v = q)
   untergrenze.py listen DATEI [...]      je Liste R_q<Q>[_v<V>]...txt:
        Lemma J je Symbolklasse  |A_s| >= q + m_s - 1  (m_s = Zahl der Waagerechten, die die Klasse trifft),
-       Klassen ohne volle Waagerechte, und fuer v = q der Vergleich |R| >= L(q).
+       Klassen ohne volle Waagerechte, und fuer v = q der Vergleich |R| >= L'(q).
   Exit 1, sobald eine Liste das Lemma oder die Schranke verletzt.
 """
 import math
@@ -28,6 +29,17 @@ def schranke(q):
     return q * q + E
 
 
+def schranke2(q):
+    """Verschaerfte Fassung (Notiz 3 §2.4): kleinste ganze Zahl >= q^2 + (q^2 - q)/(sqrt(q) + 2), exakt."""
+    def ok(E):                                   # E*(sqrt(q)+2) >= q^2 - q  <=>  sqrt(q)*E >= q^2 - q - 2E
+        rhs = q * q - q - 2 * E
+        return rhs <= 0 or q * E * E >= rhs * rhs
+    E = max(0, int((q * q - q) / (math.sqrt(q) + 2)) - 2)
+    while not ok(E):
+        E += 1
+    return q * q + E
+
+
 def lese(path):
     m = re.search(r"R_q(\d+)(?:_v(\d+))?", path)
     q = int(m.group(1))
@@ -42,7 +54,7 @@ def lese(path):
 
 def listen(paths):
     bad = 0
-    print("| Liste | q | v | `|R|` | Klassen ohne volle Waagerechte (a / b) | kleinster Wert von `|A_s| - (q + m_s - 1)` | L(q) | `|R| - L(q)` |")
+    print("| Liste | q | v | `|R|` | Klassen ohne volle Waagerechte (a / b) | kleinster Wert von `|A_s| - (q + m_s - 1)` | L'(q) | `|R| - L'(q)` |")
     print("| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |")
     for path in paths:
         q, v, reps = lese(path)
@@ -59,7 +71,7 @@ def listen(paths):
                 if max(per_line.values(), default=0) < q:
                     cnt += 1
             nofull.append(cnt)
-        L = schranke(q) if v == q else None
+        L = schranke2(q) if v == q else None
         if slack < 0 or (L is not None and len(reps) < L):
             bad += 1
         name = path.split("/")[-1]
@@ -71,7 +83,7 @@ def listen(paths):
 if __name__ == "__main__":
     if sys.argv[1] == "schranke":
         for q in map(int, sys.argv[2:]):
-            L = schranke(q)
-            print(f"q={q}: L(q)={L}  ({L / q / q:.4f} q^2;  q^2 + q*sqrt(q) - 2q = {q * q + q * math.sqrt(q) - 2 * q:.1f})")
+            L, L2 = schranke(q), schranke2(q)
+            print(f"q={q}: L(q)={L}  verschaerft L'(q)={L2}  ({L2 / q / q:.4f} q^2;  q^2 + q*sqrt(q) - 2q = {q * q + q * math.sqrt(q) - 2 * q:.1f})")
     else:
         sys.exit(1 if listen(sys.argv[2:]) else 0)
