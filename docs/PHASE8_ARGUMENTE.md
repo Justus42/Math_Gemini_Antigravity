@@ -156,7 +156,7 @@ Betrachte den bipartiten Graphen $G = (H_a, \mathbb{F}_q; E)$ mit Kante $(a, p) 
 - $\deg_G(a) = q \ge h_b$ für alle $a \in H_a \setminus S$;
 - $\deg_G(a_e) \ge |A_0(e)| = \frac{q+1}{2} \gt \frac{q-1}{2} - j \ge h_b$ für alle $e \in S$.
 
-Also hat $G$ Minimalgrad $\delta(G) \ge h_b$. Spalte jeden Knoten $x \in H_a \cup \mathbb{F}_q$ in einen Hauptknoten $x_0$ vom Grad exakt $h_b$ und weitere Restknoten vom Grad $\le h_b$ auf (die inzidenten Kanten von $x$ werden beliebig partitioniert). Der entstehende bipartite Graph $G'$ hat Maximalgrad $\Delta(G') = h_b$. Nach dem Kantenfärbungssatz von König (1916) besitzt $G'$ eine zulässige Kantenfärbung $c: E(G') \to H_b$ mit $h_b$ Farben (equivalenterweise folgt dies direkt aus dem Satz von Gupta 1967 zur Kantenüberdeckungszahl bipartiter Graphen).
+Also hat $G$ Minimalgrad $\delta(G) \ge h_b$. Spalte jeden Knoten $x \in H_a \cup \mathbb{F}_q$ in einen Hauptknoten $x_0$ vom Grad exakt $h_b$ und weitere Restknoten vom Grad $\le h_b$ auf (die inzidenten Kanten von $x$ werden beliebig partitioniert). Der entstehende bipartite Graph $G'$ hat Maximalgrad $\Delta(G') = h_b$. Nach dem Kantenfärbungssatz von König (1916) besitzt $G'$ eine zulässige Kantenfärbung $c: E(G') \to H_b$ mit $h_b$ Farben.
 
 Lege auf $d = 0$ für jede Kante $(a, p) \in E(G)$ den Vertreter $(p, 0, a, c(a, p))$ ab.
 - Da jeder Hauptknoten $p_0$ Grad $h_b$ hat und alle $h_b$ inzidenten Kanten verschiedene Farben tragen, kommt am Punkt $(p, 0)$ jedes $b \in H_b$ mindestens einmal vor.
@@ -165,7 +165,7 @@ Lege auf $d = 0$ für jede Kante $(a, p) \in E(G)$ den Vertreter $(p, 0, a, c(a,
 
 Gesamtzählung: $x_a q$ Vertreter auf reinen $a$-Geraden, $x_b q + (n - 1)$ auf reinen $b$-Geraden (Mehrfachbelegung nur bei $O$ mit $n \ge 1$ Vertretern) und $M_0 = q h_a - \sum_p \min(\mathrm{adel}(p), h_a - h_b)$ auf $d = 0$. Mit $x_a + h_a = v$ ergibt dies $(v + x_b)q - \sum_p \min(\mathrm{adel}(p), 2 + 2j) + (n - 1)$ (für $v = q$: $q^2 + q x_b - \sum_p \min(\mathrm{adel}(p), 2+2j) + (n-1)$). $\square$
 
-*(Anmerkung zum Randfall $n = 0$: Dann gibt es keine Klassen, der Punkt $O$ wird wie jeder andere Punkt von $d = d_0$ mit genau einem Vertreter belegt, und der Zusatzterm lautet einheitlich $\max(0, n - 1)$. Bei $v = q$ lässt der Rand $j = \frac{q-3}{2}$ nur $n = 0$ zu. Bei $v \lt q$ setzt 1.3 insbesondere $v \ge \frac{q+3}{2} + j$ voraus.)*
+*(Anmerkung zum Randfall $n = 0$: Er liegt **außerhalb** der Voraussetzung $1 \le n$ der Packungsbedingung, und Aussage 1.3 mit dem Zusatzterm $(n - 1)$ ist nur für $n \ge 1$ formuliert. Für $n = 0$ gibt es keine Klassen, der Punkt $O$ wird wie jeder andere Punkt von $d = d_0$ mit genau einem Vertreter belegt, es ist $G = 0$ und $|R| = q(v + x_b)$. Beide Fälle zusammen: Zusatzterm $\max(0, n - 1)$. Bei $v = q$ lässt der Rand $j = \frac{q-3}{2}$ nur $n = 0$ zu. Bei $v \lt q$ setzt 1.3 insbesondere $v \ge \frac{q+3}{2} + j$ voraus.)*
 
 ---
 
@@ -373,3 +373,10 @@ Die fünf Präzisierungen aus der Lesung durch `openai/gpt-6.2-sol` sind in den 
 5. **Lesevermerk:** $n = 13$ beim Eintrag `1942` war schon am 27.11., 06:05 MEZ nachgetragen.
 
 Die Änderungen selbst sind von niemandem gegengelesen. Belegart der Aussagen bleibt: „Argument, von einem unbeteiligten Modell gelesen (Stand `b71b035`), kein Fehler gefunden“.
+
+### Nachtrag 11:24 MEZ (Befund B2 des Prüfer-Chats, Verweis auf Gupta)
+
+- **1.3, Randfall $n = 0$:** Die Anmerkung sagt jetzt ausdrücklich, dass $n = 0$ außerhalb der Voraussetzung $1 \le n$ liegt, und gibt für diesen Fall $|R| = q(v + x_b)$ an. Die Packungsbedingung und die Formel der Aussage sind unverändert.
+- **1.3, Kantenfärbung:** Der Klammerverweis auf „Gupta 1967“ ist gestrichen. Das Argument braucht ihn nicht (Knotenaufspaltung und Satz von König), und der Prüfer-Chat konnte die Angabe nicht belegen. Das ist keine Aussage darüber, ob der Verweis sachlich falsch war.
+
+Auch diese Änderungen sind von niemandem gegengelesen.

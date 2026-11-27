@@ -2,7 +2,7 @@
 
 - Stand: 2026-11-27, 07:32 MEZ; **Nachtrag 10:10 MEZ** (§2.4 verschärfte Schranke, §8 Gegenlesen und Nachbau; Branch `claude/phase8-doku-reste`). Autor: Claude (Phase-8-Chat, Nachfolger; Erzeugerrolle). Erstfassung auf Branch `claude/phase8-untergrenze-baer` (PR `#44`).
 - Vergleichsstand: dieses Repo `main @ 6994817`; `chrispbsmolen/ca-tools @ 697325b` (27.11., 03:08 MEZ; nur `table/` geholt, rein lesend).
-- **Berichtigungen nach der Prüfung durch ein unbeteiligtes Modell (27.11., 10:33 MEZ): siehe §9.** Drei Sätze in §1, §2.2 und §3.2 sind falsch oder zu weit gefasst; der Text unten ist bewusst unverändert, damit der gelesene Stand erhalten bleibt.
+- **Berichtigungen nach der Prüfung durch ein unbeteiligtes Modell (27.11., 10:33 MEZ): siehe §9.** Drei Sätze in §1, §2.2 und §3.2 waren falsch oder zu weit gefasst. Seit dem 27.11., 11:24 MEZ sind die Berichtigungen und die sechs Präzisierungen in den Text eingearbeitet (§10); der gelesene Stand ist der Commit `886c221`.
 - **Rolle:** Argument, Bauart und Rechnung stammen vom selben Chat. Nichts hier ist von einem unbeteiligten Modell oder Menschen gelesen oder nachgebaut. **Kein Neuheitsanspruch; die Literaturprüfung nach `RULES.md` Regel 2c fehlt** (§7).
 - **Außenwirkung:** keine. Kein Bridge-Aufruf. Keine Einreichung ohne Freigabe durch Justus.
 - Auftrag: Punkt 1 aus `docs/UEBERGABE_PHASE8_CHAT_2026-11-27.md` §4 („Untergrenze im Modell `M(R)`; ist `7/5` das Ende? Andere Skelette“). Schreibweise wie `docs/PHASE8_ARGUMENTE.md` (Rahmen und Notation), `v = q`, wenn nichts anderes dasteht.
@@ -12,7 +12,7 @@
 1. **Untergrenze für jede Liste (Argument, §2):** Für jede Primzahlpotenz `q` und jede Vertreterliste `R`, deren `M(R)` Stärke 2 hat, gilt
    `|R| >= q^2 + q*sqrt(q)*(sqrt(q) - 1)/(sqrt(q) + 1)`, also mindestens `q^2 + q^(3/2) - 2q`. Das Argument braucht nur den Satz von Jamison (Brouwer–Schrijver) über blockierende Mengen der affinen Ebene und Abzählen. Eine kleine Verschärfung von Gemini gibt `|R| >= q^2 + (q^2 - q)/(sqrt(q) + 2)` (§2.4).
 2. **Für Quadratzahlen ist `7/5` nicht das Ende (gebaut, §3):** Für `q = n^2` gibt es eine Liste mit
-   `|R| = q^2 + 2*q*sqrt(q) - 2q` bei `v = q` und `|R| = q^2 + q*sqrt(q) - 2q + sqrt(q)` bei `v = q - sqrt(q)`; dazwischen kostet jedes weitere Symbol `q` Vertreter. Ohne Löser gebaut und mit zwei Zählern geprüft für `q = 4, 9, 16, 25, 49, 64, 81`.
+   `|R| = q^2 + 2*q*sqrt(q) - 2q` bei `v = q` und `|R| = q^2 + q*sqrt(q) - 2q + sqrt(q)` bei `v = q - sqrt(q)`; das erste weitere Symbol kostet `q - sqrt(q)` Vertreter, jedes folgende `q`. Unter `7/5 * q^2` liegt die Liste bei `v = q` ab `n >= 4`. Ohne Löser gebaut; mit zwei Zählern geprüft für `q = 4, 9, 16, 25`, mit dem eigenen Zähler für `q = 49, 64, 81`.
 3. Für Quadratzahlen liegt der Überschuss über `q^2` damit bei beiden Schranken in der Ordnung `q^(3/2)`; zwischen Untergrenze und Liste bleibt bei `v = q` ein Faktor von höchstens `2` im Term `q^(3/2)`.
 4. **Listenwerte bei `q = 25`:** `705, 725, 750, 775, 800, 825` für `v = 20..25` (bisher im Repo: `730, 761, 792, 828, 863, 888`). Bei `q = 16`: `292, 304, 320, 336, 352` für `v = 12..16`. Bei `q = 9` bringt die Bauart nichts (`117` gegen `113`).
 5. **Für Primzahlen ändert sich nichts Belegtes:** `7/5` bleibt der Boden *des Skeletts aus 1.3 mit den Klassen aus 1.2*. Im Modell insgesamt ist für Primzahlen nur die Untergrenze aus Satz 1 belegt (als Argument); ob mit Blokhuis ein fester Faktor über `1` folgt und ob ein zweiseitiges Skelett unter `7/5` kommt, ist offen (§5).
@@ -25,7 +25,7 @@
 
 **Argument.** Auf jede der `q - m` nicht getroffenen Waagerechten einen Punkt dazunehmen. Die neue Menge trifft jede Gerade der affinen Ebene `AG(2, q)` und hat `|A| + q - m` Punkte. Nach Jamison (1977) und Brouwer–Schrijver (1978) hat eine solche Menge mindestens `2q - 1` Punkte.
 
-Das Lemma gilt für jede Symbolklasse `A_s`, `B_s`, auch für solche mit voller Waagerechter. Gleichheit: volle Waagerechte allein (`m = 1`, `q` Punkte); Baer-Klasse (`m = sqrt(q) + 1`, `q + sqrt(q)` Punkte); Klasse `A(e)` aus `docs/PHASE8_ARGUMENTE.md` 1.2 (`m = (q + 3)/2`, `(3q + 1)/2` Punkte).
+Das Lemma gilt für jede Symbolklasse `A_s`, `B_s`, auch für solche mit voller Waagerechter. Beispiele für Gleichheit (keine vollständige Liste): volle Waagerechte allein (`m = 1`, `q` Punkte); Baer-Klasse (`m = sqrt(q) + 1`, `q + sqrt(q)` Punkte); Klasse `A(e)` aus `docs/PHASE8_ARGUMENTE.md` 1.2 (`m = (q + 3)/2`, `(3q + 1)/2` Punkte).
 
 ### 2.2 Satz U
 
@@ -39,9 +39,9 @@ Das Lemma gilt für jede Symbolklasse `A_s`, `B_s`, auch für solche mit voller 
 - (c) Für jedes `p >= 0` ist `sqrt(p) >= min(p, q)/sqrt(q)`. Also `sum_d sqrt(p_d) >= (q^2 - E)/sqrt(q)`.
 - (d) Aus (b), (c): `|R| >= q^2 - q + (q^2 - E)/sqrt(q)`. Diese Ungleichung plus `1/sqrt(q)` mal (a): `|R| * (1 + 1/sqrt(q)) >= q^2 - q + 2*q*sqrt(q)`. Auflösen ergibt die Behauptung.
 
-`L(q)` bezeichne die kleinste ganze Zahl über der Schranke: `L = 5, 11, 19, 30, 58, 75, 95, 141, 196, 295, 709` für `q = 2, 3, 4, 5, 7, 8, 9, 11, 13, 16, 25`.
+`L(q)` bezeichne die auf die nächste ganze Zahl aufgerundete Schranke: `L = 5, 11, 19, 30, 58, 75, 95, 141, 196, 295, 709` für `q = 2, 3, 4, 5, 7, 8, 9, 11, 13, 16, 25`.
 
-**Was die Schranke nicht ist.** Sie benutzt für Primzahlen den Satz von Blokhuis nicht und ist dort vermutlich weit weg: bei `q = 23` steht `602` (verschärft `604`) gegen die Liste mit `746`. Für `v < q` gibt dasselbe Argument nichts über `q^2` hinaus.
+**Was die Schranke nicht ist.** Sie benutzt für Primzahlen den Satz von Blokhuis nicht und ist dort vermutlich weit weg: bei `q = 23` steht `602` (verschärft `604`) gegen die Liste mit `746`. Für `v < q` gilt Satz U in dieser Form nicht. Dasselbe Verfahren mit `v(q-1)` statt `q(q-1)` in (b) und `sum_d p_d = v^2` gibt `(|R| - q^2) * (1 + 1/sqrt(q)) >= v(q-1) + v^2/sqrt(q) - q^2`; das ist für `v` nahe `q` mehr als `q^2` (zum Beispiel `|R| >= 85` bei `(9, 8)` und `|R| >= 681` bei `(25, 24)`), für kleinere `v` nichts (zum Beispiel `(25, 20..22)`).
 
 ### 2.3 Belege
 
@@ -49,7 +49,7 @@ Das Lemma gilt für jede Symbolklasse `A_s`, `B_s`, auch für solche mit voller 
 | --- | --- | --- |
 | Lemma J an jeder Symbolklasse aller `34` Listen in `data/phase7/`, `data/phase8/`, `data/phase8_repro/` und der `18` neuen Listen | `0` Verletzungen in `52` Listen; in jeder Liste wird die Schranke von mindestens einer Klasse mit Gleichheit angenommen | gezählt (`scripts/phase8/untergrenze.py listen`) |
 | `|R| >= L(q)` an den `25` Listen mit `v = q` | `0` Verletzungen; kleinster Abstand `4` (`q = 5`: `34` gegen `30`) | gezählt |
-| Exaktes Minimum des Modells für `q = 2, 3, 4` | `q = 2`: Minimum `5 = L(2)` (`OPTIMAL`), die Schranke ist dort scharf. `q = 3`: `12` gefunden, `L(3) = 11`, nach `300 s` **nicht** entschieden. `q = 4`: `22` gefunden, `L(4) = 19`, nach `300 s` **nicht** entschieden | CP-SAT (`scripts/phase7_solve_cpsat.py Q 300 min`), Positivkontrolle `fixknown` (`5`, `12`, `22`) |
+| Exakte Suche (CP-SAT) für `q = 2, 3, 4`; entschieden ist nur `q = 2` | `q = 2`: Minimum `5 = L(2)` (`OPTIMAL`), die Schranke ist dort scharf. `q = 3`: `12` gefunden, `L(3) = 11`, nach `300 s` **nicht** entschieden. `q = 4`: `22` gefunden, `L(4) = 19`, nach `300 s` **nicht** entschieden | CP-SAT (`scripts/phase7_solve_cpsat.py Q 300 min`), Positivkontrolle `fixknown` (`5`, `12`, `22`) |
 | Satz U allgemein | – | **Argument**, von niemandem gegengelesen |
 
 ### 2.4 Verschärfung von Schritt (c) (Gemini, 27.11.2026; vom Erzeuger nachgerechnet)
@@ -60,7 +60,7 @@ Das Lemma gilt für jede Symbolklasse `A_s`, `B_s`, auch für solche mit voller 
 `sqrt(p) >= p/sqrt(q) - max(0, p - q)/(sqrt(q) + 1)`.
 Summieren: `sum_d sqrt(p_d) >= q*sqrt(q) - E/(sqrt(q) + 1)`. Mit (b) also `|R| >= q^2 - q + q*sqrt(q) - E/(sqrt(q) + 1)`. Diese Ungleichung plus `1/(sqrt(q) + 1)` mal (a): `|R| * (sqrt(q) + 2) >= q^(5/2) + 3q^2 - q`, und das ist die Behauptung.
 
-Der Gewinn gegenüber Satz U ist `q*(sqrt(q) - 1)/((sqrt(q) + 1)*(sqrt(q) + 2))`, also weniger als `sqrt(q)`; die Größenordnung `q^2 + q^(3/2) - 2q` bleibt. `L'(q)` sei die kleinste ganze Zahl über der neuen Schranke:
+Der Gewinn gegenüber Satz U ist `q*(sqrt(q) - 1)/((sqrt(q) + 1)*(sqrt(q) + 2))`, also weniger als `sqrt(q)`; die Größenordnung `q^2 + q^(3/2) - 2q` bleibt. `L'(q)` sei die auf die nächste ganze Zahl aufgerundete neue Schranke (`q = 4`: genau `19`):
 
 | `q` | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 11 | 13 | 16 | 17 | 19 | 23 | 25 | 27 | 49 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -83,16 +83,16 @@ Belegart: **informelles Argument** (Gemini), vom Erzeuger von Hand nachgerechnet
 Vertreter:
 
 - Waagerechte mit `w_1 != 0` und `w_2 != 0` (`(n-1)^2` Stück): an jedem Punkt genau ein Vertreter, nämlich die eine `a`-Klasse und die eine `b`-Klasse, in denen der Punkt liegt.
-- Waagerechte mit `w_2 = 0` (`n - 1` Stück): keine `a`-Klasse; `b` wie oben, `a` ist das Vollgeraden-Symbol mit der Nummer des `om`-Anteils von `c*w` (falls es das nicht gibt, ein Füllsymbol). Mit `w_1 = 0` umgekehrt.
-- `d = 0`: an Punkten mit `c_2 = i != 0` die `n` Vertreter (`a`-Klasse `(i, j)`, `b`-Klasse `(i, j)`) und `F` Vertreter (Vollgeraden-Symbol `m` von `a`, Vollgeraden-Symbol `m` von `b`); an den `n` Punkten mit `c_2 = 0` die `F` Vertreter (`m`, `m + x mod F`), wobei `x` die Nummer von `c` ist (für `F = 0` ein Füllvertreter).
+- Waagerechte mit `w_2 = 0` (`n - 1` Stück): keine `a`-Klasse; `b` wie oben, `a` ist das Vollgeraden-Symbol mit der Nummer des `om`-Anteils von `c*w` (Nummern `0, ..., n-1` in einer festen Nummerierung von `F_n`; ist die Nummer nicht kleiner als `F`, steht ein Füllsymbol: für `F >= 1` das Vollgeraden-Symbol `0`, für `F = 0` ein festes vorhandenes Klassensymbol, dessen Träger dadurch größer wird als die Baer-Klasse). Mit `w_1 = 0` umgekehrt.
+- `d = 0`: an Punkten mit `c_2 = i != 0` die `n` Vertreter (`a`-Klasse `(i, j)`, `b`-Klasse `(i, j)`) und `F` Vertreter (Vollgeraden-Symbol `m` von `a`, Vollgeraden-Symbol `m` von `b`); an den `n` Punkten mit `c_2 = 0` die `F` Vertreter (`m`, `m + x mod F`), wobei `x` die Nummer von `c` in derselben Nummerierung von `F_n` ist (für `F = 0` ein Füllvertreter).
 
 **Zählung.** `|R| = q(q - 1) + (q - n)(n + F) + n*max(F, 1)`. Für `F >= 1` ist das `q^2 + q*n - 2q + F*q`.
 
 ### 3.2 Warum das die drei Bedingungen erfüllt (Argument, knapp)
 
-1. *Klassen.* Die Punkte `(x : z : z*w_0 + y*eps)` mit `x, y, z` in `F_n` bilden eine Baer-Unterebene von `PG(2, q)` (Bild von `F_n^3` unter einer über `F_q` invertierbaren Abbildung), sofern `w_0` nicht in `F_n*eps` liegt. Sie enthält den Fernpunkt der Waagerechten und trifft die Ferngerade nur dort. Ihr affiner Teil sind `n` Punkte auf `d = 0` und je `n` Punkte auf den `n` Waagerechten `d = 1/(w_0 + y*eps)`. Eine Baer-Unterebene trifft jede Gerade, also trifft der affine Teil jede nicht-waagerechte Gerade. Die Klassen oben sind Bilder solcher Mengen unter `(c, d) -> (k*c + r*d + t, d)` mit `eps = 1` für `a` und `eps = om` für `b`.
+1. *Klassen.* Die Punkte `(x : z : z*w_0 + y*eps)` mit `x, y, z` in `F_n` bilden eine Baer-Unterebene von `PG(2, q)` (Bild von `F_n^3` unter einer über `F_q` invertierbaren Abbildung), sofern `w_0` nicht in `F_n*eps` liegt. Sie enthält den Fernpunkt der Waagerechten und trifft die Ferngerade nur dort. Ihr affiner Teil sind `n` Punkte auf `d = 0` und je `n` Punkte auf den `n` Waagerechten `d = 1/(w_0 + y*eps)`. Eine Baer-Unterebene trifft jede Gerade, also trifft der affine Teil jede nicht-waagerechte Gerade. Die Klassen oben sind Bilder solcher Mengen unter `(c, d) -> (k*c + r*d + t, d)`, und zwar mit `(eps, w_0; k, r, t) = (1, i*om; 1, j*om, i*om)` für die `a`-Klasse `(i, j)` und `(om, i; om, j, i*om)` für die `b`-Klasse `(i, j)`.
 2. *Punkte.* Auf einer Waagerechten mit `w_2 = i != 0` liegt jeder Punkt in genau einer `a`-Klasse `(i, j)`, weil `c -> om`-Anteil von `(c - i*om)*w` jeden Wert gleich oft annimmt. Ebenso für `b`.
-3. *Paare Klasse mit Klasse.* `a`-Klasse `(i, j)` und `b`-Klasse `(i', j')` liegen gemeinsam auf der einen Waagerechten mit `w = i' + i*om`. Dort ist `c -> (1`-Anteil, `om`-Anteil`)` von `c*w` eine Bijektion, also gibt es genau einen gemeinsamen Punkt.
+3. *Paare Klasse mit Klasse.* `a`-Klasse `(i, j)` und `b`-Klasse `(i', j')` liegen außerhalb von `d = 0` gemeinsam nur auf der Waagerechten mit `w = i' + i*om` (auf `d = 0` teilen sie für `i = i'` alle `n` Punkte). Dort ist `c -> (1`-Anteil, `om`-Anteil`)` von `c*w` eine Bijektion, also gibt es genau einen gemeinsamen Punkt.
 4. *Paare mit Vollgeraden-Symbolen.* Jede `b`-Klasse `(i', j')` liegt auf genau einer Waagerechten mit `w_2 = 0` (nämlich `w = i'`) und trifft dort jedes Vollgeraden-Symbol von `a` einmal. Umgekehrt für `a`-Klassen. Die Paare zweier Vollgeraden-Symbole stehen an den `n` Punkten `c_2 = 0` von `d = 0`.
 
 Belegart: Argument; dazu für jedes gebaute `q` gezählt (§3.3). Der Schluss von der Liste auf das Array beruht auf Aussage A bzw. A' aus `docs/PHASE7_T2_REDUCTION.md` (Argument) und ist an den geprüften Arrays in §4 bestätigt.
@@ -152,7 +152,7 @@ Nicht kleiner als die Tabelle: alle Zellen zu `q = 4` und `q = 9`; `(3, 18, 12..
 - **Primzahlen:** nichts Neues belegt. Die Schranke `7/5` aus `docs/PHASE8_ARGUMENTE.md` 1.4 gilt für ein Skelett mit einer Klassenfamilie. Zwei Dinge sind **Überschlag, weder gebaut noch ausgeschrieben:**
   1. Ein zweiseitiges Skelett (Klassen ohne volle Gerade auf der `a`- **und** der `b`-Seite, je etwa `q/4` Klassen, je `(q-1)/2` reine Geraden) käme rechnerisch auf etwa `11/8 * q^2` statt `7/5 * q^2`. Bei `q <= 43` läge es nach dem Überschlag nicht unter den Löserlisten (`q = 37`: etwa `1946` gegen `1942`), wäre also nur für die Forschungsfrage von Belang, nicht für die Tabelle. Offen ist unter anderem die Belegung der schweren Geraden, wenn beide Seiten Klassen tragen.
   2. Mit dem Satz von Blokhuis (Klasse ohne volle Gerade hat mindestens `(3q+1)/2` Punkte) und der Bilanz aus 1.5 sollte für Primzahlen ein fester Faktor über `1` folgen (Überschlag: etwa `1,2 * q^2`). Die Fallunterscheidung über mehrere schwere Geraden habe ich nicht zu Ende geführt; das ist **keine** Aussage.
-- **Andere Primzahlpotenzen (`q = 8, 27, 32`):** Für `q = s^h` gibt es entsprechende Klassen mit `q + q/s` Punkten. Ein Überschlag für `q = 27` (`s = 3`) ergibt bei `v = 24` etwa `1026`, also mehr als die Regel-Liste mit `930`. Nicht gebaut.
+- **Andere Primzahlpotenzen (`q = 8, 27, 32`):** Für `q = s^h` gibt es entsprechende Klassen mit `q + q/s` Punkten (in dieser Notiz nicht hergeleitet; die Lesung in §9 skizziert eine Herleitung über eine `F_s`-Hyperebene von `F_q`). Ein Gitter aus solchen Klassen ist nicht belegt. Ein Überschlag für `q = 27` (`s = 3`) ergibt bei `v = 24` etwa `1026`, also mehr als die Regel-Liste mit `930`. Nicht gebaut.
 
 ## 6. Läufe (Vorab-Festlegung vom 27.11., 06:37 MEZ: Positivkontrolle, Abbruch, Zeitgrenze)
 
@@ -198,3 +198,7 @@ Zeit: festgelegt waren `45 min` insgesamt; gebraucht `53 min` (06:38–07:31 MEZ
 **Vom Erzeuger nachgerechnet (10:33 MEZ):** die Formel aus Berichtigung 1 samt Zählung; das Verhältnis `2(n+2)/(n+1)`; in der Handrechnung der Antwort die Zeile `d = 1` für `q = 4` und der gemeinsame Punkt `(2, 1 + om)` für `q = 9` (`om^2 = 2`). Alles stimmt. Die übrigen Handrechnungen der Antwort sind nicht nachgerechnet.
 
 **Einordnung.** Lesung eines unbeteiligten Sprachmodells, kein formaler Beweis und keine Rechnung. Belegart von Lemma J, Satz U, Aussage U' und §3.2: „Argument, von einem unbeteiligten Modell gelesen (Stand `886c221`), kein Fehler in den Schlüssen; drei Sätze der Notiz berichtigt“. Die Literaturprüfung nach Regel 2c und die Dual-Verifikation für `t = 4` bei `q = 25` bleiben offen.
+
+## 10. Änderungsvermerk, 2026-11-27, 11:24 MEZ
+
+In den Text oberhalb von §8 eingearbeitet (Branch `claude/phase8-korrekturen`): die drei Berichtigungen und die sechs Präzisierungen aus §9. Geändert sind §1 Punkt 2, §2.1 (Gleichheitsfälle als Beispiele), §2.2 (Aufrundung; Absatz zu `v < q`), §2.3 (Zeilenname), §2.4 (Aufrundung), §3.1 (Nummerierung, Füllsymbol), §3.2 Punkte 1 und 3, §5 (andere Primzahlpotenzen). In §1 Punkt 3 ist „Faktor von höchstens `2`“ zu lesen als: Verhältnis der führenden Terme `2`; für endliches `q` ist das Verhältnis von Listenüberschuss zu Schrankenüberschuss `2(n+2)/(n+1)`. Zahlen, Tabellen und Belegarten sind unverändert. Der von `openai/gpt-6.2-sol` gelesene Stand ist der Commit `886c221`; die Änderungen selbst sind von niemandem gegengelesen.
