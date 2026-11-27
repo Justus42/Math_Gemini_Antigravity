@@ -7,6 +7,8 @@
 
 Ausführlich: [`docs/phase8/NOTIZ_1_KLASSEN_OHNE_GERADE.md`](phase8/NOTIZ_1_KLASSEN_OHNE_GERADE.md) (Prüfung von Geminis vier Optionen, Idee, erste Listen) und [`docs/phase8/NOTIZ_2_FORMEL.md`](phase8/NOTIZ_2_FORMEL.md) (Bauart mit gemeinsamem Punkt, Formel, Zählung). Schreibweise wie in [`docs/PHASE7_T2_REDUCTION.md`](PHASE7_T2_REDUCTION.md) §2.
 
+> **Nachtrag 27.11.2026, 02:16 MEZ:** Die Argumente zu den Aussagen 1, 2, 5, 6 und 7 sind inzwischen ausgeschrieben (Gemini), siehe [`docs/PHASE8_ARGUMENTE.md`](PHASE8_ARGUMENTE.md); dort auch die Vermutung aus Notiz 1 §3.1 als Aussage 1.5. Belegart bleibt „Argument“, bis ein unbeteiligtes Modell gelesen hat. Die Tabelle unten ist der Stand von 01:39 MEZ.
+
 ## 1. Was behauptet wird, je mit Belegart
 
 | # | Aussage | Belegart |
