@@ -104,6 +104,7 @@ static PairSubs PAIR_SUBS[MAX_K][MAX_K];
 static int SUB_FREE_COLS[MAX_SUB][MAX_T];
 static int SUB_N_FREE[MAX_SUB];
 static int8_t SOLVE1[MAX_SUB][MAX_T][MAX_Q2];
+static int8_t SOLVE1_RAY[MAX_SUB][MAX_T][MAX_Q2][MAX_Q + 2];
 
 typedef struct {
     int j1, j2;
@@ -301,11 +302,19 @@ static void init_geometry(const CodeSpec *spec) {
             if (j >= D) {
                 int fi = SUB_N_FREE[s]++;
                 SUB_FREE_COLS[s][fi] = j;
-                for (int u = 0; u < Q2; u++) SOLVE1[s][fi][u] = -1;
+                for (int u = 0; u < Q2; u++) {
+                    SOLVE1[s][fi][u] = -1;
+                    for (int rt = 0; rt < Q + 2; rt++) SOLVE1_RAY[s][fi][u][rt] = -1;
+                }
                 int h0 = H_COL[s][j][0], h1 = H_COL[s][j][1];
                 for (int dv = 1; dv < Q; dv++) {
                     int dsyn = ((h0 * dv) % Q) * Q + ((h1 * dv) % Q);
                     if (dsyn != 0) SOLVE1[s][fi][dsyn] = (int8_t)dv;
+                    for (int u = 0; u < Q2; u++) {
+                        int nu = SUB_ADD[u][dsyn];
+                        int rt = SYN_TO_TGT[nu];
+                        if (SOLVE1_RAY[s][fi][u][rt] < 0) SOLVE1_RAY[s][fi][u][rt] = (int8_t)dv;
+                    }
                 }
             }
         }
@@ -632,22 +641,38 @@ static void *worker_sa(void *arg) {
                             did_focused = 1;
                         }
                     }
-                } else if (SCALE_INV && (it & 7) == 0) {
-                    /* Occasional 2-flip in scale-inv mode */
+                } else if (SCALE_INV && (it & focus_mask) == 0) {
+                    int key = st->unc_list[rng_int(&rng, st->unc)];
+                    int s = key / N_TARGETS;
+                    int target_ray = key % N_TARGETS;
                     int row = rng_int(&rng, st->M);
-                    int j1 = D + rng_int(&rng, n_free);
-                    int j2 = D + rng_int(&rng, n_free);
-                    if (j1 != j2) {
-                        if (j1 > j2) { int tmp = j1; j1 = j2; j2 = tmp; }
-                        int dv1 = 1 + rng_int(&rng, Q - 1);
-                        int dv2 = 1 + rng_int(&rng, Q - 1);
-                        int delta = eval_2flip(st, row, j1, dv1, j2, dv2);
+                    int cur_u = st->syn[row][s];
+                    int fi = rng_int(&rng, SUB_N_FREE[s]);
+                    int dv = SOLVE1_RAY[s][fi][cur_u][target_ray];
+                    if (dv > 0) {
+                        int col = SUB_FREE_COLS[s][fi];
+                        int delta = eval_1flip(st, row, col, dv);
                         evals++;
                         if (delta <= 0 || (delta < 64 && rng_dbl(&rng) < pt[delta])) {
-                            apply_2flip(st, row, j1, dv1, j2, dv2);
+                            apply_1flip(st, row, col, dv);
                             moves++;
                         }
                         did_focused = 1;
+                    } else if ((it & 7) == 0) {
+                        int j1 = D + rng_int(&rng, n_free);
+                        int j2 = D + rng_int(&rng, n_free);
+                        if (j1 != j2) {
+                            if (j1 > j2) { int tmp = j1; j1 = j2; j2 = tmp; }
+                            int dv1 = 1 + rng_int(&rng, Q - 1);
+                            int dv2 = 1 + rng_int(&rng, Q - 1);
+                            int delta = eval_2flip(st, row, j1, dv1, j2, dv2);
+                            evals++;
+                            if (delta <= 0 || (delta < 64 && rng_dbl(&rng) < pt[delta])) {
+                                apply_2flip(st, row, j1, dv1, j2, dv2);
+                                moves++;
+                            }
+                            did_focused = 1;
+                        }
                     }
                 }
                 if (!did_focused) {
@@ -843,6 +868,7 @@ int main(int argc, char **argv) {
     uint64_t seed = 42;
     int threads = 2;
     const char *out_path = NULL;
+    const char *reps_out = NULL;
     const char *prune_out = NULL;
     int do_prune = 0;
     int do_selftest = 0;
@@ -854,6 +880,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--seed") && i + 1 < argc) seed = strtoull(argv[++i], NULL, 10);
         else if (!strcmp(argv[i], "--threads") && i + 1 < argc) threads = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--out") && i + 1 < argc) out_path = argv[++i];
+        else if (!strcmp(argv[i], "--reps-out") && i + 1 < argc) reps_out = argv[++i];
         else if (!strcmp(argv[i], "--prune")) do_prune = 1;
         else if (!strcmp(argv[i], "--prune-out") && i + 1 < argc) { do_prune = 1; prune_out = argv[++i]; }
         else if (!strcmp(argv[i], "--selftest")) do_selftest = 1;
@@ -861,7 +888,7 @@ int main(int argc, char **argv) {
         else { fprintf(stderr, "Unknown arg: %s\n", argv[i]); return 1; }
     }
     if (!mode || M <= 0 || M > MAX_M) {
-        fprintf(stderr, "Usage: %s --mode <c1|c2|c0|all1_5|all1_7> --m M [--scale-inv] [--time S] [--seed U] [--threads T] [--out FILE] [--prune] [--prune-out FILE] [--selftest]\n", argv[0]);
+        fprintf(stderr, "Usage: %s --mode <c1|c2|c0|all1_5|all1_7> --m M [--scale-inv] [--time S] [--seed U] [--threads T] [--out FILE] [--reps-out FILE] [--prune] [--prune-out FILE] [--selftest]\n", argv[0]);
         return 1;
     }
 
@@ -929,6 +956,18 @@ int main(int argc, char **argv) {
                tot_moves / (elapsed > 1e-6 ? elapsed : 1e-6),
                tot_evals / (elapsed > 1e-6 ? elapsed : 1e-6),
                tot_swaps);
+        if (reps_out) {
+            FILE *rf = fopen(reps_out, "w");
+            if (!rf) { perror("fopen reps_out"); return 1; }
+            fprintf(rf, "# mode=%s q=%d k=%d t=%d d=%d M=%d scale_inv=%d has_zero=%d active=%d seed=%llu\n",
+                    spec->name, Q, K, T, D, M, SCALE_INV, HAS_ZERO, active_rows, (unsigned long long)seed);
+            for (int i = 0; i < active_rows; i++) {
+                for (int j = 0; j < K; j++)
+                    fprintf(rf, "%d%c", (int)G_BEST_REP[i][j], (j + 1 == K) ? '\n' : ' ');
+            }
+            fclose(rf);
+            printf("WROTE_REPS: %s (active=%d)\n", reps_out, active_rows);
+        }
         uint8_t *rows = NULL;
         int N = rollout_ca(M, active_rows, G_BEST_REP, &rows);
         if (out_path) {

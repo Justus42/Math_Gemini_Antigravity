@@ -101,3 +101,31 @@ Mit Profil B (`m = 10`, Größe `36`) entsteht eine deterministische Konstruktio
 - **Determinismus (2× byte-identisch):** `cmp -s` `PASS` für beide abgelegten Listen (`0,574 s` Erstlauf / `0,569 s` Repro), `data/phase9_explore/SHA256SUMS` `2/2 OK`.
 - **Lemma-J-Prüfung (`scripts/phase8/untergrenze.py listen`):** `0` Verletzungen (`2/2`), je `18 / 18` Klassen ohne volle Waagerechte, kleinster Lemma-J-Schlupf `0`.
 - **Belegart:** Deterministische Listenkonstruktion, `M(R)` `0` Lücken in zwei unabhängigen Zählern (`phase9_q27_trace_check.py`, `scripts/phase7_lift.py --check-m`); alle abgeleiteten Arrays für $t \ge 3$ sind **Vorhersage** (nicht geliftet/dual-verifiziert). Literaturprüfung nach `RULES.md` Regel 2c und Drittprüfung stehen aus.
+
+---
+
+## Nachtrag: Angepasste Option A (`q = 27` Lifts `t = 3, 4`) und 180-s-Läufe (`all1_7 m = 67`, `C_1 m = 33`)
+
+### N.1 `q = 27` End-to-End-Lifts in `/tmp/phase9/` (nicht committet)
+
+| Datei (`/tmp/phase9/`) | `(t, k, v)` | `N` | Dateigröße Bytes (`MiB`, `<= 50 MiB`?) | SHA-256 | `ca_verify` POS / NEG (1 Zeile entf.) | `verify_independent.py` POS / NEG |
+| --- | --- | ---: | ---: | --- | --- | --- |
+| `CA_24921_3_29_24.txt` | `(3, 29, 24)` | `24.921` | `1.825.875` (`1,7413 MiB`, ja) | `33954168f61a0b35b92b0e507d83ac328e9a88e19fb39b9b6b439c823abfe90e` | Exit `0` (`0,06 s`) / Exit `1` (`191/3654` Lücken) | Exit `0` (`21,96 s`) / Exit `1` (`191` Lücken, `22,43 s`) |
+| `CA_25596_3_29_25.txt` | `(3, 29, 25)` | `25.596` | `1.901.790` (`1,8137 MiB`, ja) | `1d155be3938de02fbcf3c07bdd2a21c8c477f35d6cde2d86c533a080e95fda74` | Exit `0` (`0,06 s`) / Exit `1` (`2434/3654` Lücken) | Exit `0` (`23,61 s`) / Exit `1` (`2434` Lücken, `23,46 s`) |
+| `CA_672867_4_29_24.txt` | `(4, 29, 24)` | `672.867` | `49.259.988` (`46,9780 MiB`, **ja**) | `ba70713f10b7539fe44cba550a1e3426c124bc14eaa38c74c1136982e81f5a92` | Exit `0` (`94,37 s`) / Exit `1` (`1260/23751` Lücken, `93,93 s`) | **nicht gelaufen (Shell-Cap, Ziel GitHub Actions)** |
+| `CA_691092_4_29_25.txt` | `(4, 29, 25)` | `691.092` | `51.307.020` (`48,9302 MiB`, **ja**) | `ea88c870f9ba1764aea2862587f64cb5e377edb7de3110fa86f7cbe4f8bbaf07` | Exit `0` (`101,50 s`) / Exit `1` (`13624/23751` Lücken, `99,92 s`) | **nicht gelaufen (Shell-Cap, Ziel GitHub Actions)** |
+
+- **`t = 3`:** Vollständig dual-verifiziert (POS `PASS` & NEG `FAIL` auf beiden Verifiern).
+- **`t = 4`:** Beide Dateien liegen strikt unter `52.428.800 Bytes` (`50,00 MiB`); `verifiers/ca_verify` POS `Exit 0` / NEG `Exit 1` bestanden; `verify_independent.py` ausdrücklich nicht gestartet (Shell-Cap, Ziel GitHub Actions) — daher nach `RULES.md` §3 noch kein dual-verifizierter Kandidat.
+
+### N.2 Gezielte 180-s-Läufe (`scripts/phase9_coset_search.c` mit `SOLVE1_RAY`-Fokus, `--selftest` `5000/5000 PASS`)
+
+| Lauf | Ziel `CA(N; t, k, v)` | Modus & Seed | Laufzeit | Evals (`evals/s`) | Moves (`moves/s`) | Ergebnis | Belegart |
+| --- | --- | --- | ---: | ---: | ---: | --- | --- |
+| 2.1 | `CA(469; 3, 9, 7)` (`< 472`) | `all1_7 m=67 --scale-inv`, `seed=101`, `2T` | `178,043 s` | `922,0M` (`5,18M/s`) | `105,6M` (`593k/s`) | **`TIMEOUT (best_unc=6)`** | Heuristische Suche erfolglos (180 s Cap; Plateau identisch zu 58 s) |
+| 2.2 | `CA(825; 4, 7, 5)` (`33` Cosets) | `c1 m=33 --scale-inv`, `seed=101`, `2T` | `178,016 s` | `1,194B` (`6,71M/s`) | `128,4M` (`722k/s`) | **`TIMEOUT (best_unc=2)`** | Heuristische Suche erfolglos (180 s Cap; Plateau identisch zu 58 s) |
+
+### N.3 Verallgemeinerung auf $q = p^3$ (Gegenprobe $q = 8 = 2^3$)
+
+- Für jede Primzahlpotenz $q = s^3$ liefert $B_{\mathrm{tr}}$ (Größe $q + s^2 + 1$, Profil B: $m = s^2 + 1$, Punktverteilung $(s^2, s^{s^2})$) je Seite $(s - 1) s^2 = q - s^2$ auf $d \ne 0$ disjunkte Klassen mit `100 %` exakter 1-Punkt-Paarabdeckung auf $d \ne 0$, sowie $(s - 1) s$ leere Waagerechte für Vollgeraden-Symbole.
+- Direkte Gegenprobe in `GeneralGF(8)` ($q = 8 = 2^3$, $s = 2$): `4` `a`-Klassen $\times$ `4` `b`-Klassen (Größe `12`, $m = 5$), `16/16` eindeutige Paar-Treffer auf $d \ne 0$, `max |S_a0 cap S_b0| = 3/4` $\implies$ bei $v = 6$ ergibt die Gitterformel `|R| = 79` (schlechter als Bauart §14 mit `70`, ebenso `v = 8` schlechter als Phase 7 `91`). Asymptotisch gilt $|R| = q^2 + O(q^{5/3})$, sodass das Gitter ab $q = 27$ gewinnt.
