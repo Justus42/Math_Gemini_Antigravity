@@ -11,8 +11,8 @@ werden nachgeprüft, bevor sie in eine Antwort oder ins Repo gehen. Ein „Go“
 
 ## 2. Stand im Repo
 
-- `main @ 6954b9d` (PR `#40` gemergt). PR `#41` (`claude/phase8-argumente`) offen; er enthält PR `#42`
-  (Nachbau von Antigravity) per Merge-Commit. Justus mergt `#41`; `#42` gilt dann als erledigt.
+- `main @ 11b79a8`: PR `#40` und PR `#41` sind gemergt (`#41` am 27.11., 06:07 MEZ); `#41` enthielt den Nachbau von
+  Antigravity (PR `#42`) per Merge-Commit. Diese Übergabe kommt mit einem eigenen kleinen Pull Request nach.
 - `chrispbsmolen/ca-tools @ 697325b`: die `37` Zeilen aus PR `#91` stehen in `table/ca_frame.csv`.
   Nach außen ist alles gesperrt, bis Justus in eigenen Worten freigibt. Nächste Meldung nur einmal und erst,
   wenn sie nicht absehbar von uns selbst überholt wird.
