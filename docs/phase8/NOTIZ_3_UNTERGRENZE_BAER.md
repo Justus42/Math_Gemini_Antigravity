@@ -2,6 +2,7 @@
 
 - Stand: 2026-11-27, 07:32 MEZ; **Nachtrag 10:10 MEZ** (§2.4 verschärfte Schranke, §8 Gegenlesen und Nachbau; Branch `claude/phase8-doku-reste`). Autor: Claude (Phase-8-Chat, Nachfolger; Erzeugerrolle). Erstfassung auf Branch `claude/phase8-untergrenze-baer` (PR `#44`).
 - Vergleichsstand: dieses Repo `main @ 6994817`; `chrispbsmolen/ca-tools @ 697325b` (27.11., 03:08 MEZ; nur `table/` geholt, rein lesend).
+- **Berichtigungen nach der Prüfung durch ein unbeteiligtes Modell (27.11., 10:33 MEZ): siehe §9.** Drei Sätze in §1, §2.2 und §3.2 sind falsch oder zu weit gefasst; der Text unten ist bewusst unverändert, damit der gelesene Stand erhalten bleibt.
 - **Rolle:** Argument, Bauart und Rechnung stammen vom selben Chat. Nichts hier ist von einem unbeteiligten Modell oder Menschen gelesen oder nachgebaut. **Kein Neuheitsanspruch; die Literaturprüfung nach `RULES.md` Regel 2c fehlt** (§7).
 - **Außenwirkung:** keine. Kein Bridge-Aufruf. Keine Einreichung ohne Freigabe durch Justus.
 - Auftrag: Punkt 1 aus `docs/UEBERGABE_PHASE8_CHAT_2026-11-27.md` §4 („Untergrenze im Modell `M(R)`; ist `7/5` das Ende? Andere Skelette“). Schreibweise wie `docs/PHASE8_ARGUMENTE.md` (Rahmen und Notation), `v = q`, wenn nichts anderes dasteht.
@@ -172,3 +173,28 @@ Zeit: festgelegt waren `45 min` insgesamt; gebraucht `53 min` (06:38–07:31 MEZ
 - **Gegenlesen durch Gemini (Planer, kein unbeteiligtes Modell):** kein Befund zu §2.1, §2.2 und §3; dazu ein direkter Nachweis der Geradentreffer für `a`- und `b`-Klassen ohne projektive Ebene (auch in Charakteristik `2`) und die Verschärfung in §2.4. Der Erzeuger hat beides nachgerechnet. Belegart bleibt „Argument“; die Prüfung nach Regel 2d steht aus (Auftrag vorbereitet in `docs/openrouter/PHASE8_NOTIZ3_AUFTRAG.md`, **nicht abgeschickt**).
 - **Blinder Nachbau durch Antigravity (PR `#45`, `scripts/phase8_baer_spec_repro.py`):** `20` Listen aus der Beschreibung in §3.1, die `18` gemeinsamen byte-gleich zu `data/phase8_baer/`; Einzelheiten im Lauf `P8-BAER-ABGLEICH-PR45`. Das belegt Beschreibung und Umsetzung auf einer zweiten Maschine, nicht die Mathematik unabhängig vom Erzeuger.
 - **Unverändert offen:** Literaturprüfung nach Regel 2c (§7.1), `verify_independent.py` für `t = 4` bei `q = 25`, `t = 5, 6`.
+
+## 9. Prüfung durch ein unbeteiligtes Modell, 2026-11-27, 10:29 MEZ
+
+**Was vorlag.** `openai/gpt-6.2-sol` über OpenRouter (Bridge, Freigabe Justus 10:24 MEZ), Denkstufe `high`, Auftrag `docs/openrouter/PHASE8_NOTIZ3_AUFTRAG.md`, dazu diese Notiz im Stand des Commits `886c221` (inhaltsgleich mit `main @ 2d43728`), `docs/PHASE7_T2_REDUCTION.md` und `docs/PHASE8_ARGUMENTE.md`. Antwort im Wortlaut: `docs/openrouter/PHASE8_NOTIZ3_REVIEW_gpt-6.2-sol.md` (Commit `98eb781`). Das Modell hat kein Programm ausgeführt und weder Listen noch Skripte noch die Originalquellen gesehen.
+
+**Urteile.** Lemma J: korrekt. Satz U, Schritte (a) bis (d): korrekt für `v = q`. Aussage U' (§2.4): korrekt. Baer-Klassen und Geradentreffer: korrekt mit Lücke (Parameter der affinen Abbildung fehlen im Text). Punktabdeckung, Paare, Zählung: korrekt mit Lücke bei Nummerierung und Füllung. Von Hand gerechnet laut Antwort: das Baer-Gitter für `q = 4` vollständig (`18, 20, 24`), für `q = 9` eine `a`- und eine `b`-Klasse mit gemeinsamem Punkt, `L` und `L'` für `q = 2, 3, 4, 9`.
+
+**Berichtigungen (drei Sätze oben sind falsch oder zu weit gefasst):**
+
+1. **§2.2, „Für `v < q` gibt dasselbe Argument nichts über `q^2` hinaus“: falsch.** Mit `v(q-1)` statt `q(q-1)` in (b) und `sum_d p_d = v^2` gibt dasselbe Verfahren `(|R| - q^2) * (1 + 1/sqrt(q)) >= v(q-1) + v^2/sqrt(q) - q^2`. Für `v` nahe `q` ist die rechte Seite positiv, zum Beispiel `|R| >= 85` bei `(q, v) = (9, 8)` und `|R| >= 681` bei `(25, 24)`; für `(25, 20..22)` ist sie negativ. Vom Erzeuger nachgerechnet und an den `42` Listen mit `v < q` gezählt: `0` Verletzungen, bei `20` Listen liegt die Schranke über `q^2`. Der Fehler war mein eigener (aus dem einen Fall `(25, 20)` verallgemeinert). Die unveränderte Schranke aus Satz U gilt für `v < q` nicht (`q = 4`, `v = 2`: Liste mit `18`).
+2. **§3.2 Punkt 3, „liegen gemeinsam auf der einen Waagerechten“: zu weit.** Der eine gemeinsame Punkt gilt auf der Waagerechten `w = i' + i*om`. Auf `d = 0` haben eine `a`-Klasse und eine `b`-Klasse mit `i = i'` alle `n` Punkte gemeinsam. Die Paarabdeckung ist davon nicht berührt.
+3. **§1:** (i) „dazwischen kostet jedes weitere Symbol `q` Vertreter“: das erste kostet `q - n` (`705 -> 725`), erst die weiteren `q`. (ii) „mit zwei Zählern geprüft für `q = 4, ..., 81`“: zwei Zähler nur für `q = 4, 9, 16, 25`; für `q = 49, 64, 81` der eigene (für `q = 49` inzwischen auch `--check-m`, Lauf `P8-BAER-SPEC-REPRO`). (iii) „`7/5` nicht das Ende“ gilt bei `v = q` ab `n >= 4`; für `n = 2, 3` liegt die Liste über `7/5 * q^2` (`24` gegen `22,4`; `117` gegen `113,4`). (iv) „Faktor von höchstens `2`“: nur für die führenden Terme. Das Verhältnis von Listenüberschuss zu Schrankenüberschuss ist `2(n+2)/(n+1)`, also größer als `2`; ein Grenzwert für das Optimum ist nicht bewiesen.
+
+**Präzisierungen (nicht eingearbeitet):**
+
+4. `L(q)`, `L'(q)`: gemeint ist Aufrunden, nicht „echt größer“ (`q = 4`: `L' = 19` exakt).
+5. §2.1: Die drei Gleichheitsfälle sind Beispiele, keine vollständige Liste.
+6. §3.2 Punkt 1: Parameter `(eps, w_0; k, r, t)` ausdrücklich angeben: für `a` `(1, i*om; 1, j*om, i*om)`, für `b` `(om, i; om, j, i*om)`.
+7. §3.1: Die Nummer von `c` an den Punkten `c_2 = 0` muss eine Nummerierung von `F_n` mit `0, ..., n-1` sein; das Füllsymbol bei `F = 0` ist ein vorhandenes Klassensymbol, dessen Träger dadurch größer wird als die Baer-Klasse.
+8. §2.3: Die Zeile „Exaktes Minimum“ ist für `q = 3, 4` irreführend benannt; dort ist nichts entschieden.
+9. §5: Die Klassen mit `q + q/s` Punkten sind in der Notiz nicht hergeleitet (die Antwort gibt eine Herleitung); die Zahl `1026` bleibt Überschlag.
+
+**Vom Erzeuger nachgerechnet (10:33 MEZ):** die Formel aus Berichtigung 1 samt Zählung; das Verhältnis `2(n+2)/(n+1)`; in der Handrechnung der Antwort die Zeile `d = 1` für `q = 4` und der gemeinsame Punkt `(2, 1 + om)` für `q = 9` (`om^2 = 2`). Alles stimmt. Die übrigen Handrechnungen der Antwort sind nicht nachgerechnet.
+
+**Einordnung.** Lesung eines unbeteiligten Sprachmodells, kein formaler Beweis und keine Rechnung. Belegart von Lemma J, Satz U, Aussage U' und §3.2: „Argument, von einem unbeteiligten Modell gelesen (Stand `886c221`), kein Fehler in den Schlüssen; drei Sätze der Notiz berichtigt“. Die Literaturprüfung nach Regel 2c und die Dual-Verifikation für `t = 4` bei `q = 25` bleiben offen.
