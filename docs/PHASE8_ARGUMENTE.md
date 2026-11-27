@@ -352,7 +352,7 @@ $$
 
 **Vom Phase-8-Chat nachgerechnet (06:05 MEZ):** die Punktmengen der Handrechnung für $q = 7$, $n_0 = 3$ ($\Delta = \{1, 2, 3, 6\}$, $d_0 = 2$, $A_0(1) = \{\pm 1, \pm 3\}$) und das Gegenbeispiel ($x_b = 4 = v$, also $h_b = 0$, $h_a = 2$; bei $p = 0$ ist $-e^2$ kein Quadrat, beide Klassen entfallen). Beides stimmt. Die übrigen Handrechnungen der Antwort sind nicht nachgerechnet.
 
-**Präzisierungen aus der Antwort (am 27.11.2026, 10:20 MEZ eingearbeitet, siehe „Änderungsvermerk“ am Ende; der von `openai/gpt-6.2-sol` gelesene Text ist der Stand des Commits `b71b035`):**
+**Präzisierungen aus der Antwort (am 27.11.2026, 10:10 MEZ eingearbeitet, siehe „Änderungsvermerk“ am Ende; der von `openai/gpt-6.2-sol` gelesene Text ist der Stand des Commits `b71b035`):**
 
 1. 1.1: Die zwei Fälle schließen sich nur aus, wenn Fall 2 ausdrücklich „keine volle Waagerechte“ verlangt.
 2. 1.3: die Zuordnung $e \mapsto a_e$ als Injektion nach $H_a$ ausdrücklich wählen; die $x_a + j$ Geraden außerhalb von $\Delta \cup \{0\}$ ausdrücklich aufteilen; die danach freien Punkte der reinen $b$-Geraden brauchen je einen Vertreter; für $n = 0$ lautet der Zusatzterm einheitlich $\max(0, n - 1)$.
@@ -362,7 +362,7 @@ $$
 
 **Einordnung.** Das ist die Lesung eines unbeteiligten Sprachmodells, kein formaler Beweis und keine Rechnung. Regel 2d in `RULES.md` betrifft Arrays und bleibt für jede Meldung gesondert zu erfüllen. Belegart der Aussagen 1.1 bis 1.5: „Argument, von einem unbeteiligten Modell gelesen, kein Fehler gefunden“.
 
-## Änderungsvermerk, 2026-11-27, 10:20 MEZ (Claude, Phase-8-Chat Nachfolger)
+## Änderungsvermerk, 2026-11-27, 10:10 MEZ (Claude, Phase-8-Chat Nachfolger)
 
 Die fünf Präzisierungen aus der Lesung durch `openai/gpt-6.2-sol` sind in den Text oben eingearbeitet. Am Inhalt der Aussagen 1.1 bis 1.5 ändert sich nichts.
 

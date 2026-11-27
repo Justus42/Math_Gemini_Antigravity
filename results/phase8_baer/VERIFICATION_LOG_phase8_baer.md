@@ -1,7 +1,7 @@
 # Verifikations-Log: Phase 8, Baer-Gitter (`results/phase8_baer/`)
 
 - **Datum:** 2026-11-27, 06:41–07:31 MEZ. Lauf-ID `P8-BAER-ARRAYS`. Branch `claude/phase8-untergrenze-baer` (Basis `origin/main @ 6994817`).
-- **Stand der Skripte (Nachtrag 27.11.2026, 10:20 MEZ, `RULES.md` §3 „Git-Commit des Solvers“):** Commit `f24eb95` (`scripts/phase8/baer_gitter.py`, `scripts/phase8/pruefe_baer.py`; `scripts/phase7_lift.py` und `scripts/pruefer/zaehler.c` wie in `main @ 6994817`). Keine Suche, kein Seed; Parameter je Zeile sind `Q`, `F`, `T`. Auf `main` seit `989e142`.
+- **Stand der Skripte (Nachtrag 27.11.2026, 10:10 MEZ, `RULES.md` §3 „Git-Commit des Solvers“):** Commit `f24eb95` (`scripts/phase8/baer_gitter.py`, `scripts/phase8/pruefe_baer.py`; `scripts/phase7_lift.py` und `scripts/pruefer/zaehler.c` wie in `main @ 6994817`). Keine Suche, kein Seed; Parameter je Zeile sind `Q`, `F`, `T`. Auf `main` seit `989e142`.
 - **Rolle:** Rechnung des Erzeugers der Bauart. Keine Fremd-Reproduktion, eine Maschine (`2` vCPU, Python `3.13.18`).
 - **Befehl:** `python3 scripts/phase8/pruefe_baer.py ARBEITSVERZEICHNIS ZAEHLER Q:F:T[:py] ...` aus dem Wurzelverzeichnis; `ZAEHLER` mit `gcc -O3 -march=native -o zaehler scripts/pruefer/zaehler.c`, `verifiers/ca_verify` mit `gcc -O3 -march=native -pthread -o verifiers/ca_verify verifiers/ca_verify.c -lm`.
 - **Vorab:** `sha256sum -c verifiers/SHA256SUMS` `3/3 OK`; `git diff main -- verifiers/` leer; `python3 verifiers/test_verifiers.py` `23/23`.
@@ -53,4 +53,4 @@
 
 Zur letzten Zeile (`v = 25`, 07:30–07:31 MEZ, `77 s`): Ein Lauf von `verify_independent.py` für `CA(515625; 4, 27, 25)` lief von 06:42 bis 07:30 MEZ und wurde an der Zeitgrenze ohne Ergebnis abgebrochen. Das Array ist damit **nicht** dual-verifiziert.
 
-**Nachtrag 27.11.2026, 10:20 MEZ:** Antigravity hat die fünf abgelegten Arrays und `CA(515625; 4, 27, 25)` aus einem unabhängig geschriebenen Skript neu erzeugt (PR `#45`); die gemeldeten SHA-256 sind gleich den Werten oben (Lauf `P8-BAER-ABGLEICH-PR45`). Seine Dual-Verifikation der fünf Arrays ist Bericht, vom Erzeuger nicht selbst gesehen. An dieser Datei ist sonst nichts geändert; die Arrays und `SHA256SUMS` sind unverändert.
+**Nachtrag 27.11.2026, 10:10 MEZ:** Antigravity hat die fünf abgelegten Arrays und `CA(515625; 4, 27, 25)` aus einem unabhängig geschriebenen Skript neu erzeugt (PR `#45`); die gemeldeten SHA-256 sind gleich den Werten oben (Lauf `P8-BAER-ABGLEICH-PR45`). Seine Dual-Verifikation der fünf Arrays ist Bericht, vom Erzeuger nicht selbst gesehen. An dieser Datei ist sonst nichts geändert; die Arrays und `SHA256SUMS` sind unverändert.

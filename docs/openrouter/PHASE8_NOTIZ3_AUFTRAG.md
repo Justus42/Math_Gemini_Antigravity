@@ -1,6 +1,6 @@
 # Auftrag: Prüfung von Notiz 3 zu Phase 8 (Untergrenze und Baer-Gitter)
 
-> **Entwurf vom 27.11.2026, 10:20 MEZ (Claude, Phase-8-Chat Nachfolger). NICHT abgeschickt.** Ein Aufruf über die
+> **Entwurf vom 27.11.2026, 10:10 MEZ (Claude, Phase-8-Chat Nachfolger). NICHT abgeschickt.** Ein Aufruf über die
 > Bridge braucht die Freigabe von Justus in seinen Worten. Vorgesehen: ein unbeteiligtes Modell, Denkstufe `high`,
 > mit `docs/phase8/NOTIZ_3_UNTERGRENZE_BAER.md` im Stand des dann aktuellen Commits und als Hintergrund
 > `docs/PHASE7_T2_REDUCTION.md` (§2, §3, §11) sowie `docs/PHASE8_ARGUMENTE.md` (nur „Rahmen und Notation“).

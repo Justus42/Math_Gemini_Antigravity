@@ -1,6 +1,6 @@
 # Notiz 3: Untergrenze im Modell `M(R)` und das Baer-Gitter für Quadratzahlen
 
-- Stand: 2026-11-27, 07:32 MEZ; **Nachtrag 10:20 MEZ** (§2.4 verschärfte Schranke, §8 Gegenlesen und Nachbau; Branch `claude/phase8-doku-reste`). Autor: Claude (Phase-8-Chat, Nachfolger; Erzeugerrolle). Erstfassung auf Branch `claude/phase8-untergrenze-baer` (PR `#44`).
+- Stand: 2026-11-27, 07:32 MEZ; **Nachtrag 10:10 MEZ** (§2.4 verschärfte Schranke, §8 Gegenlesen und Nachbau; Branch `claude/phase8-doku-reste`). Autor: Claude (Phase-8-Chat, Nachfolger; Erzeugerrolle). Erstfassung auf Branch `claude/phase8-untergrenze-baer` (PR `#44`).
 - Vergleichsstand: dieses Repo `main @ 6994817`; `chrispbsmolen/ca-tools @ 697325b` (27.11., 03:08 MEZ; nur `table/` geholt, rein lesend).
 - **Rolle:** Argument, Bauart und Rechnung stammen vom selben Chat. Nichts hier ist von einem unbeteiligten Modell oder Menschen gelesen oder nachgebaut. **Kein Neuheitsanspruch; die Literaturprüfung nach `RULES.md` Regel 2c fehlt** (§7).
 - **Außenwirkung:** keine. Kein Bridge-Aufruf. Keine Einreichung ohne Freigabe durch Justus.
@@ -167,7 +167,7 @@ Zeit: festgelegt waren `45 min` insgesamt; gebraucht `53 min` (06:38–07:31 MEZ
 4. **Nicht versucht:** Löser auf der Geraden `d = 0`; billigere Vollgeraden-Symbole bei `v = q`; Geminis Vorschlag mit sechs Baer-Klassen je Seite im alten Skelett (Lauf `P8-GEMINI-BAER`: seine Einzelklasse stimmt, die Überschläge `853` und `729` sind nicht gerechnet).
 5. Bei `q = 4`, `v = 2, 3` schlägt die Negativkontrolle „letzte Zeile entfernt“ nicht an: die Arrays haben dort überzählige Zeilen (`72` und `80` Zeilen gegen `12` und `33` in der Tabelle). Das ist kein Fehler der Verifier.
 
-## 8. Nachtrag 27.11.2026, 10:20 MEZ: Gegenlesen und Nachbau
+## 8. Nachtrag 27.11.2026, 10:10 MEZ: Gegenlesen und Nachbau
 
 - **Gegenlesen durch Gemini (Planer, kein unbeteiligtes Modell):** kein Befund zu §2.1, §2.2 und §3; dazu ein direkter Nachweis der Geradentreffer für `a`- und `b`-Klassen ohne projektive Ebene (auch in Charakteristik `2`) und die Verschärfung in §2.4. Der Erzeuger hat beides nachgerechnet. Belegart bleibt „Argument“; die Prüfung nach Regel 2d steht aus (Auftrag vorbereitet in `docs/openrouter/PHASE8_NOTIZ3_AUFTRAG.md`, **nicht abgeschickt**).
 - **Blinder Nachbau durch Antigravity (PR `#45`, `scripts/phase8_baer_spec_repro.py`):** `20` Listen aus der Beschreibung in §3.1, die `18` gemeinsamen byte-gleich zu `data/phase8_baer/`; Einzelheiten im Lauf `P8-BAER-ABGLEICH-PR45`. Das belegt Beschreibung und Umsetzung auf einer zweiten Maschine, nicht die Mathematik unabhängig vom Erzeuger.
