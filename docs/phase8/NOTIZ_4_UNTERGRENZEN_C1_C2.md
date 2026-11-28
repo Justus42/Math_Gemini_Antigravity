@@ -81,7 +81,7 @@ Für jedes `a \in H_A` fixieren wir auf `d(a)` je einen Basisvertreter pro Punkt
 
 ### 2.3 Asymptotik `91/68`
 
-Skaliere `\alpha = h_a/p`, `\beta = h_b/p`, `u = U/p`, `v = V/p` (`0 \le u \le \alpha \le \beta \le 1`, `0 \le v \le \beta \le 1`) und lasse `p \to \infty`. Da das Ersetzen von `S/p^2` durch `u v \ge 0` (mit `t_{11}/p \to 0^+`) alle Ausdrücke `e_{3a}, e_4, e_{5a}` nur verkleinert oder erhält, genügt es zu zeigen:
+Skaliere `\alpha = h_a/p`, `\beta = h_b/p`, `u = U/p`, `v = V/p` (`0 \le u \le \alpha \le \beta \le 1`, `0 \le v \le \beta \le 1`) und lasse `p \to \infty`. Für jedes zulässige Tupel gilt `S \le U V + F` mit `F = U + V + t_{11} \le 3p` (für `t_{11} = 0` ist `S = 0`). Ein wörtlicher Ersatz von `S/p^2` durch `u v` wäre nicht zulässig: Für endliches `p` kann `S > U V` sein, und dann würde der Ersatz die Ausdrücke mit `-S` erhöhen. Ersetzt man dagegen `-S` durch `-(U V + F)`, sinkt jeder der Ausdrücke `e_{3a}, e_4, e_{5a}` um höchstens `\lceil F/2 \rceil = O(p)`; in `e_{3a}` wird zusätzlich der nichtnegative Beitrag `p\,t_{11}` aus `p F` weggelassen. Damit sind die folgenden `f`-Ausdrücke Unterabschätzungen von `e_{3a}/p^2, e_4/p^2, e_{5a}/p^2` bis auf `O(1/p)`, ohne `t_{11}/p \to 0` vorauszusetzen. Es genügt zu zeigen:
 $$\max\big(f_1,\, f_{3a},\, f_4,\, f_{5a}\big) \ge \frac{91}{68},$$
 mit `2 f_1 = 3 - \alpha`, `2 f_{3a} = \frac{5}{2} - \frac{\alpha}{2} + v + (1 - v)u`, `2 f_4 = 3 - \frac{\alpha + \beta}{2} + \alpha\beta - u v`, `2 f_{5a} = \frac{5}{2} + \frac{\beta}{2} - v + \alpha v - u v`.
 
@@ -90,10 +90,12 @@ mit `2 f_1 = 3 - \alpha`, `2 f_{3a} = \frac{5}{2} - \frac{\alpha}{2} + v + (1 - 
   1. Für `\frac{11}{34} < \alpha \le \frac{1}{2}` fällt `2 f_4` in `\beta`, während `2 f_{5a}` in `\beta` wächst. Ist `v \le \frac{1}{2}`, liegt das Minimum über `\beta` bei `\beta = v + \frac{1}{2}`, was
      $$h(\alpha, v + \tfrac{1}{2}, v) = \tfrac{11}{4} - \tfrac{3}{4}v + \tfrac{3}{2}v^2 + \alpha v(\tfrac{1}{2} - v) \ge \tfrac{11}{4} - \tfrac{40}{68}v + \tfrac{40}{34}v^2 = \tfrac{182}{68} + \tfrac{20}{17}(v - \tfrac{1}{4})^2 \ge \tfrac{182}{68} = 2 \cdot \tfrac{91}{68}$$
      ergibt (Gleichheit bei `\alpha = \frac{11}{34}, \beta = \frac{3}{4}, v = \frac{1}{4}, u = \frac{2}{17}`). Ist `v > \frac{1}{2}`, liegt das Minimum bei `\beta = 1` und `\alpha = \frac{1}{2}`: `h(\frac{1}{2}, 1, v) = \frac{11}{4} + v^2 - \frac{v}{2} \ge \frac{11}{4} > \frac{182}{68}`.
-  2. Für `\alpha > \frac{1}{2}`: Bei `\beta \ge v + \frac{1}{2}` (also `v \le \frac{1}{2}`) ist wie oben `\beta = v + \frac{1}{2}` optimal und `h \ge \frac{182}{68}` wegen `\alpha > \frac{11}{34}`. Bei `\beta \le v + \frac{1}{2}` wächst `2 f_4` in `\beta`, also ist `\beta = \alpha` minimal; mit `x = \alpha - \frac{1}{2} \in (0, \frac{1}{2}]` ergibt Minimieren über `v`:
+  2. Für `\alpha > \frac{1}{2}`: Die Werte `\beta = v + \frac{1}{2}` bzw. `\beta = \alpha` sind hier nicht stets zulässig; sie sind Minima über einen erweiterten Bereich und liefern wegen der Monotonie in `\beta` weiterhin **untere** Vergleichswerte. Bei `\beta \ge v + \frac{1}{2}` (also `v \le \frac{1}{2}`) liefert wie oben `\beta = v + \frac{1}{2}` den unteren Vergleichswert und `h \ge \frac{182}{68}` wegen `\alpha > \frac{11}{34}`. Bei `\beta \le v + \frac{1}{2}` wächst `2 f_4` in `\beta`, also ist `\beta = \alpha` minimal; mit `x = \alpha - \frac{1}{2} \in (0, \frac{1}{2}]` ergibt Minimieren über `v`:
      $$h(\alpha, \alpha, v) \ge \tfrac{11}{4} + x^2 - \tfrac{1}{4}(\tfrac{1}{2} + \tfrac{x}{2} + x^2)^2 \ge \tfrac{43}{16} - \tfrac{x}{8} + \tfrac{1}{2}x^2 = \tfrac{343}{128} + \tfrac{1}{2}(x - \tfrac{1}{8})^2 > \tfrac{182}{68}.$$
 
 Damit gilt asymptotisch `|R| \ge \frac{91}{68} p^2 - O(p) \approx 1{,}338235\,p^2`. `\square`
+
+*Nachrechnung (Prüferchat, 28.11.2026; Auswertung der endlichen Formel aus §2.1 mit `scripts/phase8_bounds_c1_c2.py`, `bound_c1_exact` gleich `bound_c1_bruteforce` für `p \le 13`):* Für alle ungeraden Primzahlen `p \le 101` liegt das Formelminimum zwischen `\frac{91}{68}p^2 - 0{,}015\,p` (`p = 3`) und `\frac{91}{68}p^2 + 0{,}16\,p`. Die Reparatur folgt dem Review `docs/openrouter/PHASE8_NOTIZ4_REVIEW_gpt-6.2-sol.md` (Abschnitt Asymptotik, C.1).
 
 ---
 
@@ -125,11 +127,20 @@ Sei `E_{\mathrm{akt}} := |R| - q^2` der Überschuss über `q^2`. Wie in Satz C.1
 
 ### 3.3 Asymptotik `q^2 + q^{3/2} - \frac{9}{8} q`
 
-Für `q = n^2 \to \infty` setze `k_A = \alpha n`, `k_B = \beta n`, `h_A = \gamma n`, `h_B = \delta n`. Damit `(k_A - h_A)q \le q n` und `(k_B - h_B)q \le q n`, muss `\alpha - \gamma \le 1` und `\beta - \delta \le 1` gelten. Im symmetrischen Fall `\alpha = \beta = \gamma + 1` (bzw. `k - h = n - 2`, sodass `(k - h)q = q n - 2q` nicht bindet) ergibt sich für `h = \gamma n`:
-$$e_X \approx \frac{c_{1X} + c_{2X}}{2} = q n + \left(\frac{\alpha\gamma}{2} - \alpha\right)q + O(n) = q n + \left(\frac{\gamma^2 - \gamma}{2} - 1\right)q + O(n).$$
-Minimieren von `\frac{1}{2}(\gamma^2 - \gamma) - 1` über `\gamma \ge 0` liefert `\gamma = \frac{1}{2}` (`h \approx n/2`, `k \approx 3n/2`) mit dem minimalen Koeffizienten
-$$\frac{1/4 - 1/2}{2} - 1 = -\frac{9}{8},$$
-also asymptotisch `|R| \ge q^2 + q^{3/2} - \frac{9}{8} q + O(\sqrt{q})` (eine deutliche Verschärfung gegenüber `q^2 + q^{3/2} - 2q` aus Notiz 3 Satz U / Aussage U').
+**Untergrenze ohne Fehlerterm.** Für jede Quadrat-Primzahlpotenz `q = n^2` gilt
+$$|R| \ge q^2 + q^{3/2} - \tfrac{9}{8}\,q .$$
+Argument (nach dem Review `docs/openrouter/PHASE8_NOTIZ4_REVIEW_gpt-6.2-sol.md`, Abschnitt Asymptotik, C.2): **O. B. d. A. sei `k_A \le k_B`** (Vertauschen von `a` und `b` vertauscht `X` und `Y`; `E` ist unter dieser Vertauschung symmetrisch). Sei `E` das Maximum der Formel aus §3.1 für ein zulässiges Tupel `(k_A, k_B, h_A, h_B)`.
+1. Ist `k_A \le n`, so gilt `E \ge c_{1X} = (q - k_A)n \ge q n - q`.
+2. Ist `E \ge q n`, ist nichts zu zeigen. Andernfalls gilt `(k_B - h_B)q \le E < q n`, also `k_B - h_B \le n - 1`, d. h. `h_B - 1 \ge k_B - n`.
+3. Sei also `k_A > n` und `E < q n`. Aus `e_Y \ge (c_{1Y} + c_{2Y})/2` und `c_{2Y} \ge (q - k_A)n + (h_B - 1)k_A` folgt mit 2.
+$$2E \ge (q - k_B)n + (q - k_A)n + (k_B - n)k_A = 2qn + (k_A - n)k_B - 2nk_A \ge 2qn + k_A^2 - 3nk_A \ge 2qn - \tfrac{9}{4}n^2 .$$
+   Der zweite Schritt benutzt `k_A - n > 0` **und `k_B \ge k_A`** (hier geht die Annahme `k_A \le k_B` ein), der dritte das Minimum von `k_A^2 - 3nk_A` bei `k_A = 3n/2`.
+
+In allen Fällen ist `E \ge q n - \frac{9}{8} q` (Fall 1: `q n - q \ge q n - \frac{9}{8}q`), also `|R| \ge q^2 + q^{3/2} - \frac{9}{8} q`. Das ist eine Verschärfung gegenüber `q^2 + q^{3/2} - 2q` aus Notiz 3 (Satz U / Aussage U').
+
+**Koeffizient für das Formelminimum.** Der symmetrische Parameterzeuge `k_A = k_B` nahe `3n/2`, `h_A = h_B = k_A - n + 2` ergibt `E = q n - \frac{9}{8} q + O(n)`. Der Koeffizient `-\frac{9}{8}` stimmt damit für das Minimum der Formel, nicht notwendig für das Listenoptimum.
+
+*Nachrechnung (Prüferchat, 28.11.2026; Auswertung mit `scripts/phase8_bounds_c1_c2.py`, `bound_c2_exact` gleich `bound_c2_bruteforce` für `q \le 49`):* Für `q \in \{4, 9, 16, 25, 49, 64, 81\}` gilt Formelminimum `\ge q^2 + q^{3/2} - \frac{9}{8}q` (`7/7`; `20 \ge 19{,}5`, `99 \ge 97{,}875`, `304 \ge 302`, `725 \ge 721{,}875`, `2694 \ge 2688{,}875`, `4542 \ge 4536`, `7206 \ge 7198{,}875`).
 
 ---
 
