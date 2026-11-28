@@ -115,3 +115,67 @@ Abgleich ausschließlich lesend gegen `chrispbsmolen/ca-tools @ b68996787557cb79
 
 Alle `15/15` Zielzellen für `q in {7, 8, 9, 11, 13}, t in {4, 5, 6}` (plus `6` weitere Zellen bei `q = 16, 17, 19`, insgesamt **`21` Zellen**) liegen strikt unter `ca-tools @ b689967` (`8` davon in `/tmp/phase9_m3/` vollständig dual-verifiziert: `q=7 t=4,5,6`, `q=8 t=4,5`, `q=9 t=4`, `q=11 t=4`, `q=13 t=4`; `Regel-2d offen`, keine Ablage in `results/`, keine Außenwirkung).
 
+---
+
+## 6. Nachtrag Option B: Dual-Verifikation `t = 5, 6` der PAWS-Bestwerte (`5/5 PASS`) & CI-Benchmark (`q = 13, t = 5`)
+
+Datum: 2026-11-28 UTC (Branch `exp/phase9-biaffine-3d`, Basis `159dfa4`, PR `#54`). Hardware: Intel Xeon CPU @ 2.30 GHz, 2 vCPU / 2 Threads, Python 3.12 (`std`-only), `verifiers/ca_verify` (`2` Threads). Verifier unverändert (`sha256sum -c verifiers/SHA256SUMS` `3/3 OK`, `git diff main -- verifiers/` leer, `python3 verifiers/test_verifiers.py` `23/23 PASS`, `data/phase9_m3/SHA256SUMS` `22/22 OK`). Alle ausgerollten CA-Dateien liegen ausschließlich unter `/tmp/phase9_m3/` (nicht ins Repo committet).
+
+### 6.1 Dual-Verifikation `t = 5` (`q = 7, 8, 9, 11`) & `t = 6` (`q = 7`) — `5/5 PASS`
+
+Jede Zelle wurde `2×` byte-identisch per `scripts/phase9_m3_lift.py --mode full-bg3 --check-m3 --lift` nach `/tmp/phase9_m3/` ausgerollt und mit beiden unabhängigen Verifiern (`./verifiers/ca_verify <file> <t> <v> 2` und `python3 verifiers/verify_independent.py <file> <t> <v> -n <N> -k <k>`) positiv (`POS`, `rc = 0/0`) sowie negativ (`NEG`, letzte Zeile entfernt `N -> N - 1`, `rc = 1/1`) geprüft.
+
+- **`q = 11, t = 5` Laufzeit-Gate (AP 1.5):** Vorab-Benchmark auf `/tmp/phase9_m3/CA_292457_5_14_11_run1.txt` (`20/2002` Spalten-5-Tupel = `2,701 s`) ergab `ca_verify` `10,3 s` und `verify_independent.py` `~4,5 min` pro Lauf (`< 7 min` pro Einzelaufruf). Daher wurden POS (`280,52 s` = `4,68 min`) und NEG (`297,14 s` = `4,95 min`) als getrennte Läufe sicher unter dem 8-Min.-Cap vollständig bestanden.
+
+| Zelle `CA(N; t, k, v)` | Seed (`m`, `data/phase9_m3/`) | Größe (`B` / `MiB`) | Lift `1`/`2` (2× gleich) | `ca_verify` POS / NEG | `verify_independent.py` POS / NEG | `ca-tools @ b689967` (`k'`, Bauart) | **`-Delta`** | Belegstatus |
+|---|---|---:|---|---|---|---|---:|---|
+| **`CA(29743; 5, 10, 7)`** | `opt_paws_m607` (`607`) | `594.860` (`0,5673`) | `0,28 s` / `0,23 s` | `0 (0,092 s)` / `1 (0,061 s)` | `0 (2,605 s)` / `1 (2,556 s)` | `31.213` (`k'=13`, elliptic two-block / `4-Restr. SCPHF`) | **`-1.470`** | **`Dual-Verify PASS`** (`/tmp`) |
+| **`CA(58496; 5, 11, 8)`** | `opt_paws_m914` (`914`) | `1.286.912` (`1,2273`) | `0,46 s` / `0,39 s` | `0 (0,213 s)` / `1 (0,230 s)` | `0 (10,404 s)` / `1 (10,308 s)` | `61.440` (`k'=14`, elliptic two-block / `4-Restr. SCPHF`) | **`-2.944`** | **`Dual-Verify PASS`** (`/tmp`) |
+| **`CA(106839; 5, 12, 9)`** | `opt_paws_m1319` (`1319`) | `2.564.136` (`2,4454`) | `0,79 s` / `0,68 s` | `0 (0,803 s)` / `1 (0,846 s)` | `0 (32,083 s)` / `1 (31,209 s)` | `111.537` (`k'=16`, elliptic two-block / `4-Restr. SCPHF`) | **`-4.698`** | **`Dual-Verify PASS`** (`/tmp`) |
+| **`CA(208201; 6, 10, 7)`** | `opt_paws_m607` (`607`) | `4.164.020` (`3,9711`) | `1,25 s` / `1,14 s` | `0 (2,789 s)` / `1 (2,024 s)` | `0 (23,076 s)` / `1 (25,357 s)` | `218.491` (`k'=13`, elliptic two-block / `5-Restr. SCPHF`) | **`-10.290`** | **`Dual-Verify PASS`** (`/tmp`) |
+| **`CA(292457; 5, 14, 11)`** | `opt_paws_m2417` (`2417`) | `8.561.234` (`8,1646`) | `2,23 s` / `1,92 s` | `0 (10,316 s)` / `1 (10,148 s)` | `0 (280,523 s)` / `1 (297,135 s)` | `307.461` (`k'=18`, elliptic two-block / `4-Restr. SCPHF`) | **`-15.004`** | **`Dual-Verify PASS`** (`/tmp`) |
+
+### 6.2 Vollständige SHA-256-Summen (CA-Datei, Seed, NEG-Datei) & Repro-Befehl
+
+- **`CA(29743; 5, 10, 7)`:**
+  - CA: `0ada022c05c540ebd45ce99b82450f829bc328705c532c11c43ff1e6b7bfe5bf`
+  - Seed (`R3_q7_fullbg3_opt_paws_m607.txt`): `662191d6347614de4ee3ac02cc2b3cf024f997f08a3f750864943ae802b1f80b`
+  - NEG (`N=29742`): `b38d76a39800e521c5cc4c552a2bb8547575f71a3d21243b502d36dc07f57d83`
+- **`CA(58496; 5, 11, 8)`:**
+  - CA: `bfb0def6281d2945d729a689c1df0fc518f601a51db9eedeb384a34b17b65afa`
+  - Seed (`R3_q8_fullbg3_opt_paws_m914.txt`): `7b777bb8998834f58cbf02ae10f2fd8d83e2ede99afead92a9f43473fd8a458a`
+  - NEG (`N=58495`): `7ee20eb97c0ffb40b6a7455d3730d1be8e27c495fa5c06a3f1fbbe62936b40a4`
+- **`CA(106839; 5, 12, 9)`:**
+  - CA: `c8515e10248c17727238583063b70297aca6819b3121b588e760e8bd055b6b20`
+  - Seed (`R3_q9_fullbg3_opt_paws_m1319.txt`): `19ab9ff1b20eec11f3e00239a4f3c3723f826a28ed1f3fa3f543cd8772cdfecc`
+  - NEG (`N=106838`): `3a015631d6e5450b9aa0f8ff1cf431fffc5058b8dc27c1fc7f1cf219981642c4`
+- **`CA(208201; 6, 10, 7)`:**
+  - CA: `52f7706d45d4f459fbffa9bdf28ec269aa3266df9e070bbaca9319771ea67e9b`
+  - Seed (`R3_q7_fullbg3_opt_paws_m607.txt`): `662191d6347614de4ee3ac02cc2b3cf024f997f08a3f750864943ae802b1f80b`
+  - NEG (`N=208200`): `5eadb7bdac1a8f1abc0ce15270473b6d00692ee99c9ab137a8396be17a0d2f8b`
+- **`CA(292457; 5, 14, 11)`:**
+  - CA: `d3d861ee8e6a899932eadb16075fbd2971712840a94e4b6991c0ac0d2f30a4cf`
+  - Seed (`R3_q11_fullbg3_opt_paws_m2417.txt`): `cb3ceece0b67e84ec8ddbe34c512e6ad5802198ecdc94ef257e789b3e1e9d71c`
+  - NEG (`N=292456`): `8a04ede807fe27a054e2908f1c4105ba80503b993394a82e7efd8a4831733cab`
+
+Repro-Muster (analog für alle 5 Zellen):
+```bash
+python3 scripts/phase9_m3_lift.py --q <q> --t <t> --mode full-bg3 --reps data/phase9_m3/R3_q<q>_fullbg3_opt_paws_m<m>.txt --check-m3 --lift --out /tmp/phase9_m3/CA_<N>_<t>_<k>_<q>.txt
+./verifiers/ca_verify /tmp/phase9_m3/CA_<N>_<t>_<k>_<q>.txt <t> <q> 2
+python3 verifiers/verify_independent.py /tmp/phase9_m3/CA_<N>_<t>_<k>_<q>.txt <t> <q> -n <N> -k <k>
+```
+
+### 6.3 CI-/Workflow-Machbarkeitsurteil für verbleibende `check_m3=0`-Zellen (`< 50 MiB`)
+
+Auf Basis der gemessenen Durchsätze (`q=11, t=5`: `C(14,5)*N = 585,5M`, `py = 0,479 s/M`, `ca = 17,6 ms/M`; `q=7, t=6`: `C(10,6)*N = 43,7M`, `py = 0,528 s/M`):
+
+| Zelle (`check_m3=0`) | `ca-tools@b689967` (`-Delta`) | Größe (geschätzt) | `C(k,t) * N` | `ca_verify` (2T / 4T) | `verify_independent.py` (1 Lauf / POS+NEG) | CI-Empfehlung (`ubuntu-latest`, 4 vCPU, 16 GB RAM) |
+|---|---:|---:|---:|---|---|---|
+| `CA(467968; 6, 11, 8)` (`m=914`) | `491.520` (`-23.552`) | `~9,82 MiB` | `216,2M` (`v^t=262k`) | `~15–20 s` / `~10 s` | `~2,0–2,5 min` / `~4,5 min` | Lokal oder schneller CI-Job (`< 5 min`) |
+| `CA(961551; 6, 12, 9)` (`m=1319`) | `1.003.833` (`-42.282`) | `~22,01 MiB` | `888,5M` (`v^t=531k`) | `~70–100 s` / `~40 s` | `~10–12 min` / `~22 min` | GitHub Actions Matrix (`POS` & `NEG` parallel, `~12 min` Wall-Clock, `< 1 GB` RAM) |
+| **`CA(680394; 5, 16, 13)`** (`m=4026`) | `714.025` (`-33.631`) | `~23,16 MiB` | `2.972,0M` (`v^t=371k`) | `~55–70 s` / `~30 s` | `~25–30 min` / `~55 min` | GitHub Actions Matrix (`POS` & `NEG` parallel, `~30 min` Wall-Clock, `< 0,6 GB` RAM) |
+| `CA(3217027; 6, 14, 11)` / `CA(8845122; 6, 16, 13)` | `-311.454` / `-806.299` | `~94 MiB` / `~301 MiB` | `> 9,6G` | `> 10 min` | `> 2 h` | Über `50 MiB`-Dateilimit; kein Direkt-Einreichungskandidat |
+
+Zusammengefasst sind nun **`10` PAWS-Bestwert-Zellen** (`5× t=4`, `4× t=5`, `1× t=6`) auf `exp/phase9-biaffine-3d` in `/tmp/phase9_m3/` vollständig dual-verifiziert (alle `< ca-tools @ b689967` und `< 50 MiB`; Regel 2c & Regel 2d offen; Prüfmappe in [`M3_REGEL2D_BRIEF.md`](M3_REGEL2D_BRIEF.md)).
+
+
