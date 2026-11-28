@@ -1,0 +1,1095 @@
+{
+  "ap1_one_param_law": {
+    "formula": "g2 = eta^t, g1 = eta^(2t), c = zeta^((3+2q)*t), gamma = c^q, alpha = gamma*eta^(-2t), beta = gamma*eta^(-t)",
+    "aligned_form": "R1_B'(k) = c * R1_A(k); R2_B'(k) = (coords(c^q u_k^2), coords(c^q u_k), 0, 1)",
+    "outlier_capture_rate": {
+      "q13": "100% of optimal inv & sq-norm",
+      "q17": "100% of optimal inv & sq-norm",
+      "q19": "100% of optimal inv & sq-norm",
+      "q23": "12/12 (100% of unc<6000 in 167040 sym pairs)",
+      "q29": "15/15 (100% of unc<15000 in 406800 sym pairs)"
+    },
+    "structured_3n2_rules": {
+      "q13_sq_r6": {
+        "unc": 84,
+        "splits": [
+          0,
+          84,
+          0
+        ],
+        "tau": 7,
+        "k": 21,
+        "rule": "del A_even (or B_even), period 2, unc=0 verified"
+      },
+      "q17_sq_r4": {
+        "unc": 198,
+        "splits": [
+          0,
+          198,
+          0
+        ],
+        "tau": 9,
+        "k": 27,
+        "rule": "del A_even (or B_even), period 2, unc=0 verified (> Bai 26)"
+      },
+      "q19_sq_r10": {
+        "unc": 360,
+        "splits": [
+          40,
+          280,
+          40
+        ],
+        "tau": 10,
+        "k": 30,
+        "rule": "del A%4==0 & (B-10)%4==0 (5+5=10), all 18 Z_20 orbits hit all 4 mod-4 classes, unc=0 verified (= Bai 30)"
+      },
+      "q23_direct_3n2": {
+        "k_target": 36,
+        "status": "REFUTED (exact min_tau=16 -> k=32 across 100% of inv u sq-norm)"
+      },
+      "q29_direct_3n2": {
+        "k_target": 45,
+        "status": "REFUTED (pure33_cnt=0, del A_even unc(a1=1)>=16, best periodic/greedy k=36)"
+      }
+    }
+  },
+  "ap2_q23_exact": {
+    "inv": {
+      "scan": {
+        "q": 23,
+        "k_full": 48,
+        "slice": "inv",
+        "use_sym": 1,
+        "n1": 290,
+        "n2": 288,
+        "pairs": 83520,
+        "avg_unc": 20189.62,
+        "zero_hits": 0,
+        "min_unc": 360,
+        "best_tau_scan": 17,
+        "times": {
+          "init": 0.0129,
+          "r1": 1.3036,
+          "r2": 1.1869,
+          "inter": 0.2374,
+          "hitset": 44.9571,
+          "total": 47.6979
+        },
+        "top8_by_unc": [
+          {
+            "g1": [
+              8,
+              10
+            ],
+            "g2": [
+              19,
+              16
+            ],
+            "alpha": [
+              10,
+              4
+            ],
+            "beta": [
+              4,
+              6
+            ],
+            "m2": 1,
+            "unc": 360,
+            "b42": 48,
+            "b33": 264,
+            "b24": 48,
+            "tau": 17,
+            "exact_tau": 0,
+            "greedy_tau": 17,
+            "max_col_deg": 45,
+            "del_mask": 4398585279447
+          },
+          {
+            "g1": [
+              15,
+              10
+            ],
+            "g2": [
+              13,
+              11
+            ],
+            "alpha": [
+              10,
+              4
+            ],
+            "beta": [
+              5,
+              1
+            ],
+            "m2": 1,
+            "unc": 432,
+            "b42": 96,
+            "b33": 240,
+            "b24": 96,
+            "tau": 21,
+            "exact_tau": 0,
+            "greedy_tau": 21,
+            "max_col_deg": 54,
+            "del_mask": 176681576109373
+          },
+          {
+            "g1": [
+              15,
+              10
+            ],
+            "g2": [
+              10,
+              12
+            ],
+            "alpha": [
+              16,
+              8
+            ],
+            "beta": [
+              19,
+              19
+            ],
+            "m2": 1,
+            "unc": 456,
+            "b42": 96,
+            "b33": 264,
+            "b24": 96,
+            "tau": 20,
+            "exact_tau": 0,
+            "greedy_tau": 20,
+            "max_col_deg": 57,
+            "del_mask": 18711601325813
+          },
+          {
+            "g1": [
+              8,
+              10
+            ],
+            "g2": [
+              4,
+              7
+            ],
+            "alpha": [
+              16,
+              8
+            ],
+            "beta": [
+              22,
+              6
+            ],
+            "m2": 1,
+            "unc": 744,
+            "b42": 144,
+            "b33": 456,
+            "b24": 144,
+            "tau": 20,
+            "exact_tau": 0,
+            "greedy_tau": 20,
+            "max_col_deg": 93,
+            "del_mask": 73479059846187
+          },
+          {
+            "g1": [
+              0,
+              3
+            ],
+            "g2": [
+              9,
+              4
+            ],
+            "alpha": [
+              16,
+              8
+            ],
+            "beta": [
+              5,
+              21
+            ],
+            "m2": 1,
+            "unc": 4400,
+            "b42": 936,
+            "b33": 2528,
+            "b24": 936,
+            "tau": 22,
+            "exact_tau": 0,
+            "greedy_tau": 22,
+            "max_col_deg": 550,
+            "del_mask": 26670172795359
+          },
+          {
+            "g1": [
+              0,
+              3
+            ],
+            "g2": [
+              14,
+              19
+            ],
+            "alpha": [
+              10,
+              4
+            ],
+            "beta": [
+              14,
+              16
+            ],
+            "m2": 1,
+            "unc": 4472,
+            "b42": 960,
+            "b33": 2552,
+            "b24": 960,
+            "tau": 23,
+            "exact_tau": 0,
+            "greedy_tau": 23,
+            "max_col_deg": 559,
+            "del_mask": 91947006074749
+          },
+          {
+            "g1": [
+              9,
+              4
+            ],
+            "g2": [
+              8,
+              10
+            ],
+            "alpha": [
+              5,
+              4
+            ],
+            "beta": [
+              17,
+              3
+            ],
+            "m2": 1,
+            "unc": 10968,
+            "b42": 3912,
+            "b33": 3144,
+            "b24": 3912,
+            "tau": 27,
+            "exact_tau": 0,
+            "greedy_tau": 27,
+            "max_col_deg": 1371,
+            "del_mask": 1413127061503
+          },
+          {
+            "g1": [
+              15,
+              10
+            ],
+            "g2": [
+              13,
+              11
+            ],
+            "alpha": [
+              21,
+              10
+            ],
+            "beta": [
+              18,
+              16
+            ],
+            "m2": 1,
+            "unc": 12600,
+            "b42": 4008,
+            "b33": 4584,
+            "b24": 4008,
+            "tau": 29,
+            "exact_tau": 0,
+            "greedy_tau": 29,
+            "max_col_deg": 1575,
+            "del_mask": 275848104982359
+          }
+        ]
+      },
+      "exact_min_tau": 16,
+      "exact_k_punc": 32,
+      "exact_proof": "Zero-abort DFS (Z_24 sym-break) proves tau=16 exact for r=5 (unc=360) and r=1 (unc=456), tau>=17 for r=11 (unc=432) and r=7 (unc=744)",
+      "coset_rule": "del_A = 0 mod 3 [0,3,6,9,12,15,18,21], del_B = 2 mod 3 [2,5,8,11,14,17,20,23] (aligned 0 mod 3), 8+8=16 cols -> k=32 = 4(q+1)/3",
+      "independent_c_verify": {
+        "checked": 906192,
+        "unc": 0,
+        "time_s": 0.2011,
+        "sherwood_N": 296071755,
+        "neg_readd_k33_unc": 8,
+        "neg_dup_unc": 27405,
+        "neg_zero_unc": 169911
+      }
+    },
+    "sq_norm": {
+      "scan": {
+        "q": 23,
+        "k_full": 48,
+        "slice": "sq-norm",
+        "use_sym": 1,
+        "n1": 290,
+        "n2": 288,
+        "pairs": 83520,
+        "avg_unc": 21530.35,
+        "zero_hits": 0,
+        "min_unc": 552,
+        "best_tau_scan": 18,
+        "times": {
+          "init": 0.0127,
+          "r1": 1.2695,
+          "r2": 1.2325,
+          "inter": 0.263,
+          "hitset": 46.7515,
+          "total": 49.5292
+        },
+        "top8_by_unc": [
+          {
+            "g1": [
+              12,
+              1
+            ],
+            "g2": [
+              15,
+              10
+            ],
+            "alpha": [
+              1,
+              3
+            ],
+            "beta": [
+              4,
+              9
+            ],
+            "m2": 1,
+            "unc": 552,
+            "b42": 72,
+            "b33": 408,
+            "b24": 72,
+            "tau": 18,
+            "exact_tau": 0,
+            "greedy_tau": 18,
+            "max_col_deg": 69,
+            "del_mask": 283479031159
+          },
+          {
+            "g1": [
+              11,
+              1
+            ],
+            "g2": [
+              11,
+              22
+            ],
+            "alpha": [
+              1,
+              0
+            ],
+            "beta": [
+              11,
+              22
+            ],
+            "m2": 1,
+            "unc": 744,
+            "b42": 132,
+            "b33": 480,
+            "b24": 132,
+            "tau": 20,
+            "exact_tau": 0,
+            "greedy_tau": 20,
+            "max_col_deg": 93,
+            "del_mask": 9655091181501
+          },
+          {
+            "g1": [
+              12,
+              1
+            ],
+            "g2": [
+              8,
+              13
+            ],
+            "alpha": [
+              21,
+              6
+            ],
+            "beta": [
+              6,
+              22
+            ],
+            "m2": 1,
+            "unc": 1224,
+            "b42": 192,
+            "b33": 840,
+            "b24": 192,
+            "tau": 22,
+            "exact_tau": 0,
+            "greedy_tau": 22,
+            "max_col_deg": 153,
+            "del_mask": 5519118383039
+          },
+          {
+            "g1": [
+              11,
+              1
+            ],
+            "g2": [
+              12,
+              1
+            ],
+            "alpha": [
+              0,
+              6
+            ],
+            "beta": [
+              7,
+              3
+            ],
+            "m2": 1,
+            "unc": 1368,
+            "b42": 228,
+            "b33": 912,
+            "b24": 228,
+            "tau": 21,
+            "exact_tau": 0,
+            "greedy_tau": 21,
+            "max_col_deg": 171,
+            "del_mask": 8125439
+          },
+          {
+            "g1": [
+              1,
+              0
+            ],
+            "g2": [
+              22,
+              0
+            ],
+            "alpha": [
+              0,
+              6
+            ],
+            "beta": [
+              0,
+              17
+            ],
+            "m2": 1,
+            "unc": 4832,
+            "b42": 1020,
+            "b33": 2792,
+            "b24": 1020,
+            "tau": 24,
+            "exact_tau": 0,
+            "greedy_tau": 24,
+            "max_col_deg": 604,
+            "del_mask": 70527046864381
+          },
+          {
+            "g1": [
+              22,
+              0
+            ],
+            "g2": [
+              0,
+              3
+            ],
+            "alpha": [
+              1,
+              3
+            ],
+            "beta": [
+              22,
+              3
+            ],
+            "m2": 1,
+            "unc": 5264,
+            "b42": 1080,
+            "b33": 3104,
+            "b24": 1080,
+            "tau": 23,
+            "exact_tau": 0,
+            "greedy_tau": 23,
+            "max_col_deg": 658,
+            "del_mask": 162712403371019
+          },
+          {
+            "g1": [
+              19,
+              7
+            ],
+            "g2": [
+              9,
+              4
+            ],
+            "alpha": [
+              10,
+              1
+            ],
+            "beta": [
+              15,
+              16
+            ],
+            "m2": 1,
+            "unc": 9968,
+            "b42": 3300,
+            "b33": 3368,
+            "b24": 3300,
+            "tau": 23,
+            "exact_tau": 0,
+            "greedy_tau": 23,
+            "max_col_deg": 1246,
+            "del_mask": 8388607
+          },
+          {
+            "g1": [
+              4,
+              7
+            ],
+            "g2": [
+              4,
+              7
+            ],
+            "alpha": [
+              2,
+              9
+            ],
+            "beta": [
+              2,
+              9
+            ],
+            "m2": 1,
+            "unc": 11136,
+            "b42": 3096,
+            "b33": 4944,
+            "b24": 3096,
+            "tau": 22,
+            "exact_tau": 0,
+            "greedy_tau": 22,
+            "max_col_deg": 1392,
+            "del_mask": 8386559
+          }
+        ]
+      },
+      "exact_min_tau": 17,
+      "exact_k_punc": 31,
+      "exact_proof": "Zero-abort DFS proves tau>=17 for r=2 (unc=552) and r=8 (unc=744); WalkSAT exhibits valid tau=17 for r=2 (mask=0x280000557abd)"
+    },
+    "ca_tools_b689967_v23_t6": {
+      "k32": {
+        "N": 296071755,
+        "src": "Bai Singer (2*23^6 - 23)"
+      },
+      "k33": {
+        "N": 296071777,
+        "src": "Bai elliptic two-block"
+      },
+      "k34": {
+        "N": 444107665,
+        "src": "WCS (CPHF IPO 3)"
+      },
+      "k36": {
+        "N": 488281245,
+        "src": "Bai elliptic q=25 fused (derived.csv)"
+      }
+    }
+  },
+  "ap2_q29_optional": {
+    "sq_norm": {
+      "q": 29,
+      "k_full": 60,
+      "slice": "sq-norm",
+      "use_sym": 1,
+      "n1": 452,
+      "n2": 450,
+      "pairs": 203400,
+      "avg_unc": 52482.83,
+      "zero_hits": 0,
+      "min_unc": 1110,
+      "best_tau_scan": 24,
+      "times": {
+        "init": 0.0386,
+        "r1": 6.3653,
+        "r2": 6.1438,
+        "inter": 2.4929,
+        "hitset": 0.577,
+        "total": 15.6177
+      },
+      "top8_by_unc": [
+        {
+          "g1": [
+            14,
+            5
+          ],
+          "g2": [
+            14,
+            24
+          ],
+          "alpha": [
+            1,
+            0
+          ],
+          "beta": [
+            14,
+            24
+          ],
+          "m2": 1,
+          "unc": 1110,
+          "b42": 150,
+          "b33": 810,
+          "b24": 150,
+          "tau": 24,
+          "exact_tau": 0,
+          "greedy_tau": 24,
+          "max_col_deg": 111,
+          "del_mask": 532147707
+        },
+        {
+          "g1": [
+            2,
+            4
+          ],
+          "g2": [
+            25,
+            14
+          ],
+          "alpha": [
+            5,
+            16
+          ],
+          "beta": [
+            22,
+            6
+          ],
+          "m2": 1,
+          "unc": 1890,
+          "b42": 330,
+          "b33": 1230,
+          "b24": 330,
+          "tau": 27,
+          "exact_tau": 0,
+          "greedy_tau": 27,
+          "max_col_deg": 189,
+          "del_mask": 63112307717323911
+        },
+        {
+          "g1": [
+            10,
+            8
+          ],
+          "g2": [
+            7,
+            13
+          ],
+          "alpha": [
+            5,
+            16
+          ],
+          "beta": [
+            16,
+            3
+          ],
+          "m2": 1,
+          "unc": 2700,
+          "b42": 480,
+          "b33": 1740,
+          "b24": 480,
+          "tau": 28,
+          "exact_tau": 0,
+          "greedy_tau": 28,
+          "max_col_deg": 270,
+          "del_mask": 536868863
+        },
+        {
+          "g1": [
+            7,
+            13
+          ],
+          "g2": [
+            2,
+            25
+          ],
+          "alpha": [
+            4,
+            25
+          ],
+          "beta": [
+            11,
+            5
+          ],
+          "m2": 1,
+          "unc": 2760,
+          "b42": 480,
+          "b33": 1800,
+          "b24": 480,
+          "tau": 30,
+          "exact_tau": 0,
+          "greedy_tau": 30,
+          "max_col_deg": 276,
+          "del_mask": 31556015865941499
+        },
+        {
+          "g1": [
+            25,
+            14
+          ],
+          "g2": [
+            10,
+            21
+          ],
+          "alpha": [
+            4,
+            25
+          ],
+          "beta": [
+            17,
+            15
+          ],
+          "m2": 1,
+          "unc": 2760,
+          "b42": 480,
+          "b33": 1800,
+          "b24": 480,
+          "tau": 27,
+          "exact_tau": 0,
+          "greedy_tau": 27,
+          "max_col_deg": 276,
+          "del_mask": 536346111
+        },
+        {
+          "g1": [
+            26,
+            2
+          ],
+          "g2": [
+            17,
+            12
+          ],
+          "alpha": [
+            4,
+            25
+          ],
+          "beta": [
+            1,
+            9
+          ],
+          "m2": 1,
+          "unc": 7840,
+          "b42": 1620,
+          "b33": 4600,
+          "b24": 1620,
+          "tau": 28,
+          "exact_tau": 0,
+          "greedy_tau": 28,
+          "max_col_deg": 784,
+          "del_mask": 76992804809500535
+        },
+        {
+          "g1": [
+            17,
+            12
+          ],
+          "g2": [
+            26,
+            27
+          ],
+          "alpha": [
+            8,
+            15
+          ],
+          "beta": [
+            3,
+            26
+          ],
+          "m2": 1,
+          "unc": 8650,
+          "b42": 1800,
+          "b33": 5050,
+          "b24": 1800,
+          "tau": 30,
+          "exact_tau": 0,
+          "greedy_tau": 30,
+          "max_col_deg": 865,
+          "del_mask": 512409557722347747
+        },
+        {
+          "g1": [
+            12,
+            12
+          ],
+          "g2": [
+            12,
+            12
+          ],
+          "alpha": [
+            4,
+            25
+          ],
+          "beta": [
+            4,
+            25
+          ],
+          "m2": 1,
+          "unc": 30280,
+          "b42": 10320,
+          "b33": 9640,
+          "b24": 10320,
+          "tau": 28,
+          "exact_tau": 0,
+          "greedy_tau": 28,
+          "max_col_deg": 3028,
+          "del_mask": 805298175
+        }
+      ]
+    },
+    "inv": {
+      "q": 29,
+      "k_full": 60,
+      "slice": "inv",
+      "use_sym": 1,
+      "n1": 452,
+      "n2": 450,
+      "pairs": 203400,
+      "avg_unc": 50516.85,
+      "zero_hits": 0,
+      "min_unc": 900,
+      "best_tau_scan": 26,
+      "times": {
+        "init": 0.0382,
+        "r1": 6.1602,
+        "r2": 7.0126,
+        "inter": 2.5821,
+        "hitset": 0.7388,
+        "total": 16.532
+      },
+      "top8_by_unc": [
+        {
+          "g1": [
+            14,
+            5
+          ],
+          "g2": [
+            15,
+            5
+          ],
+          "alpha": [
+            0,
+            17
+          ],
+          "beta": [
+            25,
+            23
+          ],
+          "m2": 1,
+          "unc": 900,
+          "b42": 180,
+          "b33": 540,
+          "b24": 180,
+          "tau": 26,
+          "exact_tau": 0,
+          "greedy_tau": 26,
+          "max_col_deg": 90,
+          "del_mask": 468375599963962229
+        },
+        {
+          "g1": [
+            25,
+            14
+          ],
+          "g2": [
+            19,
+            8
+          ],
+          "alpha": [
+            10,
+            24
+          ],
+          "beta": [
+            23,
+            14
+          ],
+          "m2": 1,
+          "unc": 930,
+          "b42": 210,
+          "b33": 510,
+          "b24": 210,
+          "tau": 27,
+          "exact_tau": 0,
+          "greedy_tau": 27,
+          "max_col_deg": 93,
+          "del_mask": 2254001453596095
+        },
+        {
+          "g1": [
+            10,
+            8
+          ],
+          "g2": [
+            22,
+            16
+          ],
+          "alpha": [
+            22,
+            27
+          ],
+          "beta": [
+            14,
+            18
+          ],
+          "m2": 1,
+          "unc": 1080,
+          "b42": 270,
+          "b33": 540,
+          "b24": 270,
+          "tau": 28,
+          "exact_tau": 0,
+          "greedy_tau": 28,
+          "max_col_deg": 108,
+          "del_mask": 162288073224707775
+        },
+        {
+          "g1": [
+            2,
+            4
+          ],
+          "g2": [
+            4,
+            15
+          ],
+          "alpha": [
+            22,
+            27
+          ],
+          "beta": [
+            28,
+            3
+          ],
+          "m2": 1,
+          "unc": 1290,
+          "b42": 240,
+          "b33": 810,
+          "b24": 240,
+          "tau": 27,
+          "exact_tau": 0,
+          "greedy_tau": 27,
+          "max_col_deg": 129,
+          "del_mask": 36028943987232635
+        },
+        {
+          "g1": [
+            7,
+            13
+          ],
+          "g2": [
+            27,
+            4
+          ],
+          "alpha": [
+            10,
+            24
+          ],
+          "beta": [
+            27,
+            21
+          ],
+          "m2": 1,
+          "unc": 2430,
+          "b42": 480,
+          "b33": 1470,
+          "b24": 480,
+          "tau": 29,
+          "exact_tau": 0,
+          "greedy_tau": 29,
+          "max_col_deg": 243,
+          "del_mask": 600478662826625785
+        },
+        {
+          "g1": [
+            1,
+            0
+          ],
+          "g2": [
+            28,
+            0
+          ],
+          "alpha": [
+            0,
+            17
+          ],
+          "beta": [
+            0,
+            12
+          ],
+          "m2": 1,
+          "unc": 7570,
+          "b42": 1650,
+          "b33": 4270,
+          "b24": 1650,
+          "tau": 28,
+          "exact_tau": 0,
+          "greedy_tau": 28,
+          "max_col_deg": 757,
+          "del_mask": 520093695
+        },
+        {
+          "g1": [
+            17,
+            12
+          ],
+          "g2": [
+            3,
+            2
+          ],
+          "alpha": [
+            6,
+            19
+          ],
+          "beta": [
+            7,
+            11
+          ],
+          "m2": 1,
+          "unc": 7600,
+          "b42": 1620,
+          "b33": 4360,
+          "b24": 1620,
+          "tau": 31,
+          "exact_tau": 0,
+          "greedy_tau": 31,
+          "max_col_deg": 760,
+          "del_mask": 622270071366796381
+        },
+        {
+          "g1": [
+            26,
+            2
+          ],
+          "g2": [
+            12,
+            17
+          ],
+          "alpha": [
+            10,
+            24
+          ],
+          "beta": [
+            8,
+            23
+          ],
+          "m2": 1,
+          "unc": 7630,
+          "b42": 1650,
+          "b33": 4330,
+          "b24": 1650,
+          "tau": 30,
+          "exact_tau": 0,
+          "greedy_tau": 30,
+          "max_col_deg": 763,
+          "del_mask": 3221094399
+        }
+      ]
+    },
+    "best_periodic_tau": {
+      "r5_inv": 24,
+      "r13_inv": 24,
+      "r7_inv": 24,
+      "r11_inv": 25,
+      "r10_sq": 30
+    },
+    "best_k_punc_found": 36,
+    "ca_tools_note": "ca-tools@b689967 t=6 covers v=2..25 only (v=29 outside table)"
+  }
+}

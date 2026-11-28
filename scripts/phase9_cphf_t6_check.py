@@ -22,10 +22,10 @@ class FiniteField:
     """Exact arithmetic for F_q and K = F_{q^2} = F_q[i] / (i^2 - p1*i - p0)."""
 
     def __init__(self, q: int):
-        if q not in (5, 7, 8, 9, 11, 13, 17, 19):
-            raise ValueError(f"Unsupported q={q}; expected one of 5, 7, 8, 9, 11, 13, 17, 19")
+        if q not in (5, 7, 8, 9, 11, 13, 17, 19, 23, 29):
+            raise ValueError(f"Unsupported q={q}; expected one of 5, 7, 8, 9, 11, 13, 17, 19, 23, 29")
         self.q = q
-        if q in (5, 7, 11, 13, 17, 19):
+        if q in (5, 7, 11, 13, 17, 19, 23, 29):
             self.add = [[(a + b) % q for b in range(q)] for a in range(q)]
             self.sub = [[(a - b) % q for b in range(q)] for a in range(q)]
             self.mul = [[(a * b) % q for b in range(q)] for a in range(q)]
@@ -67,6 +67,8 @@ class FiniteField:
             13: (2, 0, (2, 1)),  # i^2 = 2, zeta = 2 + i
             17: (3, 0, (3, 1)),  # i^2 = 3, zeta = 3 + i
             19: (2, 0, (2, 1)),  # i^2 = 2, zeta = 2 + i
+            23: (5, 0, (1, 1)),  # i^2 = 5, zeta = 1 + i
+            29: (2, 0, (1, 4)),  # i^2 = 2, zeta = 1 + 4i
         }
         self.p0, self.p1, self.zeta = ext_params[q]
         self.eta = self.kpow(self.zeta, q - 1)

@@ -22,10 +22,10 @@
 #include <time.h>
 #include <omp.h>
 
-#define MAX_Q 19
-#define MAX_ORB 20
-#define MAX_K 40
-#define MAX_KORDER 360
+#define MAX_Q 29
+#define MAX_ORB 30
+#define MAX_K 60
+#define MAX_KORDER 840
 
 static double now_sec(void) {
     struct timespec ts;
@@ -98,7 +98,7 @@ static void ff_init(FF *ff, int q) {
     ff->k_full = 2 * q + 2;
     ff->k_order = q * q - 1;
 
-    if (q == 5 || q == 7 || q == 11 || q == 13 || q == 17 || q == 19) {
+    if (q == 5 || q == 7 || q == 11 || q == 13 || q == 17 || q == 19 || q == 23 || q == 29) {
         for (int a = 0; a < q; a++)
             for (int b = 0; b < q; b++) {
                 ff->add[a][b] = (uint8_t)((a + b) % q);
@@ -143,6 +143,8 @@ static void ff_init(FF *ff, int q) {
     else if (q == 13) { ff->p0 = 2; ff->p1 = 0; ff->zeta = (KElem){2, 1}; }
     else if (q == 17) { ff->p0 = 3; ff->p1 = 0; ff->zeta = (KElem){3, 1}; }
     else if (q == 19) { ff->p0 = 2; ff->p1 = 0; ff->zeta = (KElem){2, 1}; }
+    else if (q == 23) { ff->p0 = 5; ff->p1 = 0; ff->zeta = (KElem){1, 1}; }
+    else if (q == 29) { ff->p0 = 2; ff->p1 = 0; ff->zeta = (KElem){1, 4}; }
 
     ff->eta = k_pow(ff, ff->zeta, q - 1);
     for (int a = 0; a < MAX_Q; a++)
@@ -1567,7 +1569,8 @@ static void run_bench(int q, int n_threads) {
  * Supports q in {5, 7, 8, 9, 11, 13, 17, 19} (k <= 40, uint64_t bitmasks)
  * ============================================================================ */
 
-#define MAX_SHORT_ORB 128
+#define SHORT_WORDS 8
+#define MAX_SHORT_ORB (SHORT_WORDS * 64)
 
 typedef struct {
     uint8_t a_cnt;       /* 4, 3, or 2 */
@@ -1578,19 +1581,19 @@ typedef struct {
 
 typedef struct {
     int n_orb;
-    /* Canonical A-orbits of sizes 2, 3, 4 (only ~310 total at q=19!) */
+    /* Canonical A-orbits of sizes 2, 3, 4 (up to q=29, n=30!) */
     int nCA2, nCA3, nCA4;
-    uint8_t ca2[64][2], ca3[128][3], ca4[512][4];
-    uint8_t ca2_stab[64], ca3_stab[128], ca4_stab[512];
-    uint8_t N1_4[512][2][6], N1_3[128][3][6], N1_2[64][4][6];
-    uint8_t N2_4[512][2][6], N2_3[128][3][6], N2_2[64][4][6];
+    uint8_t ca2[64][2], ca3[256][3], ca4[1024][4];
+    uint8_t ca2_stab[64], ca3_stab[256], ca4_stab[1024];
+    uint8_t N1_4[1024][2][6], N1_3[256][3][6], N1_2[64][4][6];
+    uint8_t N2_4[1024][2][6], N2_3[256][3][6], N2_2[64][4][6];
 
-    /* All B combinations of sizes 2, 3, 4 */
+    /* All B combinations of sizes 2, 3, 4 (up to C(30,4)=27405) */
     int nB2, nB3, nB4;
-    uint8_t combB2[200][2];
-    uint8_t combB3[1200][3];
-    uint8_t combB4[5000][4];
-    uint32_t maskB2[200], maskB3[1200], maskB4[5000];
+    uint8_t combB2[450][2];
+    uint8_t combB3[4100][3];
+    uint8_t combB4[28000][4];
+    uint32_t maskB2[450], maskB3[4100], maskB4[28000];
 
     /* Z_n orbits */
     int n_orbits;
@@ -1817,15 +1820,15 @@ static void free_orbit_table(OrbitTable *ot) {
 
 /* Precompute N_A * B[k] for one canonical A and all k in 0..n-1 for massive speedup! */
 static int build_orb_mask_fast(const FF *ff, const OrbitTable *ot, int is_row2,
-                               const uint8_t B[MAX_ORB][6], uint64_t *omask, uint64_t smask[2]) {
+                               const uint8_t B[MAX_ORB][6], uint64_t *omask, uint64_t smask[SHORT_WORDS]) {
     memset(omask, 0, (size_t)ot->ow_total * sizeof(uint64_t));
-    smask[0] = smask[1] = 0;
+    memset(smask, 0, SHORT_WORDS * sizeof(uint64_t));
     int n = ot->n_orb;
     int dep = 0;
 
-    /* Precompute projections for all canonical A (tiny: <= 512 x 20 x 4 bytes!) */
-    uint8_t P4[512][MAX_ORB][2];
-    uint8_t P3[128][MAX_ORB][3];
+    /* Precompute projections for all canonical A (up to q=29!) */
+    uint8_t P4[1024][MAX_ORB][2];
+    uint8_t P3[256][MAX_ORB][3];
     uint8_t P2[64][MAX_ORB][4];
 
     for (int ca = 0; ca < ot->nCA4; ca++) {
@@ -1892,13 +1895,12 @@ static int build_orb_mask_fast(const FF *ff, const OrbitTable *ot, int is_row2,
 
 /* Extract exact uncovered 6-tuple uint64_t hyperedges directly from (o1 & o2, s1 & s2) */
 static int extract_edges_from_orbits(const OrbitTable *ot,
-                                     const uint64_t *o1, const uint64_t s1[2],
-                                     const uint64_t *o2, const uint64_t s2[2],
+                                     const uint64_t *o1, const uint64_t s1[SHORT_WORDS],
+                                     const uint64_t *o2, const uint64_t s2[SHORT_WORDS],
                                      uint64_t *edges, int max_edges) {
     int n = ot->n_orb;
     int ne = 0;
-    /* Helper lambda-style block via array of uncovered oids */
-    int cap_oids = 4096;
+    int cap_oids = 16384;
     int *oids = (int *)malloc((size_t)cap_oids * sizeof(int));
     int n_oids = 0;
 
@@ -1911,7 +1913,7 @@ static int extract_edges_from_orbits(const OrbitTable *ot,
             if (n_oids < cap_oids) oids[n_oids++] = oid;
         }
     }
-    for (int sw = 0; sw < 2; sw++) {
+    for (int sw = 0; sw < SHORT_WORDS; sw++) {
         uint64_t x = s1[sw] & s2[sw];
         while (x) {
             int b = __builtin_ctzll(x);
@@ -2211,43 +2213,43 @@ static void build_slice_lists(const FF *ff, int slice_mode, int use_sym,
 
 static void run_slice_bench(int q, int n_threads) {
     omp_set_num_threads(n_threads);
-    FF ff; ff_init(&ff, q);
+    FF *ff = (FF *)calloc(1, sizeof(FF)); ff_init(ff, q);
     uint8_t R1_A[MAX_ORB][6], R2_A[MAX_ORB][6];
-    build_R1_A(&ff, R1_A); build_R2_A(&ff, R2_A);
+    build_R1_A(ff, R1_A); build_R2_A(ff, R2_A);
 
     double t0 = now_sec();
-    OrbitTable ot;
-    init_orbit_table(&ot, &ff, R1_A, R2_A);
+    OrbitTable *ot = (OrbitTable *)calloc(1, sizeof(OrbitTable));
+    init_orbit_table(ot, ff, R1_A, R2_A);
     double t_init = now_sec() - t0;
 
-    R1Rep r1[512]; R2Rep r2[512];
+    R1Rep r1[1024]; R2Rep r2[1024];
     int n1 = 0, n2 = 0;
-    build_slice_lists(&ff, 0, 1, r1, &n1, r2, &n2);
+    build_slice_lists(ff, 0, 1, r1, &n1, r2, &n2);
 
     int samp = (n1 < 10) ? n1 : 10;
-    uint64_t *om = (uint64_t *)malloc((size_t)samp * ot.ow_total * sizeof(uint64_t));
-    uint64_t sm[10][2];
+    uint64_t *om = (uint64_t *)malloc((size_t)samp * ot->ow_total * sizeof(uint64_t));
+    uint64_t sm[10][SHORT_WORDS];
     double tb = now_sec();
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < samp; i++) {
         uint8_t B[MAX_ORB][6];
-        build_R1_B(&ff, ff.k_nonzero[r1[i].g1_idx], ff.k_nonzero[r1[i].g2_idx], B);
-        build_orb_mask_fast(&ff, &ot, 0, B, om + (size_t)i * ot.ow_total, sm[i]);
+        build_R1_B(ff, ff->k_nonzero[r1[i].g1_idx], ff->k_nonzero[r1[i].g2_idx], B);
+        build_orb_mask_fast(ff, ot, 0, B, om + (size_t)i * ot->ow_total, sm[i]);
     }
     double dt_1 = (now_sec() - tb) / samp;
     double est_build = dt_1 * (n1 + n2);
 
     printf("SLICE-BENCH q=%d (k=%d, canA=[%d,%d,%d], orbits=%d, short=%d, ow=%d, threads=%d):\n",
-           q, ff.k_full, ot.nCA4, ot.nCA3, ot.nCA2, ot.n_orbits, ot.n_short, ot.ow_total, n_threads);
+           q, ff->k_full, ot->nCA4, ot->nCA3, ot->nCA2, ot->n_orbits, ot->n_short, ot->ow_total, n_threads);
     printf("  init=%.3fs | S_inv sym: n1=%d x n2=%d = %d pairs (raw %d x %d = %d)\n",
-           t_init, n1, n2, n1 * n2, ff.n_orb * ff.n_orb, n2, ff.n_orb * ff.n_orb * n2);
+           t_init, n1, n2, n1 * n2, ff->n_orb * ff->n_orb, n2, ff->n_orb * ff->n_orb * n2);
     printf("  1 build=%.2f ms (10 builds=%.3fs) | est full S_inv scan=%.2fs\n",
-           dt_1 * 1e3, dt_1 * samp, est_build + (double)n1 * n2 * ot.ow_total * 0.6e-9);
+           dt_1 * 1e3, dt_1 * samp, est_build + (double)n1 * n2 * ot->ow_total * 0.6e-9);
 
-    free(om); free_orbit_table(&ot);
+    free(om); free_orbit_table(ot); free(ot); free(ff);
 }
 
-/* Direct m2 != 1 control sample on q=17, 19: evaluate small sample of pairs directly on orbits */
+/* Direct m2 != 1 control sample on q>=17: evaluate small sample of pairs directly on orbits */
 static void run_m2ne1_control(int q, int n_threads) {
     double t0 = now_sec();
     omp_set_num_threads(n_threads);
@@ -2255,8 +2257,8 @@ static void run_m2ne1_control(int q, int n_threads) {
     uint8_t R1_A[MAX_ORB][6], R2_A[MAX_ORB][6];
     build_R1_A(&ff, R1_A); build_R2_A(&ff, R2_A);
 
-    /* Sample 12 (g1,g2) in U^2 x 12 (alpha,beta) in S_inv for m2=3 and m2=q (288 pairs) */
-    R1Rep r1[512]; R2Rep r2[512];
+    /* Sample 10 (g1,g2) in U^2 x 10 (alpha,beta) in S_inv for m2!=1 */
+    R1Rep r1[1024]; R2Rep r2[1024];
     int n1_all = 0, n2_all = 0;
     build_slice_lists(&ff, 0, 1, r1, &n1_all, r2, &n2_all);
     int s1 = (n1_all < 10) ? n1_all : 10;
@@ -2333,24 +2335,24 @@ static void run_slice_scan(int q, int slice_mode, int use_sym, int max_exact_tau
     uint8_t R1_A[MAX_ORB][6], R2_A[MAX_ORB][6];
     build_R1_A(&ff, R1_A); build_R2_A(&ff, R2_A);
 
-    OrbitTable ot;
-    init_orbit_table(&ot, &ff, R1_A, R2_A);
+    OrbitTable *ot_p = (OrbitTable *)calloc(1, sizeof(OrbitTable));
+    init_orbit_table(ot_p, &ff, R1_A, R2_A);
     double t_init = now_sec() - t0;
 
-    R1Rep r1[512]; R2Rep r2[512];
+    R1Rep r1[1024]; R2Rep r2[1024];
     int n1 = 0, n2 = 0;
     build_slice_lists(&ff, slice_mode, use_sym, r1, &n1, r2, &n2);
 
-    uint64_t *r1_om = (uint64_t *)malloc((size_t)n1 * ot.ow_total * sizeof(uint64_t));
-    uint64_t (*r1_sm)[2] = (uint64_t (*)[2])malloc((size_t)n1 * sizeof(uint64_t[2]));
-    uint64_t *r2_om = (uint64_t *)malloc((size_t)n2 * ot.ow_total * sizeof(uint64_t));
-    uint64_t (*r2_sm)[2] = (uint64_t (*)[2])malloc((size_t)n2 * sizeof(uint64_t[2]));
+    uint64_t *r1_om = (uint64_t *)malloc((size_t)n1 * ot_p->ow_total * sizeof(uint64_t));
+    uint64_t (*r1_sm)[SHORT_WORDS] = (uint64_t (*)[SHORT_WORDS])malloc((size_t)n1 * sizeof(uint64_t[SHORT_WORDS]));
+    uint64_t *r2_om = (uint64_t *)malloc((size_t)n2 * ot_p->ow_total * sizeof(uint64_t));
+    uint64_t (*r2_sm)[SHORT_WORDS] = (uint64_t (*)[SHORT_WORDS])malloc((size_t)n2 * sizeof(uint64_t[SHORT_WORDS]));
 
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < n1; i++) {
         uint8_t B[MAX_ORB][6];
         build_R1_B(&ff, ff.k_nonzero[r1[i].g1_idx], ff.k_nonzero[r1[i].g2_idx], B);
-        build_orb_mask_fast(&ff, &ot, 0, B, r1_om + (size_t)i * ot.ow_total, r1_sm[i]);
+        build_orb_mask_fast(&ff, ot_p, 0, B, r1_om + (size_t)i * ot_p->ow_total, r1_sm[i]);
     }
     double t_r1 = now_sec() - t0 - t_init;
 
@@ -2358,7 +2360,7 @@ static void run_slice_scan(int q, int slice_mode, int use_sym, int max_exact_tau
     for (int j = 0; j < n2; j++) {
         uint8_t B[MAX_ORB][6];
         build_R2_B(&ff, ff.zeta_pow[r2[j].a_coset], ff.k_nonzero[r2[j].b_idx], 1, B);
-        build_orb_mask_fast(&ff, &ot, 1, B, r2_om + (size_t)j * ot.ow_total, r2_sm[j]);
+        build_orb_mask_fast(&ff, ot_p, 1, B, r2_om + (size_t)j * ot_p->ow_total, r2_sm[j]);
     }
     double t_r2 = now_sec() - t0 - t_init - t_r1;
 
@@ -2370,7 +2372,8 @@ static void run_slice_scan(int q, int slice_mode, int use_sym, int max_exact_tau
     int min_42 = 1000000000, min_33 = 1000000000, min_24 = 1000000000, min_tot = 1000000000;
     uint64_t zero_hits = 0;
     double sum_tot = 0;
-    int ow42 = ot.ow_42_end, ow33 = ot.ow_33_end, owtot = ot.ow_total, n_orb = ff.n_orb;
+    int ow42 = ot_p->ow_42_end, ow33 = ot_p->ow_33_end, owtot = ot_p->ow_total, n_orb = ff.n_orb;
+    int n_sw = (ot_p->n_short + 63) / 64;
 
     #pragma omp parallel
     {
@@ -2383,7 +2386,7 @@ static void run_slice_scan(int q, int slice_mode, int use_sym, int max_exact_tau
         #pragma omp for schedule(dynamic, 4)
         for (int i = 0; i < n1; i++) {
             const uint64_t *m1 = r1_om + (size_t)i * owtot;
-            uint64_t s10 = r1_sm[i][0], s11 = r1_sm[i][1];
+            const uint64_t *s1 = r1_sm[i];
             for (int j = 0; j < n2; j++) {
                 const uint64_t *m2 = r2_om + (size_t)j * owtot;
                 int c42 = 0, c33 = 0, c24 = 0;
@@ -2391,18 +2394,14 @@ static void run_slice_scan(int q, int slice_mode, int use_sym, int max_exact_tau
                 for (int w = ow42; w < ow33; w++) c33 += __builtin_popcountll(m1[w] & m2[w]);
                 for (int w = ow33; w < owtot; w++) c24 += __builtin_popcountll(m1[w] & m2[w]);
                 int b42 = c42 * n_orb, b33 = c33 * n_orb, b24 = c24 * n_orb;
-                uint64_t sm0 = s10 & r2_sm[j][0], sm1 = s11 & r2_sm[j][1];
-                while (sm0) {
-                    int sb = __builtin_ctzll(sm0); sm0 &= sm0 - 1;
-                    if (ot.short_acnt[sb] == 4) b42 += ot.short_len[sb];
-                    else if (ot.short_acnt[sb] == 3) b33 += ot.short_len[sb];
-                    else b24 += ot.short_len[sb];
-                }
-                while (sm1) {
-                    int sb = 64 + __builtin_ctzll(sm1); sm1 &= sm1 - 1;
-                    if (ot.short_acnt[sb] == 4) b42 += ot.short_len[sb];
-                    else if (ot.short_acnt[sb] == 3) b33 += ot.short_len[sb];
-                    else b24 += ot.short_len[sb];
+                for (int sw = 0; sw < n_sw; sw++) {
+                    uint64_t sm = s1[sw] & r2_sm[j][sw];
+                    while (sm) {
+                        int sb = (sw << 6) + __builtin_ctzll(sm); sm &= sm - 1;
+                        if (ot_p->short_acnt[sb] == 4) b42 += ot_p->short_len[sb];
+                        else if (ot_p->short_acnt[sb] == 3) b33 += ot_p->short_len[sb];
+                        else b24 += ot_p->short_len[sb];
+                    }
                 }
                 int tot = b42 + b33 + b24;
                 lsum += (double)tot;
@@ -2462,9 +2461,9 @@ static void run_slice_scan(int q, int slice_mode, int use_sym, int max_exact_tau
         if (i1 < 0 || i2 < 0) continue;
         int cap_e = c->tot + 64;
         uint64_t *edges = (uint64_t *)malloc((size_t)cap_e * sizeof(uint64_t));
-        int ne = extract_edges_from_orbits(&ot, r1_om + (size_t)i1 * owtot, r1_sm[i1],
+        int ne = extract_edges_from_orbits(ot_p, r1_om + (size_t)i1 * owtot, r1_sm[i1],
                                            r2_om + (size_t)i2 * owtot, r2_sm[i2], edges, cap_e);
-        uint64_t nl = (ne <= 1500) ? 50000000ULL : 2000000ULL;
+        uint64_t nl = (ne <= 2500) ? 50000000ULL : 2000000ULL;
         c->tau = compute_min_hitting_set_u64(ff.k_full, edges, ne, max_exact_tau, nl,
                                              &c->del_mask, &c->exact_tau, &c->greedy_tau, &c->max_col_deg);
         free(edges);
@@ -2491,7 +2490,7 @@ static void run_slice_scan(int q, int slice_mode, int use_sym, int max_exact_tau
     double t_tot = now_sec() - t0;
 
     printf("SLICE-SCAN q=%d slice=%s (k=%d, orbits=%d, short=%d, sym=%d): n1=%d x n2=%d = %d pairs, avg_unc=%.1f, zero_hits=%llu\n",
-           q, snames[slice_mode], ff.k_full, ot.n_orbits, ot.n_short, use_sym,
+           q, snames[slice_mode], ff.k_full, ot_p->n_orbits, ot_p->n_short, use_sym,
            n1, n2, n1 * n2, sum_tot / (double)(n1 * n2), (unsigned long long)zero_hits);
     printf("  times: init=%.3fs r1=%.3fs r2=%.3fs inter=%.3fs hitset(%d)=%.3fs total=%.3fs\n",
            t_init, t_r1, t_r2, t_int, n_eval, t_hs, t_tot);
@@ -2548,7 +2547,7 @@ static void run_slice_scan(int q, int slice_mode, int use_sym, int max_exact_tau
 
     free(r1_om); free(r1_sm); free(r2_om); free(r2_sm);
     free(top_tot.items); free(top_pure33.items);
-    free_orbit_table(&ot);
+    free_orbit_table(ot_p); free(ot_p);
 }
 
 int main(int argc, char **argv) {

@@ -21,7 +21,7 @@
 #include <time.h>
 #include <omp.h>
 
-#define V_MAX_Q 23
+#define V_MAX_Q 29
 #define V_MAX_K 64
 
 static double v_now(void) {
@@ -41,7 +41,7 @@ typedef struct {
 static void vfield_init(VField *f, int q) {
     memset(f, 0, sizeof(*f));
     f->q = q;
-    if (q == 5 || q == 7 || q == 11 || q == 13 || q == 17 || q == 19 || q == 23) {
+    if (q == 5 || q == 7 || q == 11 || q == 13 || q == 17 || q == 19 || q == 23 || q == 29) {
         for (int a = 0; a < q; a++)
             for (int b = 0; b < q; b++) {
                 f->add[a][b] = (uint8_t)((a + b) % q);
