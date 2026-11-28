@@ -1,0 +1,167 @@
+name: verify-phase9-m3
+
+# Manuelle Dual-Verifikation der Phase-9-M_3(R_3)-Bestwerte <= 50 MiB (Branch exp/phase9-biaffine-3d, PR #54).
+# Nur lesend gegen das Repo: kein Commit, keine Roh-CA-Dateien als Artifact, keine Aussenwirkung.
+# verifiers/ bleibt strikt READ-ONLY (SHA256SUMS + test_verifiers.py in jedem Matrix-Job).
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Zellumfang: remaining3 (q=8 t=6, q=9 t=6, q=13 t=5) oder all13 (alle 13 <=50-MiB-PAWS-Zellen)"
+        required: true
+        default: "remaining3"
+        type: choice
+        options: ["remaining3", "all13"]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        env:
+          SCOPE_IN: ${{ inputs.scope }}
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os
+
+          remaining3 = [
+              {"q": 8,  "t": 6, "m": 914,  "seed": "data/phase9_m3/R3_q8_fullbg3_opt_paws_m914.txt",   "table_n": 491520,  "table_k": 14, "sha": ""},
+              {"q": 9,  "t": 6, "m": 1319, "seed": "data/phase9_m3/R3_q9_fullbg3_opt_paws_m1319.txt",  "table_n": 1003833, "table_k": 16, "sha": ""},
+              {"q": 13, "t": 5, "m": 4026, "seed": "data/phase9_m3/R3_q13_fullbg3_opt_paws_m4026.txt", "table_n": 714025,  "table_k": 21, "sha": ""},
+          ]
+          already10 = [
+              {"q": 7,  "t": 4, "m": 607,  "seed": "data/phase9_m3/R3_q7_fullbg3_opt_paws_m607.txt",   "table_n": 4459,   "table_k": 15, "sha": "5a1243a2bb01f3f590e66b3cbbe31fbefe80db26460e777946c5830d007f797d"},
+              {"q": 7,  "t": 5, "m": 607,  "seed": "data/phase9_m3/R3_q7_fullbg3_opt_paws_m607.txt",   "table_n": 31213,  "table_k": 13, "sha": "0ada022c05c540ebd45ce99b82450f829bc328705c532c11c43ff1e6b7bfe5bf"},
+              {"q": 7,  "t": 6, "m": 607,  "seed": "data/phase9_m3/R3_q7_fullbg3_opt_paws_m607.txt",   "table_n": 218491, "table_k": 13, "sha": "52f7706d45d4f459fbffa9bdf28ec269aa3266df9e070bbaca9319771ea67e9b"},
+              {"q": 8,  "t": 4, "m": 914,  "seed": "data/phase9_m3/R3_q8_fullbg3_opt_paws_m914.txt",   "table_n": 7680,   "table_k": 15, "sha": "5fc8b4a2c45e2b4cdebe7553ce1a907e8799abd33c8ad839f05668b345adf1ee"},
+              {"q": 8,  "t": 5, "m": 914,  "seed": "data/phase9_m3/R3_q8_fullbg3_opt_paws_m914.txt",   "table_n": 61440,  "table_k": 14, "sha": "bfb0def6281d2945d729a689c1df0fc518f601a51db9eedeb384a34b17b65afa"},
+              {"q": 9,  "t": 4, "m": 1319, "seed": "data/phase9_m3/R3_q9_fullbg3_opt_paws_m1319.txt",  "table_n": 12393,  "table_k": 17, "sha": "774bff33af29ecfb721cbff2ac4f8b122ec4ec7b016ee8746e5c0ba8f7af16df"},
+              {"q": 9,  "t": 5, "m": 1319, "seed": "data/phase9_m3/R3_q9_fullbg3_opt_paws_m1319.txt",  "table_n": 111537, "table_k": 16, "sha": "c8515e10248c17727238583063b70297aca6819b3121b588e760e8bd055b6b20"},
+              {"q": 11, "t": 4, "m": 2417, "seed": "data/phase9_m3/R3_q11_fullbg3_opt_paws_m2417.txt", "table_n": 27544,  "table_k": 14, "sha": "7ff2e3c747d8d63756b66e2469e925291ee1163e7e5efd23f1e6325c9b947dad"},
+              {"q": 11, "t": 5, "m": 2417, "seed": "data/phase9_m3/R3_q11_fullbg3_opt_paws_m2417.txt", "table_n": 307461, "table_k": 18, "sha": "d3d861ee8e6a899932eadb16075fbd2971712840a94e4b6991c0ac0d2f30a4cf"},
+              {"q": 13, "t": 4, "m": 4026, "seed": "data/phase9_m3/R3_q13_fullbg3_opt_paws_m4026.txt", "table_n": 54925,  "table_k": 21, "sha": "8db4c6c94cf87174b1b05a2f1dd302e894ac2dcbf2c2f7b0210a402ae224c727"},
+          ]
+
+          scope = os.environ["SCOPE_IN"]
+          inc = remaining3 if scope == "remaining3" else sorted(
+              already10 + remaining3, key=lambda r: (r["q"], r["t"])
+          )
+          print("matrix=" + json.dumps({"include": inc}))
+          EOF
+
+  verify:
+    needs: plan
+    name: q${{ matrix.q }} t${{ matrix.t }} m${{ matrix.m }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      Q: ${{ matrix.q }}
+      T: ${{ matrix.t }}
+      M: ${{ matrix.m }}
+      SEED: ${{ matrix.seed }}
+      TABLE_N: ${{ matrix.table_n }}
+      TABLE_K: ${{ matrix.table_k }}
+      SHA_SOLL: ${{ matrix.sha }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verifier-Integritaet (READ-ONLY), Build & Selbsttest
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          sha256sum -c verifiers/SHA256SUMS
+          (cd data/phase9_m3 && sha256sum -c SHA256SUMS)
+          gcc -O3 -march=native -pthread -o verifiers/ca_verify verifiers/ca_verify.c -lm
+          python3 verifiers/test_verifiers.py
+
+      - name: 2x Lift (byte-gleich), <=50 MiB Check & Dual-Verify (POS + NEG)
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/phase9_m3_summary
+          python3 scripts/phase9_m3_ci_verify.py \
+            --q "${Q}" \
+            --t "${T}" \
+            --m "${M}" \
+            --seed "${SEED}" \
+            --table-n "${TABLE_N}" \
+            --table-k "${TABLE_K}" \
+            --expected-sha256 "${SHA_SOLL}" \
+            --max-mib 50.0 \
+            --threads 4 \
+            --out-dir /tmp/phase9_m3_summary
+
+      - name: Upload kompaktes Summary-Artifact (JSON + MD, keine Roh-CA-Dateien)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summary-q${{ matrix.q }}-t${{ matrix.t }}-m${{ matrix.m }}
+          path: |
+            /tmp/phase9_m3_summary/summary_q${{ matrix.q }}_t${{ matrix.t }}_m${{ matrix.m }}.json
+            /tmp/phase9_m3_summary/summary_q${{ matrix.q }}_t${{ matrix.t }}_m${{ matrix.m }}.md
+          if-no-files-found: warn
+          retention-days: 14
+
+  summarize:
+    needs: verify
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download kompakte JSON-Summaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: summary-*
+          merge-multiple: true
+          path: /tmp/phase9_m3_all
+
+      - name: Gesamt-Tabelle in GITHUB_STEP_SUMMARY & Combined JSON
+        run: |
+          python3 - <<'EOF'
+          import glob, json, os
+          from pathlib import Path
+
+          rows = []
+          for p in sorted(glob.glob("/tmp/phase9_m3_all/summary_*.json")):
+              rows.append(json.loads(Path(p).read_text(encoding="utf-8")))
+          rows.sort(key=lambda r: (r["q"], r["t"]))
+
+          Path("/tmp/phase9_m3_all/phase9_m3_combined_summary.json").write_text(
+              json.dumps(rows, indent=2) + "\n", encoding="utf-8"
+          )
+
+          lines = [
+              "## Phase 9 M_3(R_3) Dual-Verify Gesamtergebnis",
+              "",
+              "| Zelle | MiB (<=50) | 2x Lift | `ca_verify` POS/NEG | `py_verify` POS/NEG | `ca-tools@b689967` (`Delta`) | CA SHA-256 | Status |",
+              "|---|---:|:---:|---|---|---|---|:---:|",
+          ]
+          for r in rows:
+              cell = f"`CA({r['N']}; {r['t']}, {r['k']}, {r['q']})`"
+              ca_s = f"`{r['ca_verify_pos']['rc']}` ({r['ca_verify_pos']['sec']}s) / `{r['ca_verify_neg']['rc']}` ({r['ca_verify_neg']['sec']}s)"
+              py_s = f"`{r['py_verify_pos']['rc']}` ({r['py_verify_pos']['sec']}s) / `{r['py_verify_neg']['rc']}` ({r['py_verify_neg']['sec']}s)"
+              tbl = f"`{r['table_b689967_N']}` (`{r['delta_vs_table']:+d}`)" if r.get("table_b689967_N") else "n/a"
+              lines.append(
+                  f"| {cell} | `{r['size_mib']:.4f}` | `{'YES' if r['lift_byte_equal'] else 'NO'}` | {ca_s} | {py_s} | {tbl} | `{r['ca_sha256']}` | **{r['status']}** |"
+              )
+          summary_md = "\n".join(lines) + "\n"
+          print(summary_md)
+          gh_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if gh_summary:
+              with open(gh_summary, "a", encoding="utf-8") as f:
+                  f.write(summary_md)
+          EOF
+
+      - name: Upload kombiniertes JSON-Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase9-m3-combined-summary
+          path: /tmp/phase9_m3_all/phase9_m3_combined_summary.json
+          retention-days: 14
