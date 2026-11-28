@@ -188,7 +188,7 @@ static int gf_init(GF *gf, int q) {
 /* ---------- Problem specification (D_1, N_2, offsets) ---------- */
 
 typedef enum { MODE_TSPEC = 0, MODE_FULL_BG3 = 1 } Mode;
-typedef enum { INIT_BASE = 0, INIT_RAND = 1, INIT_FILE = 2 } InitMode;
+typedef enum { INIT_BASE = 0, INIT_RAND = 1, INIT_FILE = 2, INIT_HEAVY = 3 } InitMode;
 typedef enum { ALGO_PAWS = 0, ALGO_SA = 1 } AlgoMode;
 
 typedef struct {
@@ -444,6 +444,30 @@ static void state_record_best(State *S) {
     }
 }
 
+static int row_unique_cov(const State *S, int r) {
+    const Problem *P = S->P;
+    int q = P->q;
+    int ucnt = 0;
+    int c0 = S->rows[r][0], c1 = S->rows[r][1], c2 = S->rows[r][2];
+    int a = S->rows[r][3], b = S->rows[r][4], c = S->rows[r][5];
+    if (S->cnt[id_t0(P, c0, c1, c2)] == 1) ucnt++;
+    if (S->cnt[id_t3(P, a, b, c)] == 1) ucnt++;
+    for (int d = 0; d < P->num_d1; d++) {
+        int proj = S->t1_proj[r][d];
+        if (S->cnt[id_t1(P, 0, d, a, proj)] == 1) ucnt++;
+        if (S->cnt[id_t1(P, 1, d, b, proj)] == 1) ucnt++;
+        if (S->cnt[id_t1(P, 2, d, c, proj)] == 1) ucnt++;
+    }
+    int sp0 = a * q + b, sp1 = a * q + c, sp2 = b * q + c;
+    for (int n = 0; n < P->num_n2; n++) {
+        int val = S->t2_val[r][n];
+        if (S->cnt[id_t2(P, 0, n, sp0, val)] == 1) ucnt++;
+        if (S->cnt[id_t2(P, 1, n, sp1, val)] == 1) ucnt++;
+        if (S->cnt[id_t2(P, 2, n, sp2, val)] == 1) ucnt++;
+    }
+    return ucnt;
+}
+
 static void state_init_rows(State *S, InitMode imode, const uint8_t (*init_file_rows)[6], int init_file_m) {
     const Problem *P = S->P;
     const GF *gf = &P->gf;
@@ -451,19 +475,126 @@ static void state_init_rows(State *S, InitMode imode, const uint8_t (*init_file_
     int idx = 0;
 
     if (imode == INIT_FILE && init_file_rows != NULL && init_file_m > 0) {
-        if (init_file_m >= S->m) {
-            /* Randomly pick S->m rows without replacement */
-            int perm[MAX_M];
-            for (int i = 0; i < init_file_m; i++) perm[i] = i;
-            for (int i = 0; i < S->m; i++) {
-                int j = i + (int)rng_bound(&S->rng, (uint32_t)(init_file_m - i));
-                int tmp = perm[i]; perm[i] = perm[j]; perm[j] = tmp;
-                memcpy(S->rows[i], init_file_rows[perm[i]], 6);
+        if (init_file_m > S->m) {
+            /* Iteratively delete min-unique-coverage rows (with small random tie-break) */
+            int target_m = S->m;
+            S->m = init_file_m;
+            for (int i = 0; i < init_file_m; i++) memcpy(S->rows[i], init_file_rows[i], 6);
+            state_rebuild(S);
+            while (S->m > target_m) {
+                int best_u = 1000000000;
+                int drop_r = 0;
+                int ties = 0;
+                for (int r = 0; r < S->m; r++) {
+                    int uc = row_unique_cov(S, r);
+                    /* Allow slight randomization among lowest-unique rows (+1 tolerance) */
+                    if (uc < best_u) {
+                        best_u = uc;
+                        drop_r = r;
+                        ties = 1;
+                    } else if (uc == best_u) {
+                        ties++;
+                        if (rng_bound(&S->rng, (uint32_t)ties) == 0) drop_r = r;
+                    }
+                }
+                if (drop_r != S->m - 1) memcpy(S->rows[drop_r], S->rows[S->m - 1], 6);
+                S->m--;
+                state_rebuild(S);
             }
-            idx = S->m;
+            return;
         } else {
             for (int i = 0; i < init_file_m; i++) memcpy(S->rows[i], init_file_rows[i], 6);
             idx = init_file_m;
+        }
+    } else if (imode == INIT_HEAVY) {
+        /*
+         * Teil-1-derived light+heavy layer skeleton:
+         *   - (q - 1) light layers z = 0..q-2 partitioned among a, b, c:
+         *     k_a + k_b + k_c = q - 1 (balanced), each light layer gives one symbol a full z-plane
+         *     and covers full x-lines + Typ-3 triples cyclically.
+         *   - 1 heavy layer z = q - 1 with remaining m - (q - 1)*q^2 reps covering all remaining
+         *     r_u = q - k_u symbols of a, b, c on z = q - 1 (Typ 0 = 0 and Typ 1 = 0 immediately).
+         */
+        int ka = (q - 1 + 2) / 3;
+        int kb = (q - 1 + 1) / 3;
+        int kc = (q - 1) / 3;
+        int ra = q - ka, rb = q - kb, rc = q - kc;
+        int L = ra;
+        if (rb > L) L = rb;
+        if (rc > L) L = rc;
+        int need = (q - 1 + L) * P->q2;
+        if (S->m >= need) {
+            /* Light layers for a = 0..ka-1 */
+            for (int z = 0; z < ka; z++) {
+                for (int y = 0; y < q; y++) {
+                    for (int x = 0; x < q; x++) {
+                        S->rows[idx][0] = (uint8_t)x;
+                        S->rows[idx][1] = (uint8_t)y;
+                        S->rows[idx][2] = (uint8_t)z;
+                        S->rows[idx][3] = (uint8_t)z;
+                        S->rows[idx][4] = (uint8_t)y;
+                        S->rows[idx][5] = gf->add[x][y];
+                        idx++;
+                    }
+                }
+            }
+            /* Light layers for b = 0..kb-1 */
+            for (int j = 0; j < kb; j++) {
+                int z = ka + j;
+                for (int y = 0; y < q; y++) {
+                    for (int x = 0; x < q; x++) {
+                        S->rows[idx][0] = (uint8_t)x;
+                        S->rows[idx][1] = (uint8_t)y;
+                        S->rows[idx][2] = (uint8_t)z;
+                        S->rows[idx][3] = gf->add[x][y];
+                        S->rows[idx][4] = (uint8_t)j;
+                        S->rows[idx][5] = (uint8_t)y;
+                        idx++;
+                    }
+                }
+            }
+            /* Light layers for c = 0..kc-1 */
+            for (int j = 0; j < kc; j++) {
+                int z = ka + kb + j;
+                for (int y = 0; y < q; y++) {
+                    for (int x = 0; x < q; x++) {
+                        S->rows[idx][0] = (uint8_t)x;
+                        S->rows[idx][1] = (uint8_t)y;
+                        S->rows[idx][2] = (uint8_t)z;
+                        S->rows[idx][3] = (uint8_t)y;
+                        S->rows[idx][4] = gf->add[x][y];
+                        S->rows[idx][5] = (uint8_t)j;
+                        idx++;
+                    }
+                }
+            }
+            /* Heavy layer z = q - 1: L full copies guaranteeing Typ 0 = 0 and Typ 1 = 0 */
+            int zh = q - 1;
+            for (int l = 0; l < L; l++) {
+                for (int y = 0; y < q; y++) {
+                    for (int x = 0; x < q; x++) {
+                        S->rows[idx][0] = (uint8_t)x;
+                        S->rows[idx][1] = (uint8_t)y;
+                        S->rows[idx][2] = (uint8_t)zh;
+                        S->rows[idx][3] = (uint8_t)(ka + ((l + y) % ra));
+                        S->rows[idx][4] = (uint8_t)(kb + ((l + x) % rb));
+                        S->rows[idx][5] = (uint8_t)(kc + ((l + x + y) % rc));
+                        idx++;
+                    }
+                }
+            }
+            /* Extra reps placed on heavy layer z = q - 1 with random (x, y, a, b, c) */
+            while (idx < S->m) {
+                S->rows[idx][0] = (uint8_t)rng_bound(&S->rng, (uint32_t)q);
+                S->rows[idx][1] = (uint8_t)rng_bound(&S->rng, (uint32_t)q);
+                S->rows[idx][2] = (uint8_t)zh;
+                S->rows[idx][3] = (uint8_t)rng_bound(&S->rng, (uint32_t)q);
+                S->rows[idx][4] = (uint8_t)rng_bound(&S->rng, (uint32_t)q);
+                S->rows[idx][5] = (uint8_t)rng_bound(&S->rng, (uint32_t)q);
+                idx++;
+            }
+            state_rebuild(S);
+            return;
         }
     } else if (imode == INIT_BASE && S->m >= P->q3) {
         /* Linear base: (c0, c1, c2, c2, c0, c0 + c1 + 2*c2) in GF(q) */
@@ -879,12 +1010,13 @@ static int collect_repair_moves(const State *S, int id, Move *out, int max_out) 
 /* ---------- Self-Test ---------- */
 
 static int run_self_test(void) {
-    const struct { int q; Mode mode; int t; int m; } cases[] = {
-        {3, MODE_TSPEC, 3, 35},
-        {3, MODE_FULL_BG3, 3, 40},
-        {4, MODE_TSPEC, 4, 80},
-        {5, MODE_TSPEC, 4, 180},
-        {5, MODE_FULL_BG3, 4, 200},
+    const struct { int q; Mode mode; int t; int m; int steps; InitMode im; } cases[] = {
+        {3, MODE_TSPEC, 3, 35, 2000, INIT_BASE},
+        {3, MODE_FULL_BG3, 3, 40, 2000, INIT_BASE},
+        {4, MODE_TSPEC, 4, 80, 2000, INIT_BASE},
+        {5, MODE_TSPEC, 4, 180, 2000, INIT_BASE},
+        {5, MODE_FULL_BG3, 4, 200, 2000, INIT_HEAVY},
+        {7, MODE_FULL_BG3, 4, 636, 400, INIT_HEAVY},
     };
     int n_cases = (int)(sizeof(cases) / sizeof(cases[0]));
     State *S = calloc(1, sizeof(State));
@@ -904,12 +1036,12 @@ static int run_self_test(void) {
         S->base_w03 = 1;
         rng_seed(&S->rng, 1234567ULL + (uint64_t)ci * 99991ULL);
         state_reset_weights_tabu(S);
-        state_init_rows(S, INIT_BASE, NULL, 0);
+        state_init_rows(S, cases[ci].im, NULL, 0);
 
         /* Assign non-trivial weights to also test dw! */
         for (int id = 0; id < P.total_inter; id++) S->weight[id] = 1 + (uint32_t)(id % 7);
 
-        for (int step = 0; step < 2000; step++) {
+        for (int step = 0; step < cases[ci].steps; step++) {
             int r = (int)rng_bound(&S->rng, (uint32_t)S->m);
             int col = (int)rng_bound(&S->rng, 6);
             int nv = (int)rng_bound(&S->rng, (uint32_t)P.q);
@@ -967,8 +1099,8 @@ static int run_self_test(void) {
                 }
             }
         }
-        printf("self-test case %d (q=%d mode=%s t=%d m=%d |D1|=%d |N2|=%d inter=%d): PASS (2000 moves, 0 diffs)\n",
-               ci, P.q, P.mode == MODE_TSPEC ? "tspec" : "full-bg3", P.t, S->m, P.num_d1, P.num_n2, P.total_inter);
+        printf("self-test case %d (q=%d mode=%s t=%d m=%d |D1|=%d |N2|=%d inter=%d): PASS (%d moves, 0 diffs)\n",
+               ci, P.q, P.mode == MODE_TSPEC ? "tspec" : "full-bg3", P.t, S->m, P.num_d1, P.num_n2, P.total_inter, cases[ci].steps);
     }
     free(S);
     free(Ref);
@@ -1027,12 +1159,17 @@ static void *worker_run(void *arg) {
     state_reset_weights_tabu(S);
     state_init_rows(S, cur_init, W->init_file_rows, W->init_file_m);
     state_record_best(S);
+    if (W->tid == 0) {
+        fprintf(stderr, "[init] q=%d m=%d init_unc=%d by_type=(%d,%d,%d,%d)\n",
+                W->P->q, W->m, S->unc_count,
+                S->unc_by_type[0], S->unc_by_type[1], S->unc_by_type[2], S->unc_by_type[3]);
+    }
 
     if (S->unc_count == 0) {
         atomic_store(W->stop_flag, 1);
     }
 
-    Move cands[512];
+    Move cands[2048];
     uint64_t steps_since_best = 0;
     double last_check = W->start_time;
 
@@ -1057,7 +1194,7 @@ static void *worker_run(void *arg) {
             if ((S->step & 3ULL) != 0) {
                 /* 75% focused SA move */
                 int eid = S->unc_list[rng_bound(&S->rng, (uint32_t)S->unc_count)];
-                int nc = collect_repair_moves(S, eid, cands, 512);
+                int nc = collect_repair_moves(S, eid, cands, 2048);
                 if (nc > 0) {
                     Move mv = cands[rng_bound(&S->rng, (uint32_t)nc)];
                     r = mv.r; col = mv.col; nv = mv.val;
@@ -1101,7 +1238,7 @@ static void *worker_run(void *arg) {
 
             /* Pick a random uncovered interaction */
             int eid = S->unc_list[rng_bound(&S->rng, (uint32_t)S->unc_count)];
-            int nc = collect_repair_moves(S, eid, cands, 512);
+            int nc = collect_repair_moves(S, eid, cands, 2048);
             if (nc == 0) {
                 for (int k = 0; k < 32; k++) {
                     int r = (int)rng_bound(&S->rng, (uint32_t)S->m);
@@ -1278,7 +1415,7 @@ static void usage(const char *prog) {
     fprintf(stderr,
             "Usage: %s --q Q --m M [--mode tspec|full-bg3] [--t T]\n"
             "          [--timeout SECS] [--seed SEED] [--threads N]\n"
-            "          [--init base|rand] [--init-file FILE]\n"
+            "          [--init base|rand|heavy] [--init-file FILE]\n"
             "          [--algo paws|sa] [--tenure B] [--smooth P] [--w03 W] [--rw R] [--restart K]\n"
             "          [--out FILE] [--self-test]\n",
             prog);
@@ -1319,6 +1456,7 @@ int main(int argc, char **argv) {
             i++;
             if (strcmp(argv[i], "base") == 0) init_mode = INIT_BASE;
             else if (strcmp(argv[i], "rand") == 0) init_mode = INIT_RAND;
+            else if (strcmp(argv[i], "heavy") == 0) init_mode = INIT_HEAVY;
             else { fprintf(stderr, "unknown init: %s\n", argv[i]); return 2; }
         } else if (strcmp(argv[i], "--init-file") == 0 && i + 1 < argc) {
             init_file = argv[++i];
@@ -1345,9 +1483,9 @@ int main(int argc, char **argv) {
         usage(argv[0]);
         return 2;
     }
-    if (timeout_s > 90.0) {
-        fprintf(stderr, "enforcing hard timeout cap <= 90.0 s (requested %.1f)\n", timeout_s);
-        timeout_s = 90.0;
+    if (timeout_s > 120.0) {
+        fprintf(stderr, "enforcing hard timeout cap <= 120.0 s (requested %.1f)\n", timeout_s);
+        timeout_s = 120.0;
     }
 
     Problem P;
