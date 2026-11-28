@@ -27,7 +27,7 @@
 #define MAX_Q 9
 #define MAX_Q2 (MAX_Q * MAX_Q)
 #define MAX_Q3 (MAX_Q * MAX_Q * MAX_Q)
-#define MAX_M 1024
+#define MAX_M 1536
 #define MAX_D MAX_Q2
 #define MAX_N MAX_Q2
 #define MAX_INTER (MAX_Q3 + 3 * MAX_D * MAX_Q * MAX_Q2 + 3 * MAX_N * MAX_Q2 * MAX_Q + MAX_Q3)
