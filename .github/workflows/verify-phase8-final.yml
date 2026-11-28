@@ -1,0 +1,142 @@
+name: verify-phase8-final
+
+# Einmaliger finaler Dual-Verifikationslauf fuer die 11 Endlisten-Arrays der Phase-8-Pareto-Liste
+# (Zellen <= 50 MiB, kleiner als chrispbsmolen/ca-tools @ b689967), die noch ohne verify_independent.py sind.
+# Voraussetzung: PR #51 (data/phase8_baer_v3/) und PR #53 (data/phase9_explore/) liegen auf dem ausgewaehlten Branch.
+# Nur lesend: kein Commit, kein Artefakt, keine Aussenwirkung. verifiers/ wird nicht veraendert.
+# Soll-SHA-256 der Arrays: Lift mit scripts/phase7_lift.py im Prueferchat am 28.11.2026.
+
+on:
+  workflow_dispatch:
+    inputs:
+      auswahl:
+        description: "Zelle (t_k_v) oder all"
+        required: true
+        default: "all"
+        type: choice
+        options: ["all", "4_25_22", "4_27_20", "4_27_21", "4_27_22", "4_27_23", "4_27_24", "4_27_25", "4_29_24", "4_29_25", "5_15_13", "5_18_14"]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        env:
+          SEL: ${{ inputs.auswahl }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          # id: (q, v, t, m, Verzeichnis, Liste, Soll-SHA-256 des Arrays)
+          rows = {
+              "4_25_22": (23, 22, 4, 722, "data/phase8", "R_q23_v22_m722.txt", "47efa3c24c2066d7a33df3d6eacf2705c0245266e8cfe9856f2a8d3ccfd12b5a"),
+              "4_27_20": (25, 20, 4, 685, "data/phase8_baer_v3", "R_q25_v20_baer3_m685.txt", "2ccd878d419ca6cce254b35f0b6cddcf1563f8ea52280943d446727db0cc761e"),
+              "4_27_21": (25, 21, 4, 690, "data/phase8_baer_v3", "R_q25_v21_baer3_m690.txt", "5d68e0adf8764e91ccffd81d9651a79f1f97e2403c396ba43b5f5fe891818016"),
+              "4_27_22": (25, 22, 4, 708, "data/phase8_baer_v3", "R_q25_v22_baer3_m708.txt", "4e3949f9d29f68e31db2283265352eb877681c147589329e92283e12d6c01b10"),
+              "4_27_23": (25, 23, 4, 733, "data/phase8_baer_v3", "R_q25_v23_baer3_m733.txt", "f933784fedb236f149c4f4739cb7d097bc21ae6d1b0bf139884f5f30d5640697"),
+              "4_27_24": (25, 24, 4, 762, "data/phase8_baer_v3", "R_q25_v24_baer3_m762.txt", "5121333795a5ad8c5294261dfa992da540188322e0de2de0a3e023f73ce924d4"),
+              "4_27_25": (25, 25, 4, 791, "data/phase8_baer_v3", "R_q25_v25_baer3_m791.txt", "98c84010a0a91f862bfb1b94f6d9e80149441577c5605cb7070e453443dbf326"),
+              "4_29_24": (27, 24, 4, 923, "data/phase9_explore", "R_q27_v24_m923.txt", "ba70713f10b7539fe44cba550a1e3426c124bc14eaa38c74c1136982e81f5a92"),
+              "4_29_25": (27, 25, 4, 948, "data/phase9_explore", "R_q27_v25_m948.txt", "ea88c870f9ba1764aea2862587f64cb5e377edb7de3110fa86f7cbe4f8bbaf07"),
+              "5_15_13": (13, 13, 5, 238, "data/phase8", "R_q13_m238.txt", "9554b2565ebe9cd60cfeebd224d2bc1c3e363ddc353a36b3dd8315c2efc3978c"),
+              "5_18_14": (16, 14, 5, 298, "data/phase8_baer_v3", "R_q16_v14_baer3_m298.txt", "25a06e98b674cddddf8d1cd2905acf606d2f52bdc455c129b63ae27ed27439e8"),
+          }
+          sel = os.environ["SEL"]
+          ids = sorted(rows) if sel == "all" else [sel]
+          inc = []
+          for i in ids:
+              q, v, t, m, d, f, sha = rows[i]
+              for mode in ("pos", "neg"):
+                  inc.append({"id": i, "q": q, "v": v, "t": t, "m": m, "dir": d, "liste": f, "sha": sha, "mode": mode})
+          print("matrix=" + json.dumps({"include": inc}))
+          PY
+
+  verify:
+    needs: plan
+    name: CA t${{ matrix.t }} q${{ matrix.q }} v${{ matrix.v }} ${{ matrix.mode }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      Q: ${{ matrix.q }}
+      T: ${{ matrix.t }}
+      V: ${{ matrix.v }}
+      M: ${{ matrix.m }}
+      DIR: ${{ matrix.dir }}
+      LISTE: ${{ matrix.liste }}
+      MODE: ${{ matrix.mode }}
+      SHA_SOLL: ${{ matrix.sha }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verifier unveraendert (SHA256SUMS) und Selbsttest
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          sha256sum -c verifiers/SHA256SUMS
+          gcc -O3 -march=native -pthread -o verifiers/ca_verify verifiers/ca_verify.c -lm
+          python3 verifiers/test_verifiers.py
+
+      - name: Eingabeliste pruefen
+        run: |
+          set -euo pipefail
+          cd "${DIR}"
+          grep "  ${LISTE}\$" SHA256SUMS | sha256sum -c -
+          test "$(grep -cv '^#' "${LISTE}")" -eq "${M}"
+
+      - name: Lift nach /tmp und SHA-256 des Arrays
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ca
+          K=$(( Q + 2 ))
+          N=$(( M * Q ** (T - 2) ))
+          echo "K=${K}" >> "$GITHUB_ENV"
+          python3 scripts/phase7_lift.py --q "${Q}" --v "${V}" \
+            --reps "${DIR}/${LISTE}" --check-m --t "${T}" --out /tmp/ca/CA.txt
+          test "$(wc -l < /tmp/ca/CA.txt)" -eq "${N}"
+          ls -l /tmp/ca/CA.txt
+          sha256sum /tmp/ca/CA.txt
+          echo "${SHA_SOLL}  /tmp/ca/CA.txt" | sha256sum -c -
+          if [ "${MODE}" = "neg" ]; then
+            head -n -1 /tmp/ca/CA.txt > /tmp/ca/IN.txt
+            echo "N_IN=$(( N - 1 ))" >> "$GITHUB_ENV"
+            echo "RC_SOLL=1" >> "$GITHUB_ENV"
+          else
+            cp /tmp/ca/CA.txt /tmp/ca/IN.txt
+            echo "N_IN=${N}" >> "$GITHUB_ENV"
+            echo "RC_SOLL=0" >> "$GITHUB_ENV"
+          fi
+
+      - name: ca_verify
+        run: |
+          set +e -uo pipefail
+          START=$(date +%s)
+          ./verifiers/ca_verify /tmp/ca/IN.txt "${T}" "${V}"
+          RC=$?
+          echo "ca_verify: Exit ${RC}, erwartet ${RC_SOLL}, $(( $(date +%s) - START )) s"
+          {
+            echo "| Verifier | Zelle | Modus | Exit | Soll | Zeit |"
+            echo "|---|---|---|---|---|---|"
+            echo "| ca_verify | (${T},${K},${V}) | ${MODE} | ${RC} | ${RC_SOLL} | $(( $(date +%s) - START )) s |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "${RC}" -eq "${RC_SOLL}"
+
+      - name: verify_independent.py
+        run: |
+          set +e -uo pipefail
+          START=$(date +%s)
+          python3 verifiers/verify_independent.py /tmp/ca/IN.txt "${T}" "${V}" -n "${N_IN}" -k "${K}"
+          RC=$?
+          echo "verify_independent.py: Exit ${RC}, erwartet ${RC_SOLL}, $(( $(date +%s) - START )) s"
+          {
+            echo "| Verifier | Zelle | Modus | Exit | Soll | Zeit |"
+            echo "|---|---|---|---|---|---|"
+            echo "| verify_independent.py | (${T},${K},${V}) | ${MODE} | ${RC} | ${RC_SOLL} | $(( $(date +%s) - START )) s |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "${RC}" -eq "${RC_SOLL}"
