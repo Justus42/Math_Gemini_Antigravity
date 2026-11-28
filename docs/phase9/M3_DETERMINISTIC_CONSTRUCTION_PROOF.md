@@ -1,181 +1,247 @@
-# Beweisnotiz: Deterministische Light+Heavy-3D-Konstruktion im biaffinen Modell `M_3(R_3)` (`k = q + 3`, `3 <= t <= q`)
+# Phase 9 — Beweisnotiz: Deterministische Light+Heavy-3D-Konstruktion im Modell `M_3(R_3)` (`k = q + 3`, `3 <= t <= q`)
 
-- **Datum:** 2026-11-28 UTC
-- **Branch / Basis:** `exp/phase9-biaffine-3d` (Basis `0d6e9f5`, PR `#54`)
-- **Referenzimplementierung:** [`scripts/phase9_m3_construct.py`](../../scripts/phase9_m3_construct.py) (`std`-only + `GeneralGF`), [`scripts/phase9_m3_lift.py`](../../scripts/phase9_m3_lift.py)
-- **Zweck:** Prüfbare mathematische Ausarbeitung für Gegenprüfung und Drittmodell-Prüfung nach [`RULES.md`](../../RULES.md) Regel 2d.
-- **Belegart-Disziplin:** Algebraische Beweisschritte sind streng von numerisch geprüften Fällen (`suff=0`, `check_m3=0`, `Dual-Verify PASS`) und offenen Punkten (`[OFFEN / PRUEFPUNKT]`) getrennt. **Drittprüfung nach Regel 2d steht aus.**
-
----
-
-## 1. Definitionen und Übersetzungssatz (`M_3(R_3)` → `CA(N; t, q + 3, q)`)
-
-Sei $q = p^e \ge 3$ eine Primzahlpotenz, $\mathbb{F}_q$ der endliche Körper der Ordnung $q$ (mit gewählter Nummerierung $\mathbb{F}_q = \{0, 1, \dots, q-1\}$), und $3 \le t \le q$.
-
-### 1.1 Kern und Nebenklassen-Lift
-Wir definieren den linearen Kern der Dimension $t - 3$ über $\mathbb{F}_q$:
-$$K_t^{(3)} := \Big\{ \big( (g(x))_{x \in \mathbb{F}_q},\, 0,\, 0,\, 0 \big) \in \mathbb{F}_q^{q+3} \;:\; g \in \mathbb{F}_q[X],\; \deg g \le t - 4 \Big\}$$
-(für $t = 3$ ist $K_3^{(3)} = \{0\}$). Eine **Vertreterliste** ist eine endliche Menge $R_3 \subseteq \mathbb{F}_q^6$ von $6$-Tupeln $(c_0, c_1, c_2, a, b, c)$. Der zugehörige **Lift** $M_3(R_3, t)$ hat $N = |R_3|\, q^{t-3}$ Zeilen und $k = q + 3$ Spalten (indiziert durch $x \in \mathbb{F}_q$ sowie drei Zusatzspalten $\infty_a, \infty_b, \infty_c$):
-$$\mathrm{row}(g;\, c_0, c_1, c_2, a, b, c) := \Big( \big(f(x)\big)_{x \in \mathbb{F}_q},\; a,\; b,\; c \Big), \qquad f(X) = g(X) + c_0 X^{t-3} + c_1 X^{t-2} + c_2 X^{t-1}$$
-über alle $(c_0, c_1, c_2, a, b, c) \in R_3$ und alle $g \in \mathbb{F}_q[X]$ mit $\deg g \le t - 4$.
-
-### 1.2 Exakte Bedingungen (`check_m3=0`) und stärkeunabhängige Bedingung (`full-bg3`)
-Sei $U \subseteq \mathbb{F}_q$ eine Menge von $r$ Körper-Spalten ($0 \le r \le t$). Für $S \subseteq \mathbb{F}_q$ bezeichnen $e_1(S) = \sum_{x \in S} x$ und $e_2(S) = \sum_{\{x, y\} \subset S} xy$ die ersten beiden elementarsymmetrischen Polynome.
-
-**Satz 1 (Übersetzungssatz `M_3` → `CA`).** *Für festes $3 \le t \le q$ ist $M_3(R_3, t)$ genau dann ein Covering Array $\mathrm{CA}(|R_3|\,q^{t-3};\, t,\, q+3,\, q)$, wenn $R_3$ die vier Bedingungen (Typ 0–3) erfüllt:*
-- **(Typ 0, $0$ Zusatzspalten):** Jedes $(c_0, c_1, c_2) \in \mathbb{F}_q^3$ tritt mindestens einmal in $R_3$ auf.
-- **(Typ 1, $1$ Zusatzspalte):** Für jedes $u \in \{a, b, c\}$, jedes $s \in \mathbb{F}_q$ und jede Richtung $(v, w, 1) \in D_1(t)$ gilt
-  $$\big|\big\{ (c_0 - v c_2,\; c_1 - w c_2) \;:\; (c_0, c_1, c_2, a, b, c) \in R_3,\; u = s \big\}\big| = q^2,$$
-  wobei $D_1(t) = \{ (e_2(S), -e_1(S), 1) : S \in \binom{\mathbb{F}_q}{t-1} \}$.
-- **(Typ 2, $2$ Zusatzspalten):** Für jedes Spaltenpaar $\{u_1, u_2\} \in \{\{a,b\}, \{a,c\}, \{b,c\}\}$, jedes $(s_1, s_2) \in \mathbb{F}_q^2$ und jede Normale $(1, \alpha, \beta) \in N_2(t)$ gilt
-  $$\big|\big\{ c_0 + \alpha c_1 + \beta c_2 \;:\; (c_0, c_1, c_2, a, b, c) \in R_3,\; (u_1, u_2) = (s_1, s_2) \big\}\big| = q,$$
-  wobei $N_2(t) = \{ (1,\, e_1(U),\, e_1(U)^2 - e_2(U)) : U \in \binom{\mathbb{F}_q}{t-2} \}$.
-- **(Typ 3, $3$ Zusatzspalten):** Jedes $(a, b, c) \in \mathbb{F}_q^3$ tritt mindestens einmal in $R_3$ auf.
-
-*Beweisskizze (Polynomdivision / Lagrange-Interpolation):*
-1. **Typ 0 ($t$ Körper-Spalten $S$, $|S|=t$):** Zu gegebenen Zielwerten $(y_x)_{x \in S}$ gibt es genau ein Polynom $f$ mit $\deg f \le t - 1$ und $f(x) = y_x$ für alle $x \in S$. Dieses legt $(c_0, c_1, c_2)$ und $g$ ($\deg g \le t-4$) eindeutig fest.
-2. **Typ 1 ($t - 1$ Körper-Spalten $S$ + $1$ Zusatzspalte $u = s$):** Sei $P_S(X) = \prod_{x \in S} (X - x) = X^{t-1} - e_1(S) X^{t-2} + e_2(S) X^{t-3} + \tilde{P}(X)$ mit $\deg \tilde{P} \le t - 4$. Zwei Polynome $f, f'$ vom Grad $\le t - 1$ stimmen auf $S$ genau dann überein, wenn $f - f' = \lambda P_S(X)$ für ein $\lambda \in \mathbb{F}_q$, d. h. wenn sich ihre drei obersten Koeffizienten $(c_0, c_1, c_2)$ genau um ein Vielfaches von $(e_2(S), -e_1(S), 1)$ unterscheiden. Da $g$ frei über alle Polynome vom Grad $\le t - 4$ läuft, wird ein Tupel auf $S$ bei $u = s$ genau dann erreicht, wenn die Projektion $(c_0 - e_2(S)c_2,\; c_1 + e_1(S)c_2)$ den entsprechenden Restklassen-Vektor in $\mathbb{F}_q^2$ trifft.
-3. **Typ 2 ($t - 2$ Körper-Spalten $U$ + $2$ Zusatzspalten $(u_1, u_2) = (s_1, s_2)$):** Sei $Q_U(X) = \prod_{x \in U}(X - x) = X^{t-2} - e_1(U)X^{t-3} + e_2(U)X^{t-4} + \dots$. Die Nebenklassen von $f \bmod Q_U(X)$ im Quotienten $\mathbb{F}_q[X]_{< t} / (K_t^{(3)} + Q_U \cdot \mathbb{F}_q[X]_{< 2})$ sind eindimensional und werden durch die Linearform $\ell_U(c_0, c_1, c_2) = c_0 + e_1(U)\,c_1 + (e_1(U)^2 - e_2(U))\,c_2$ getrennt (Division von $c_0 X^{t-3} + c_1 X^{t-2} + c_2 X^{t-1}$ durch $Q_U(X)$ liefert als $X^{t-3}$-Koeffizient des Rests exakt $c_0 + e_1 c_1 + (e_1^2 - e_2) c_2$, da $X^{t-2} \equiv e_1 X^{t-3} - e_2 X^{t-4}$ und $X^{t-1} \equiv (e_1^2 - e_2) X^{t-3} + \text{deg}\le t-4 \pmod{Q_U}$).
-4. **Typ 3 ($t - 3$ Körper-Spalten $W$ + alle $3$ Zusatzspalten $(a,b,c)$):** Für festes $(c_0, c_1, c_2, a, b, c) \in R_3$ läuft $g(X)$ über alle Polynome vom Grad $\le t - 4$ und nimmt damit auf den $t - 3$ Stellen $W$ jedes $(t - 3)$-Tupel genau einmal an. Somit ist Surjektivität genau dann erfüllt, wenn $(a, b, c)$ vorkommt. $\square$
-
-*(Prüfvermerk: Satz 1 ist numerisch gegen Exhaustivzählung auf $q = 3, 4, 5$ in Gate 0 `scripts/phase9_m3_lift.py --gate0` mit $0$ Abweichungen und durch Dual-Verifikation gelifteter Arrays für $q \in \{3, 4, 5, 7, 8, 9, 11, 13\}$ bestätigt; Regel-2d-Prüfung des Texts steht aus.)*
-
-**Korollar 1 (`full-bg3`).** *Ersetzt man $D_1(t)$ und $N_2(t)$ durch alle $q^2$ Richtungen $D_1^{\mathrm{full}} = \{(v, w, 1) : v, w \in \mathbb{F}_q\}$ und alle $q^2$ Normalen $N_2^{\mathrm{full}} = \{(1, \alpha, \beta) : \alpha, \beta \in \mathbb{F}_q\}$, so hebt jedes $R_3$ mit `check_m3(full-bg3) = 0` simultan für **alle** Stärken $3 \le t \le q$ auf ein gültiges $\mathrm{CA}(|R_3|\,q^{t-3};\, t,\, q+3,\, q)$.*
-
-### 1.3 Hinreichende geometrische Bedingung (`suff=0`)
-Im affinen Raum $\mathrm{AG}(3, q) = \mathbb{F}_q^3$ mit Koordinaten $(x, y, z) := (c_0, c_1, c_2)$ gilt:
-- Eine **horizontale $z$-Ebene** $H_{z_0} = \{(x, y, z_0) : x, y \in \mathbb{F}_q\}$ trifft jede nicht-horizontale Gerade $\{(x_0 + vt, y_0 + wt, t) : t \in \mathbb{F}_q\}$ genau bei $t = z_0$. Enthält die Faser $\{u = s\}$ eine vollständige horizontale Ebene $H_{z_0}$, so ist Typ 1 für $(u, s)$ über ganz $D_1^{\mathrm{full}}$ erfüllt.
-- Eine **volle $x$-Gerade** $L_{y_0, z_0} = \{(x, y_0, z_0) : x \in \mathbb{F}_q\}$ trifft jede Ebene $x + \alpha y + \beta z = \mu$ genau bei $x = \mu - \alpha y_0 - \beta z_0$. Enthält die Paar-Faser $\{(u_1, u_2) = (s_1, s_2)\}$ eine volle $x$-Gerade $L_{y_0, z_0}$, so ist Typ 2 für dieses Paar über ganz $N_2^{\mathrm{full}}$ erfüllt.
-
-**Lemma 1 (`suff=0` $\Rightarrow$ `check_m3(full-bg3)=0`).** *Besitzt $R_3 \subseteq \mathbb{F}_q^6$ keine Duplikate, deckt alle $q^3$ Punkte $(x, y, z)$ (Typ 0) und alle $q^3$ Tripel $(a, b, c)$ (Typ 3), besitzt jedes Einzelsymbol $s \in \mathbb{F}_q$ in jeder Spalte $u \in \{a, b, c\}$ mindestens eine vollständige horizontale $z$-Ebene, und besitzt jedes Symbolpaar $(s_1, s_2) \in \mathbb{F}_q^2$ in jedem Paar $\{a,b\}, \{a,c\}, \{b,c\}$ mindestens eine volle $x$-Gerade, dann gilt `check_m3(full-bg3) = 0`.* $\square$
-
-*(Implementiert als `check_sufficient_full_bg3` in [`scripts/phase9_m3_construct.py`](../../scripts/phase9_m3_construct.py#L578-L615).)*
+- **Datum:** 2026-11-28 UTC (Branch `exp/phase9-biaffine-3d`, PR `#54`, Basis `0d6e9f5`).
+- **Bezugscode:** [`scripts/phase9_m3_lift.py`](../../scripts/phase9_m3_lift.py) (`FieldOps`, `check_m3`, `lift_rows`), [`scripts/phase9_m3_construct.py`](../../scripts/phase9_m3_construct.py) (`build_m3_for_params`, `construct_best`, `check_sufficient_full_bg3`).
+- **Status & Rolle:** Erzeugernotiz (**Belegart: Argument + rechnerische Verifikation für endliche $q$**), aufbereitet für die unabhängige Prüfung durch Claude und ein unbeteiligtes Drittmodell nach `RULES.md` Regel 2d. **Kein formaler Beweis, keine Außenwirkung, Literaturprüfung nach Regel 2c steht aus.**
+- **Ehrlichkeitshinweis zu `[OFFEN / PRUEFPUNKT]`:** Jeder Beweisschritt, der über endliche Zählung hinaus noch eine analytische Schranke oder Randfallverschärfung benötigt, ist im Text explizit als `[OFFEN / PRUEFPUNKT]` gekennzeichnet. Insbesondere wird die **tatsächliche** asymptotische Konstante dieser Bauart ($\frac{19}{10} q^3$, nicht $\frac{49}{27} q^3$) sauber gegen die LP-Schranken $\frac{46}{27} q^3$ und $\frac{49}{27} q^3$ abgegrenzt (§2.4, §4).
 
 ---
 
-## 2. Explizite deterministische Konstruktion & exakte Zählformel
+## 1. Definitionen & Übersetzungssatz (`M_3(R_3)` $\implies$ `CA(N; t, q + 3, q)`)
 
-Im Folgenden bezeichnen wir die $q$ Elemente des Symbolalphabets als $\mathbb{Z}_q = \{0, 1, \dots, q-1\}$ (die Symbol-Arithmetik in Step 1 nutzt ausschließlich die zyklische Gruppe $\mathbb{Z}_q$, unabhängig davon, ob $q$ prim oder eine echte Primzahlpotenz ist; die Körperstruktur $\mathbb{F}_q$ wird erst beim Lift in Satz 1 benötigt).
+### 1.1 Modell `M_3(R_3)` und Nebenklassen-Lift
 
-### 2.1 Parameterwahl und Light+Heavy-Zerlegung
-Für jede Primzahlpotenz $q \ge 5$, Bandbreite $r \in \{1, \dots, q-1\}$ (mit Komplement $e := q - r$) und Verschiebung $c_{\mathrm{shift}} \in \mathbb{Z}_q$:
-1. **Balancierte Partition der $q - 1$ leichten $z$-Ebenen:**
-   $$k_a = \left\lfloor \frac{q + 1}{3} \right\rfloor, \qquad k_b = \left\lfloor \frac{q}{3} \right\rfloor, \qquad k_c = \left\lfloor \frac{q - 1}{3} \right\rfloor \qquad (k_a + k_b + k_c = q - 1).$$
-   Setze $A_L = \{0, \dots, k_a - 1\}$, $B_L = \{0, \dots, k_b - 1\}$, $C_L = \{(c_{\mathrm{shift}} + i) \bmod q : 0 \le i < k_c\}$ sowie die schweren Mengen $A_H = \mathbb{Z}_q \setminus A_L$, $B_H = \mathbb{Z}_q \setminus B_L$, $C_H = \mathbb{Z}_q \setminus C_L$. Die $q - 1$ leichten horizontalen Ebenen $z \in \{0, \dots, q-2\}$ werden bijektiv den Symbolen aus $A_L \sqcup B_L \sqcup C_L$ zugeordnet; $z^* := q - 1$ ist die einzige schwere Ebene.
-2. **Zyklisches Differenzband `3P` + komplementäre `1P`-`x`-Geraden + Resttripel $U$:**
-   Setze $D := \{0, 1, \dots, r-1\} \subset \mathbb{Z}_q$ und $E := \mathbb{Z}_q \setminus D = \{r, \dots, q-1\}$ ($|E| = e = q - r$).
-   - **Typ-`3P`-`x`-Geraden** (partielles lateinisches Quadrat $T$ der Größe $|T| = r q$):
-     $$T := \big\{ (a, b, c) \in \mathbb{Z}_q^3 \;:\; a + b + c \equiv 0 \pmod q,\; (a - b) \bmod q \in D \big\}.$$
-     Jedes $(a, b, c) \in T$ definiert eine volle $x$-Gerade mit konstanten Symbolen $(a, b, c)$ (`q` Punkte), die die drei Paare $(a, b), (a, c), (b, c)$ sowie das Tripel $(a, b, c)$ abdeckt.
-     Da $a + b + c \equiv 0 \pmod q$ jede dritte Koordinate eindeutig festlegt, sind die drei Paarprojektionen exakt charakterisiert durch:
-     $$\begin{aligned}
-     E_{ab} &:= \mathrm{proj}_{ab}(T) = \{(a, b) : (a - b) \bmod q \in D\}, && |E_{ab}| = rq, \\
-     E_{ac} &:= \mathrm{proj}_{ac}(T) = \{(a, c) : (2a + c) \bmod q \in D\}, && |E_{ac}| = rq, \\
-     E_{bc} &:= \mathrm{proj}_{bc}(T) = \{(b, c) : (-2b - c) \bmod q \in D\}, && |E_{bc}| = rq.
-     \end{aligned}$$
-   - **Typ-`1P`-`x`-Geraden** ($3(q - r)q = 3 e q$ Geraden):
-     Für jedes fehlende Paar $(a, b) \notin E_{ab}$ wird eine Gerade `1P_ab(a, b)` erzeugt (mit konstanten $a, b$ und einer Bijektion $\pi: \mathbb{F}_q \to \mathbb{F}_q$ in der dritten Koordinate $c$), analog `1P_ac(a, c)` für $(a, c) \notin E_{ac}$ und `1P_bc(b, c)` für $(b, c) \notin E_{bc}$.
-   - **Resttripel $U$ (Typ-3-Defekt von $T$ und `1P`):**
-     $$U := \big\{ (a, b, c) \in \mathbb{Z}_q^3 \setminus T \;:\; (a, b) \in E_{ab},\; (a, c) \in E_{ac},\; (b, c) \in E_{bc} \big\}.$$
-3. **Deterministisches Light-Plane-Matching (Ebenen $z = 0, \dots, q-2$):**
-   Die $q(q-1)$ $x$-Geraden-Slots $(z, y)$ werden durch ein maximales bipartites Matching kompatiblen `3P`-/`1P`-Geraden zugeordnet (eine Gerade ist zu Ebene $z$ mit Besitzer $(\mathrm{col}, s)$ kompatibel, wenn ihre feste Koordinate $\mathrm{col}$ gleich $s$ ist). Jeder ungematchte Light-Slot $(z, y)$ wird mit $q$ noch unbenutzten Tripeln aus $U$ mit $\mathrm{col} = s$ (oder bei Erschöpfung mit Füllpunkten mit $\mathrm{col} = s$) aufgefüllt.
-4. **Deterministische Heavy-Plane-Platzierung (Ebene $z^* = q - 1$):**
-   - Übrige `3P`-Geraden werden nacheinander auf die Zeile $y \in \{0, \dots, q-1\}$ mit maximalem neuem Heavy-Deckungsgewinn (in $A_H, B_H, C_H$) gelegt.
-   - Übrige `1P`-Geraden erhalten für jedes $y$ per bipartitem Matching (`_max_bijection_gain`) eine duplikatfreie $x$-Bijektion $\pi$ mit maximalem Heavy-Deckungsgewinn und wählen das beste $y$.
-   - Übrige Tripel aus $U$ werden punktweise auf schwere Defizitzellen $(x, y)$ von $z^*$ verteilt, gefolgt von bis zu $5$ deterministischen $1$-Punkt-Relokationspässen.
-   - Verbleibende Heavy-Defizite (`exh` Punkte) werden zellweise auf $z^*$ aufgefüllt.
+Sei $q$ eine Primzahlpotenz, $\mathbb{F}_q$ der endliche Körper der Ordnung $q$ und $t \in \mathbb{Z}$ mit $3 \le t \le q$. Wir indizieren die $k = q + 3$ Spalten durch $\mathbb{F}_q \sqcup \{a, b, c\}$.
 
-### 2.2 Exakte geschlossene Zählformel für $|U|$ und $m_{\mathrm{raw}}(q, r)$ (und Korrektur gegen `49/27`)
+- **Kern:**
+  $$K_t^{(3)} := \Big\{\big((g(x))_{x \in \mathbb{F}_q},\, 0,\, 0,\, 0\big) : g \in \mathbb{F}_q[X],\; \deg g \le t - 4\Big\} \subset \mathbb{F}_q^{q+3}$$
+  (mit $K_3^{(3)} = \{0\}$ für $t = 3$; stets $|K_t^{(3)}| = q^{t-3}$).
+- **Vertreterliste:** Eine endliche Menge $R_3 \subset \mathbb{F}_q^6$ paarweise verschiedener 6-Tupel $(c_0, c_1, c_2, a, b, c)$ (geometrisch: Punkt $(x, y, z) = (c_0, c_1, c_2) \in \mathrm{AG}(3, q)$ versehen mit Symboltripel $(a, b, c) \in \mathbb{F}_q^3$).
+- **Lift $M_3^{(t)}(R_3)$:** Für jedes $(c_0, c_1, c_2, a, b, c) \in R_3$ und jedes $g \in \mathbb{F}_q[X]$ mit $\deg g \le t - 4$ bilde das Polynom
+  $$f(X) := g(X) + c_0 X^{t-3} + c_1 X^{t-2} + c_2 X^{t-1}$$
+  und die Zeile $((f(x))_{x \in \mathbb{F}_q}, a, b, c) \in \mathbb{F}_q^{q+3}$. Das resultierende Array hat
+  $$N = |R_3| \cdot q^{t-3} \text{ Zeilen}, \qquad k = q + 3 \text{ Spalten}, \qquad v = q \text{ Symbole}.$$
 
-**Satz 2 (Exakte Zählformel für das zyklische Differenzband).** *Für jedes $q \ge 3$ und jedes $r \in [\lceil q/2 \rceil, q - 1]$ (d. h. $e = q - r \le \lfloor q/2 \rfloor$) gilt exakt:*
-$$|U| = q \cdot \mathrm{AP}_3(q, r), \qquad \mathrm{AP}_3(q, r) := \#\big\{(d, s) \in D^2 \;:\; s \neq d,\; (2d - s) \bmod q \in D\big\},$$
-*mit der geschlossenen Formel*
-$$\mathrm{AP}_3(q, r) = q^2 - (3e + 1)q + \frac{5}{2}e^2 + e + (-1)^q \frac{1}{2}\,\mathbf{1}_{e\text{ ungerade}}.$$
-*Die Roh-Punktzahl aus `3P`, `1P` und $U$ beträgt damit exakt:*
-$$m_{\mathrm{raw}}(q, r) := (3q - 2r)q^2 + q \cdot \mathrm{AP}_3(q, r) = 2q^3 - (e + 1)q^2 + \frac{5}{2}e^2 q + eq + (-1)^q \frac{q}{2}\,\mathbf{1}_{e\text{ ungerade}}.$$
+### 1.2 Exakte Charakterisierung (`check_m3 = 0`)
 
-*Beweis:*
-1. **Reduktion auf $\mathrm{AP}_3(q, r)$:** Zu $(a, b, c) \in \mathbb{Z}_q^3$ setze $d := (a - b) \bmod q$, $s := (2a + c) \bmod q$ und $w := (-2b - c) \bmod q$. Dann gilt identisch $s + w \equiv 2(a - b) = 2d \pmod q$, also $w = (2d - s) \bmod q$. Weiter ist $(a, b, c) \in T \iff a + b + c \equiv 0 \iff 2a + c \equiv a - b \iff s = d$. Umgekehrt legt jedes Tripel $(a, d, s) \in \mathbb{Z}_q \times D^2$ mit $s \neq d$ und $(2d - s) \bmod q \in D$ genau ein $(a, b, c) \in U$ fest via $b = (a - d) \bmod q$ und $c = (s - 2a) \bmod q$. Also $|U| = q \cdot \mathrm{AP}_3(q, r)$.
-2. **Inklusion-Exklusion über $E = \{r, \dots, q-1\}$ ($|E| = e \le q/2$):**
-   Betrachte alle $q(q - 1)$ geordneten Paare $(d, s) \in \mathbb{Z}_q^2$ mit $d \neq s$ und setze $w = (2d - s) \bmod q$ (stets $w \neq d$).
-   - **1 Element in $E$:** Jede der drei Bedingungen $d \in E$, $s \in E$, $w \in E$ trifft genau $e(q - 1)$ Paare (Summe $3e(q - 1)$).
-   - **2 Elemente in $E$:**
-     - $(d, s) \in E^2, s \neq d$: genau $e(e - 1)$ Paare.
-     - $(d, w) \in E^2, w \neq d$: genau $e(e - 1)$ Paare.
-     - $(s, w) \in E^2$ mit $2d \equiv s + w \pmod q$ und $d \neq s$:
-       - Ist $q$ **ungerade**, so ist $2$ invertierbar in $\mathbb{Z}_q$; jedes $(s, w) \in E^2$ mit $s \neq w$ liefert eindeutig $d = (s + w)/2 \neq s$, also genau $e(e - 1)$ Paare.
-       - Ist $q$ **gerade**, so erfordert $2d \equiv s + w \pmod q$ genau $s \equiv w \pmod 2$. Für $s \neq w$ gibt es zwei Lösungen $d_1 = (s+w)/2 \in E$ und $d_2 = d_1 + q/2 \notin E$ (beide $\neq s$, da $|w - s| < e \le q/2$), zusammen $2 \cdot \mathrm{AP}_3^{\mathbb{Z}}(E)$; für $s = w \in E$ liefert $d = s + q/2 \neq s$ weitere $e$ Lösungen.
-   - **3 Elemente in $E$ ($\mathrm{AP}_3(E)$):** Da $E = [q - e, q - 1]$ und $2e \le q$, gilt für $d, s \in E$: $2d - s \in [q - 2e + 1, q + e - 2]$, was weder $\le -1$ noch $\ge 2q - e$ erreichen kann. Es tritt **kein zyklischer Wrap-Around** auf, sodass $(d, s, 2d - s) \in E^3$ mit $d \neq s$ bijektiv den geordneten Paaren $(s, w) \in [0, e)^2$ mit $s \neq w$ und $s \equiv w \pmod 2$ entspricht:
-     $$\mathrm{AP}_3^{\mathbb{Z}}(E) = \begin{cases} \frac{1}{2} e^2 - e & (e \text{ gerade}), \\ \frac{1}{2}(e - 1)^2 & (e \text{ ungerade}). \end{cases}$$
-   - Zusammenfassen nach Inklusion-Exklusion $\mathrm{AP}_3(q, r) = q(q-1) - 3e(q-1) + 2e(e-1) + N_{sw} - \mathrm{AP}_3^{\mathbb{Z}}(E)$ liefert in allen vier Paritätsfällen $(q \bmod 2, e \bmod 2)$ exakt die behauptete Formel. Addition von $(3q - 2r)q^2 = (q + 2e)q^2$ ergibt $m_{\mathrm{raw}}(q, r)$. $\square$
+Für jede nichtleere Teilmenge $S \subset \mathbb{F}_q$ bezeichne $e_1(S) = \sum_{x \in S} x$ und $e_2(S) = \sum_{\{x, y\} \subset S} x y$ die erste bzw. zweite elementarsymmetrische Funktion (mit $e_1(\emptyset) = e_2(\emptyset) = 0$). Definiere die Richtungs- und Normalenmengen:
+- **Modus `tspec` (festes $t$, $3 \le t \le q$):**
+  $$D_1^{(t)} := \Big\{(e_2(S),\, -e_1(S)) : S \in \binom{\mathbb{F}_q}{t - 1}\Big\}, \qquad N_2^{(t)} := \Big\{(e_1(U),\, e_1(U)^2 - e_2(U)) : U \in \binom{\mathbb{F}_q}{t - 2}\Big\}.$$
+- **Modus `full-bg3` ($t$-unabhängig für alle $3 \le t \le q$):**
+  $$D_1^{\mathrm{full}} := \mathbb{F}_q^2, \qquad N_2^{\mathrm{full}} := \mathbb{F}_q^2.$$
 
-*(Rechnerische Gegenprüfung: Formel für alle $3 \le q < 40$ und alle $\lceil q/2 \rceil \le r \le q - 1$ gegen Exhaustivzählung mit $0$ Abweichungen bestätigt.)*
+**Satz 1 (Übersetzungssatz — Argument, geprüft in Gate 0 und an Dual-Verify-Arrays; `[OFFEN / PRUEFPUNKT 4]` für Regel-2d-Prüfung).**
+*Das geliftete Array $M_3^{(t)}(R_3)$ ist genau dann ein $\mathrm{CA}(|R_3| q^{t-3}; t, q + 3, q)$, wenn $R_3$ die folgenden vier Bedingungen erfüllt (`check_m3(tspec, t) = 0`):*
+1. **(Typ 0)** $\{(c_0, c_1, c_2) : (c_0, c_1, c_2, a, b, c) \in R_3\} = \mathbb{F}_q^3$.
+2. **(Typ 1)** Für jedes $u \in \{a, b, c\}$, jedes $s \in \mathbb{F}_q$ und jedes $(v, w) \in D_1^{(t)}$ gilt:
+   $$\big|\{(c_0 - v c_2,\, c_1 - w c_2) : (c_0, c_1, c_2, a, b, c) \in R_3,\; u = s\}\big| = q^2.$$
+3. **(Typ 2)** Für jedes Paar $\{u_1, u_2\} \in \{\{a,b\}, \{a,c\}, \{b,c\}\}$, jedes $(s_1, s_2) \in \mathbb{F}_q^2$ und jedes $(\alpha, \beta) \in N_2^{(t)}$ gilt:
+   $$\big|\{c_0 + \alpha c_1 + \beta c_2 : (c_0, c_1, c_2, a, b, c) \in R_3,\; (u_1, u_2) = (s_1, s_2)\}\big| = q.$$
+4. **(Typ 3)** $\{(a, b, c) : (c_0, c_1, c_2, a, b, c) \in R_3\} = \mathbb{F}_q^3$.
 
-**Korollar 2 (Asymptotik von `scripts/phase9_m3_construct.py` — explizite Korrektur gegen `(49/27) q^3`).**
-*Minimierung von $m_{\mathrm{raw}}(q, q - e)$ über $e \in \mathbb{Z}_{\ge 1}$ liefert das kontinuierliche Minimum bei $e^* = (q - 1)/5$, also $r^* = \mathrm{round}((4q + 1)/5)$. Mit $e = (q - 1)/5 + \delta$ ($|\delta| \le 1/2$) folgt:*
-$$m_{\mathrm{raw}}(q, r^*) = \mathbf{\frac{19}{10}\,q^3} - \frac{4}{5}\,q^2 + \left(\frac{5}{2}\delta^2 - \frac{1}{10} + \frac{(-1)^q}{2}\mathbf{1}_{e\text{ odd}}\right)q.$$
-*Die tatsächliche Größe der deterministischen Liste beträgt:*
-$$|R_3| = m_{\mathrm{det}}(q) = m_{\mathrm{raw}}(q, r) + \mathrm{exh}(q, r, c_{\mathrm{shift}}) + \mathrm{dummy}(q, r, c_{\mathrm{shift}}).$$
+*Insbesondere impliziert `check_m3(full-bg3) = 0` (mit $D_1^{\mathrm{full}} = N_2^{\mathrm{full}} = \mathbb{F}_q^2$), dass $M_3^{(t)}(R_3)$ für **alle** Stärken $3 \le t \le q$ zugleich ein gültiges $\mathrm{CA}(|R_3| q^{t-3}; t, q+3, q)$ ist.*
 
-> **Wichtige Klarstellung zur führenden Konstante (`19/10` vs. `49/27`):**
-> Die führende Konstante der deterministischen zyklischen Differenzband-Bauart in [`scripts/phase9_m3_construct.py`](../../scripts/phase9_m3_construct.py) ist **$\frac{19}{10} = 1{,}90$**, **nicht** $\frac{49}{27} \approx 1{,}8148$. Dass $m_{\mathrm{det}}(q)/q^3$ für $q \in [7, 13]$ im Bereich $1{,}827\dots 1{,}861$ liegt (und bei $q = 9, r = 7$ zufällig exakt $m_{\mathrm{raw}}(9, 7) = 1323 = \frac{49}{27} \cdot 9^3$ annimmt), beruht allein auf dem negativen $q^2$-Restterm $-\frac{4}{5}q^2$ (bei $q = 9$: $1{,}90 - 0{,}80/9 = 1{,}8111$). Für wachsendes $q$ steigt $m_{\mathrm{raw}}/q^3$ monoton gegen $1{,}90$ ($q = 25$: $1{,}8672$; $q = 31$: $1{,}8741$; $q = 97$: $1{,}8917$). Die Konstante $\frac{49}{27}$ gehört stattdessen als **LP-Untergrenze** zur `1P_LH`-freien Familie (Abschnitt 4).
+**Beweis (Polynomreduktion modulo Knotenpolynom):**
+Sei $C \subset \mathbb{F}_q \sqcup \{a, b, c\}$ eine beliebige $t$-elementige Spaltenmenge und $j := |C \cap \{a, b, c\}| \in \{0, 1, 2, 3\}$. Setze $S := C \cap \mathbb{F}_q$ ($|S| = t - j$). Für jede feste Nebenklasse $(c_0, c_1, c_2, a, b, c) \in R_3$ variiert $g$ frei über alle $q^{t-3}$ Polynome vom Grad $\le t - 4$.
+- **$j = 0$ ($|S| = t$):** Die Auswertungsabbildung $\mathbb{F}_q[X]_{< t} \to \mathbb{F}_q^S$, $f \mapsto (f(x))_{x \in S}$, ist per Lagrange-Interpolation bijektiv. Da $g$ den Unterraum $\mathbb{F}_q[X]_{< t-3}$ durchläuft, ist die Auswertung surjektiv genau dann, wenn $(c_0, c_1, c_2)$ alle $q^3$ Tupel in $\mathbb{F}_q^3$ durchläuft (Typ 0).
+- **$j = 1$ ($|S| = t - 1$, $C = S \cup \{u\}$):** Das normierte Knotenpolynom lautet
+  $$p_S(X) := \prod_{x \in S} (X - x) = X^{t-1} - e_1(S) X^{t-2} + e_2(S) X^{t-3} - \dots \in \mathbb{F}_q[X].$$
+  Modulo $p_S(X)$ gilt $X^{t-1} \equiv e_1(S) X^{t-2} - e_2(S) X^{t-3} + r_S(X)$ mit $\deg r_S \le t - 4$. Damit reduziert sich $f(X)$ modulo $p_S(X)$ zu
+  $$f(X) \equiv \big(g(X) + c_2 r_S(X)\big) + \big(c_0 - e_2(S) c_2\big) X^{t-3} + \big(c_1 + e_1(S) c_2\big) X^{t-2} \pmod{p_S(X)}.$$
+  Da $\tilde{g} := g + c_2 r_S$ für festes $c_2$ bijektiv alle Polynome vom Grad $\le t - 4$ durchläuft und die Auswertung auf $S$ ein Isomorphismus $\mathbb{F}_q[X]/(p_S) \xrightarrow{\sim} \mathbb{F}_q^S$ ist, wird bei festem $u = s$ ganz $\mathbb{F}_q^S$ genau dann getroffen, wenn $(c_0 - v c_2, c_1 - w c_2)$ mit $(v, w) = (e_2(S), -e_1(S))$ ganz $\mathbb{F}_q^2$ durchläuft (Typ 1). *(Hinweis zu $t = 3$: Hier ist $|S| = 2$, $p_S(X) = X^2 - e_1(S) X + e_2(S)$, $g \equiv 0$, $r_S \equiv 0$, und die Formel gilt exakt ohne Grad-Anomalie.)*
+- **$j = 2$ ($|S| = t - 2$, $C = U \cup \{u_1, u_2\}$):** Sei $p_U(X) := \prod_{x \in U} (X - x) = X^{t-2} - e_1(U) X^{t-3} + e_2(U) X^{t-4} - \dots$ (für $t = 3$ ist $|U| = 1$, $p_U(X) = X - x_0$, $e_1(U) = x_0$, $e_2(U) = 0$). Modulo $p_U(X)$ gilt:
+  $$X^{t-2} \equiv e_1(U) X^{t-3} - e_2(U) X^{t-4} + \dots \equiv e_1(U) X^{t-3} + \tilde{r}_1(X),$$
+  $$X^{t-1} = X \cdot X^{t-2} \equiv e_1(U) X^{t-2} - e_2(U) X^{t-3} + \tilde{r}_2(X) \equiv \big(e_1(U)^2 - e_2(U)\big) X^{t-3} + \tilde{r}_3(X),$$
+  mit $\deg \tilde{r}_i \le t - 4$. Setze $\alpha := e_1(U)$ und $\beta := e_1(U)^2 - e_2(U)$. Dann ist
+  $$f(X) \equiv \tilde{g}(X) + (c_0 + \alpha c_1 + \beta c_2) X^{t-3} \pmod{p_U(X)},$$
+  wobei $\tilde{g}$ ganz $\mathbb{F}_q[X]_{< t-3}$ durchläuft. Per Lagrange-Interpolation auf $U$ deckt die Faser $(u_1, u_2) = (s_1, s_2)$ ganz $\mathbb{F}_q^U$ genau dann, wenn $c_0 + \alpha c_1 + \beta c_2$ alle $q$ Werte in $\mathbb{F}_q$ annimmt (Typ 2).
+- **$j = 3$ ($|S| = t - 3$, $C = W \cup \{a, b, c\}$):** Für festes $(c_0, c_1, c_2, a, b, c) \in R_3$ läuft $g|_W$ bijektiv über ganz $\mathbb{F}_q^W$ (für $t = 3$ ist $W = \emptyset$ trivial). Also deckt $C$ ganz $\mathbb{F}_q^t$ genau dann, wenn jedes $(a, b, c) \in \mathbb{F}_q^3$ in $R_3$ vorkommt (Typ 3). $\square$
+
+### 1.3 Körperunabhängige hinreichende Bedingung (`suff = 0`)
+
+**Lemma 1 (`suff = 0` $\implies$ `check_m3(full-bg3) = 0`).**
+*Erfüllt $R_3 \subset \mathbb{F}_q^6$ (`0` Duplikate):*
+- *(S0) Alle $q^3$ Punkte $(c_0, c_1, c_2) \in \mathbb{F}_q^3$ treten auf;*
+- *(S1) Jedes Symbol $s \in \mathbb{F}_q$ in jeder Koordinate $u \in \{a, b, c\}$ besitzt eine volle horizontale Ebene $\{(x, y, z_0) : x, y \in \mathbb{F}_q\}$ für mindestens ein $z_0 \in \mathbb{F}_q$;*
+- *(S2) Jedes Symbolpaar $(s_1, s_2) \in \mathbb{F}_q^2$ in jedem Paar $\{a,b\}, \{a,c\}, \{b,c\}$ besitzt eine volle $x$-Gerade $\{(x, y_0, z_0) : x \in \mathbb{F}_q\}$ für mindestens ein $(y_0, z_0) \in \mathbb{F}_q^2$;*
+- *(S3) Alle $q^3$ Symboltripel $(a, b, c) \in \mathbb{F}_q^3$ treten auf;*
+
+*so gilt `check_m3(full-bg3) = 0` (für **jeden** Körper $\mathbb{F}_q$ der Ordnung $q$, unabhängig von seiner Multiplikationstafel).*
+
+**Beweis:** (S0) und (S3) sind identisch zu Typ 0 und Typ 3. Für (S1) und beliebiges $(v, w) \in \mathbb{F}_q^2$ bildet $(x, y) \mapsto (x - v z_0, y - w z_0)$ bei festem $z_0$ die Menge $\mathbb{F}_q^2$ durch reine Translation bijektiv auf $\mathbb{F}_q^2$ ab $\implies$ Typ 1 erfüllt. Für (S2) und beliebiges $(\alpha, \beta) \in \mathbb{F}_q^2$ bildet $x \mapsto x + \alpha y_0 + \beta z_0$ bei festem $(y_0, z_0)$ die Menge $\mathbb{F}_q$ bijektiv auf $\mathbb{F}_q$ ab $\implies$ Typ 2 erfüllt. $\square$
 
 ---
 
-## 3. Beweis der Vollabdeckung (`suff=0` für alle Primzahlpotenzen $q \ge 5$) & offene Prüfpunkte
+## 2. Explizite deterministische Light+Heavy-Konstruktion (`scripts/phase9_m3_construct.py`)
 
-**Satz 3 (Deterministische Korrektheit — `suff=0` ohne Ausnahmen für alle $q \ge 2, 1 \le r < q$).**
-*Für jede Primzahlpotenz $q \ge 2$, jedes $r \in \{1, \dots, q-1\}$ und jedes $c_{\mathrm{shift}} \in \mathbb{Z}_q$ terminiert `build_m3_for_params(q, r, c_shift)` ohne Fehler und liefert eine duplikatfreie Liste $R_3 \subseteq \mathbb{F}_q^6$ mit `check_sufficient_full_bg3(R_3, q) = 0` (also nach Lemma 1 und Korollar 1 `check_m3(full-bg3) = 0` und gültige $\mathrm{CA}(|R_3| q^{t-3}; t, q+3, q)$ für alle $3 \le t \le q$).*
+Identifiziere die Symbolmenge $\mathbb{F}_q$ mit $\{0, 1, \dots, q - 1\}$ (für die kombinatorische Symbolzuweisung wird ausschließlich $\mathbb{Z}_q$-Arithmetik verwendet; nach Lemma 1 ist die Konstruktion für jede Primzahlpotenz $q \ge 5$ gültig).
 
-*Algebraischer Fallunterscheidungsbeweis (Schritt für Schritt):*
-1. **Keine Duplikate und keine Abbrüche auf den leichten Ebenen $z \in \{0, \dots, q-2\}$:**
-   In Step 2 wird für jedes Paar $(z, y) \in \{0, \dots, q-2\} \times \{0, \dots, q-1\}$ und jedes $x \in \{0, \dots, q-1\}$ genau ein Punkt $(x, y, z, a, b, c)$ erzeugt (entweder durch die zu $(z, y)$ gematchte Gerade oder durch $q$ Füllpunkte). Daher liegt auf jedem Gitterpunkt $(x, y, z)$ mit $z \le q - 2$ exakt ein Vertreter: **0 Duplikate** auf $z \le q - 2$ und **alle $(q-1)q^2$ Punkte** mit $z \le q - 2$ sind gedeckt. Ferner gilt nach Kompatibilitätsdefinition für jeden Punkt auf Ebene $z$ mit Besitzer $(\mathrm{col}, s)$, dass seine Koordinate $\mathrm{col}$ gleich $s$ ist; damit besitzt jedes Symbol in $A_L \sqcup B_L \sqcup C_L$ seine vollständige horizontale Ebene $z$.
-2. **Kollisionsfreie `3P`-Platzierung auf $z^* = q - 1$:**
-   Alle `3P`-Geraden tragen paarweise verschiedene Tripel $(a, b, c) \in T$ und werden auf $z^*$ vor allen `1P`-Geraden und $U$-Punkten platziert. Für jede `3P`-Gerade ist daher jedes $y \in \{0, \dots, q-1\}$ frei von $(a, b, c)$ (`best_3p` ist stets definiert, **0 Duplikate**).
-3. **Existenz einer kollisionsfreien `1P`-Bijektion auf $z^*$ (Schubfachprinzip + Hall-Heiratssatz):**
-   Sei `1P_ab(a, b)` auf $z^*$ zu platzieren (analog für `1P_ac`, `1P_bc`). Da $(a, b) \notin E_{ab}$, kann kein zuvor platzierter `3P`-Punkt und keine andere `1P_ab`-Gerade das Paar $(a, b)$ tragen. Ein Konflikt $(a, b, c) \in \mathrm{used}[y][x]$ entsteht daher ausschließlich durch zuvor auf derselben Zeile $y$ platzierte Geraden `1P_ac(a, c)` (mit $\pi(x) = b$) oder `1P_bc(b, c)` (mit $\pi(x) = a$).
-   - Es gibt höchstens $q - r$ Geraden `1P_ac(a, \cdot)` und höchstens $q - r$ Geraden `1P_bc(b, \cdot)`, und jede legt höchstens eine verbotene Kante $(x, c)$ auf genau einer Zeile $y$ fest.
-   - Über alle $q$ Zeilen $y \in \{0, \dots, q-1\}$ summiert gibt es höchstens $2(q - r)$ verbotene Kanten $(x, c)$.
-   - Da $r \ge 1$, ist $2(q - r) \le 2q - 2 < 2q$; nach dem **Schubfachprinzip** existiert mindestens eine Zeile $y$ mit höchstens $\lfloor (2q - 2)/q \rfloor = 1$ verbotener Kante (für $r > q/2$ sogar mit **$0$ verbotenen Kanten**, d. h. vollständigem $K_{q, q}$!).
-   - Ein vollständiger bipartiter Graph $K_{q, q}$ minus höchstens eine Kante besitzt für jedes $q \ge 2$ ein perfektes Matching (Hall-Bedingung trivial erfüllt). Folglich findet `_max_bijection_gain` auf dieser Zeile $y$ garantiert eine duplikatfreie Bijektion $\pi: \mathbb{F}_q \to \mathbb{F}_q$ (`best_1p` ist stets definiert, **0 Duplikate**).
-4. **Kollisionsfreie Platzierung und Relokation von $U_{\mathrm{rem}}$ auf $z^*$:**
-   Jedes $(a, b, c) \in U$ liegt weder in $T$ noch im Bild einer `1P`-Geraden (denn $(a, b) \in E_{ab}$, $(a, c) \in E_{ac}$, $(b, c) \in E_{bc}$), und alle Elemente von $U$ sind paarweise verschieden. Somit ist $(a, b, c) \notin \mathrm{used}[y][x]$ für **alle** $q^2$ Zellen $(x, y)$ von $z^*$ (sowohl bei der Erstplatzierung als auch bei allen Relokationen: **0 Duplikate**).
-5. **Kollisionsfreie `extra_heavy`-Auffüllung und Vollständigkeit auf $z^*$:**
-   Für jede Zelle $(x, y)$ auf $z^*$ werden die fehlenden schweren Symbole $m_a, m_b, m_c$ in $\mathrm{need} = \max(|m_a|, |m_b|, |m_c|)$ Schritten aufgefüllt. In Schritt $i < \mathrm{need}$ gilt mindestens eine der Bedingungen $i < |m_a|$, $i < |m_b|$ oder $i < |m_c|$. Ohne Einschränkung sei $i < |m_a|$; dann kommt $a = m_a[i]$ in $\mathrm{used}[y][x]$ bisher **gar nicht** vor (`cnt_a[y][x][a] == 0`), sodass $(a, b, c) \notin \mathrm{used}[y][x]$ für beliebige $b, c$ automatisch erfüllt ist (**0 Duplikate**). Danach enthält jede Zelle $(x, y)$ von $z^*$ jedes $a \in A_H$, $b \in B_H$, $c \in C_H$ (und wegen $A_H \neq \emptyset$ insbesondere mindestens einen Punkt $\Rightarrow$ **Typ 0 auf $z^*$ erfüllt** und **Typ 1 für alle schweren Symbole erfüllt**).
-6. **Vollabdeckung Typ 2 und Typ 3:**
-   - **Typ 2:** Jedes Paar $(a, b) \in \mathbb{Z}_q^2$ liegt entweder in $E_{ab}$ (dann existiert eine `3P`-Gerade mit $(a, b)$ auf einer leichten Ebene oder auf $z^*$) oder in $\mathbb{Z}_q^2 \setminus E_{ab}$ (dann existiert eine `1P_ab`-Gerade mit $(a, b)$ auf einer leichten Ebene oder auf $z^*$). Analog für $\{a, c\}$ und $\{b, c\}$. Jedes Paar besitzt also eine volle $x$-Gerade.
-   - **Typ 3:** Jedes Tripel $(a, b, c) \in \mathbb{Z}_q^3$ liegt entweder in $T$ (gedeckt durch seine `3P`-Gerade), hat mindestens eine Projektion außerhalb von $E_{ab}/E_{ac}/E_{bc}$ (gedeckt durch die zugehörige `1P`-Gerade, da $\pi$ surjektiv auf $\mathbb{F}_q$ ist), oder liegt in $U$ (gedeckt auf einem ungematchten Light-Slot oder auf $z^*$). $\square$
+### 2.1 Schritt 0: Balancierte Light/Heavy-Ebenenpartition
 
-### 3.1 Ehrliche Markierung aller `[OFFEN / PRUEFPUNKT]`-Stellen (für Regel 2d)
+Wähle die balancierten Light-Größen
+$$k_a = \left\lfloor \frac{q + 1}{3} \right\rfloor, \qquad k_b = \left\lfloor \frac{q}{3} \right\rfloor, \qquad k_c = \left\lfloor \frac{q - 1}{3} \right\rfloor \qquad (k_a + k_b + k_c = q - 1),$$
+und einen zyklischen Versatz $c_{\mathrm{shift}} \in \{0, \lfloor q/3 \rfloor, \lfloor 2q/3 \rfloor\}$:
+$$A_L = \{0, \dots, k_a - 1\}, \quad B_L = \{0, \dots, k_b - 1\}, \quad C_L = \{(c_{\mathrm{shift}} + i) \bmod q : 0 \le i < k_c\},$$
+sowie die komplementären Heavy-Mengen $A_H = \mathbb{Z}_q \setminus A_L$, $B_H = \mathbb{Z}_q \setminus B_L$, $C_H = \mathbb{Z}_q \setminus C_L$ (je Größe $\approx \frac{2}{3} q$).
+Die $q - 1$ leichten horizontalen Ebenen $z \in \{0, \dots, q - 2\}$ werden bijektiv den Elementen von $A_L \sqcup B_L \sqcup C_L$ zugeordnet; jede leichte Ebene $z$ besitzt $q$ disjunkte $x$-Geraden-Slots $(y, z)$ ($y = 0, \dots, q - 1$). Die einzige verbleibende horizontale Ebene $z^* := q - 1$ ist die **schwere Ebene** für alle Symbole aus $A_H, B_H, C_H$.
 
-| Nr. | Status | Gegenstand & konkreter Handlungsbedarf |
+### 2.2 Schritt 1: Zyklisches Differenzband `3P` + komplementäre `1P`-Geraden + Resttripel `U`
+
+Wähle eine Bandbreite $r \in \{1, \dots, q - 1\}$ und setze $e := q - r$ (Komplementbreite) sowie $D := \{0, 1, \dots, r - 1\} \subset \mathbb{Z}_q$, $E := \mathbb{Z}_q \setminus D = \{r, \dots, q - 1\}$. Definiere:
+1. **`3P`-$x$-Geraden (partielles lateinisches Quadrat $T$):**
+   $$T := \big\{(a, b, (-a - b) \bmod q) : a, b \in \mathbb{Z}_q,\; (a - b) \bmod q \in D\big\}, \qquad |T| = r q = (q - e) q.$$
+   Jede `3P`-Gerade $(a, b, c) \in T$ liefert bei Platzierung auf $(y, z)$ die $q$ Punkte $\{(x, y, z, a, b, c) : x \in \mathbb{Z}_q\}$.
+   Ihre drei Paarprojektionen sind exakt:
+   $$\mathrm{proj}_{ab}(T) = \{(a, b) : (a - b) \bmod q \in D\}, \quad \mathrm{proj}_{ac}(T) = \{(a, c) : (2a + c) \bmod q \in D\},$$
+   $$\mathrm{proj}_{bc}(T) = \{(b, c) : (-2b - c) \bmod q \in D\},$$
+   jeweils von Größe $r q$ (da zu jedem $(a, c)$ genau ein $b \equiv -a - c \pmod q$ existiert und dann $a - b \equiv 2a + c$; analog $-2b - c$; gültig **auch für gerades $q$**, da nie durch $2$ dividiert wird).
+2. **`1P`-$x$-Geraden (komplementäre Paare):**
+   Für jedes nicht von $T$ gedeckte Paar $(a, b) \notin \mathrm{proj}_{ab}(T)$ bilde eine Gerade `1P_ab(a, b)` (bei Platzierung auf $(y, z)$ mit einer Bijektion $\pi: \mathbb{Z}_q \to \mathbb{Z}_q$ die $q$ Punkte $\{(x, y, z, a, b, \pi(x)) : x \in \mathbb{Z}_q\}$); analog `1P_ac(a, c)` für $(a, c) \notin \mathrm{proj}_{ac}(T)$ und `1P_bc(b, c)` für $(b, c) \notin \mathrm{proj}_{bc}(T)$. Insgesamt:
+   $$n_{\mathrm{1P}} = 3 (q - r) q = 3 e q, \qquad n_{\mathrm{lines}} = n_{\mathrm{3P}} + n_{\mathrm{1P}} = (3 q - 2 r) q = (q + 2 e) q.$$
+3. **Verbleibende Typ-3-Tripel $U$:**
+   $$U := \big\{(a, b, c) \in \mathbb{Z}_q^3 \setminus T : (a, b) \in \mathrm{proj}_{ab}(T),\; (a, c) \in \mathrm{proj}_{ac}(T),\; (b, c) \in \mathrm{proj}_{bc}(T)\big\}.$$
+
+### 2.3 Schritte 2 & 3: Deterministische Platzierung auf leichten Ebenen und schwerer Ebene $z^*$
+
+- **Schritt 2 (Light-Plane-Matching):** Ein deterministisches maximales bipartites Matching weist den $(q - 1) q$ Slots $(y, z)$ ($z \in \{0, \dots, q - 2\}$) kompatible `3P`/`1P`-Geraden zu (eine Gerade ist kompatibel zu Ebene $z$ mit Besitzer $(u, s)$, falls ihre feste $u$-Koordinate gleich $s$ ist; Priorisierung nach fallendem Light-Grad und `3P` vor `1P`). Bleiben `unm` Slots ungematcht, wird jeder ungematchte Slot $(y, z)$ mit bis zu $q$ noch unbenutzten Tripeln aus $U$ befüllt, deren $u$-Koordinate gleich $s$ ist; nur falls weniger als $q$ solche $U$-Tripel verbleiben, wird bis $q$ mit deterministischen Füllpunkten (`pad_light`) aufgefüllt. Auf den leichten Ebenen erhalten alle `1P`-Geraden die Identität $\pi(x) = x$.
+- **Schritt 3 (Heavy-Plane-Platzierung auf $z^* = q - 1$):**
+  1. Alle nicht auf leichten Ebenen platzierten `3P`-Geraden werden deterministisch auf Zeilen $y \in \{0, \dots, q - 1\}$ von $z^*$ gelegt, die maximalen neuen Heavy-Gewinn (fehlende $(x, y)$-Zellen für $A_H, B_H, C_H$) liefern.
+  2. Alle verbleibenden `1P`-Geraden werden deterministisch auf eine Zeile $y$ mit einer über `_max_bijection_gain` (maximales bipartites Matching auf `valid_adj`/`gain_adj`) gewählten kollisionsfreien Bijektion $\pi: \mathbb{Z}_q \to \mathbb{Z}_q$ gelegt, die den Heavy-Gewinn maximiert.
+  3. Alle noch nicht verbrauchten Tripel aus $U$ werden deterministisch auf defizitäre $(x, y)$-Zellen von $z^*$ verteilt (gefolgt von bis zu 5 deterministischen 1-Punkt-Relokationspässen über `unc_pos`).
+  4. Jedes danach noch fehlende Heavy-Symbol in Zelle $(x, y)$ von $z^*$ wird punktuell aufgefüllt (`exh = extra_heavy` Zusatzvertreter).
+
+### 2.4 Exakte Zählformel für `|U|`, `m_raw(q, e)` und `|R_3|` (geschlossen + Restterme)
+
+**Satz 2 (Exakte Zählung von $U$ und $m_{\mathrm{raw}}$ — vollständig algebraisch bewiesen, zusätzlich geprüft für alle $q \in [5..49]$ und $1 \le e \le \lfloor (q-1)/2 \rfloor$ ohne Abweichung).**
+*Sei $q \ge 3$ eine beliebige ganze Zahl und $1 \le e = q - r \le \lfloor (q - 1)/2 \rfloor$. Dann gilt:*
+1. **Bijektion für $U$:** Die Abbildung
+   $$\Phi: \mathbb{Z}_q \times \{(d, s) \in D^2 : s \neq d,\; (2d - s) \bmod q \in D\} \longrightarrow U, \qquad (a, d, s) \longmapsto \big(a,\; (a - d) \bmod q,\; (s - 2a) \bmod q\big)$$
+   ist eine Bijektion (auch für gerades $q$, ohne Division durch $2$). Somit gilt $|U| = q \cdot \mathrm{AP3}(q, r)$ mit $\mathrm{AP3}(q, r) := \#\{(d, s) \in D^2 : s \neq d,\; (2d - s) \bmod q \in D\}$.
+2. **Geschlossene Formel für $\mathrm{AP3}(q, r)$:**
+   $$\mathrm{AP3}(q, q - e) = q^2 - 3 q e + \kappa(q, e) - q + e, \qquad \kappa(q, e) := \begin{cases} \left\lfloor \dfrac{5 e^2}{2} \right\rfloor = \dfrac{5 e^2 - (e \bmod 2)}{2} & (q \text{ ungerade}), \\[8pt] \left\lceil \dfrac{5 e^2}{2} \right\rceil = \dfrac{5 e^2 + (e \bmod 2)}{2} & (q \text{ gerade}). \end{cases}$$
+3. **Geschlossene Formel für die Rohgröße $m_{\mathrm{raw}}(q, e) := q \cdot n_{\mathrm{lines}} + |U|$:**
+   $$m_{\mathrm{raw}}(q, e) = 2 q^3 - q^2 e + \kappa(q, e) \cdot q - q^2 + q e.$$
+4. **Exakte Zerlegung der tatsächlichen Listengröße $|R_3| = m_{\mathrm{det}}(q)$:**
+   $$|R_3| = m_{\mathrm{raw}}(q, e) + \mathrm{pad}_{\mathrm{light}}(q, r, c_{\mathrm{shift}}) + \mathrm{exh}(q, r, c_{\mathrm{shift}}).$$
+
+**Beweis von Satz 2:**
+1. *(Bijektion)* Setze $d_1 := (a - b) \bmod q$, $d_2 := (2a + c) \bmod q$, $d_3 := (-2b - c) \bmod q$. Dann gilt identisch $d_2 + d_3 \equiv 2(a - b) \equiv 2 d_1 \pmod q$, also $d_3 \equiv 2 d_1 - d_2 \pmod q$. Zudem ist $(a, b, c) \in T \iff a + b + c \equiv 0 \iff 2a + c \equiv a - b \iff d_2 = d_1$. Zu gegebenem $(a, d_1, d_2)$ mit $d_1, d_2 \in D$, $d_2 \neq d_1$, $(2 d_1 - d_2) \bmod q \in D$ sind $b \equiv a - d_1$ und $c \equiv d_2 - 2a \pmod q$ eindeutig bestimmt und erfüllen automatisch $-2b - c \equiv 2 d_1 - d_2 \in D$.
+2. *(Inklusion-Exklusion)* Setze $N_{\mathrm{all}}(D) := \#\{(d, s) \in D^2 : (2d - s) \bmod q \in D\} = \mathrm{AP3}(q, r) + r$. Mit $1_D = 1 - 1_E$ folgt:
+   $$N_{\mathrm{all}}(D) = \sum_{d, s \in \mathbb{Z}_q} (1 - 1_E(d))(1 - 1_E(s))(1 - 1_E(2d - s))$$
+   $$= q^2 - 3 q e + \underbrace{\sum 1_E(d) 1_E(s)}_{e^2} + \underbrace{\sum 1_E(d) 1_E(2d - s)}_{e^2} + \underbrace{\sum 1_E(s) 1_E(2d - s)}_{S_{\mathrm{par}}} - N_{\mathrm{all}}(E).$$
+   - Für ungerades $q$ ist $d \mapsto (2d - s) \bmod q$ bei festem $s$ eine Bijektion $\mathbb{Z}_q \to \mathbb{Z}_q$, also $S_{\mathrm{par}} = e^2$.
+   - Für gerades $q$ gilt $2d - s \equiv s \pmod 2$; jedes Paar $(s, t) \in E^2$ gleicher Parität besitzt genau zwei Urbilder $d \in \mathbb{Z}_q$, also $S_{\mathrm{par}} = 2(e_{\mathrm{even}}^2 + e_{\mathrm{odd}}^2) = e^2 + (e \bmod 2)$ (da $E$ ein zusammenhängendes Intervall der Länge $e$ ist, gilt $|e_{\mathrm{even}} - e_{\mathrm{odd}}| = e \bmod 2$).
+   - Wegen $2e \le q - 1$ gilt für alle $d, s \in \{0, \dots, e - 1\}$ die strikte Nicht-Überlauf-Schranke $-(e - 1) > -q + e - 1$ und $2(e - 1) < q$. Daher ist $N_{\mathrm{all}}(E) = \#\{(d, s) \in [0, e-1]^2 : 0 \le 2d - s \le e - 1\}$. Summieren über $d = 0, \dots, e - 1$ liefert für $e = 2h$: $\sum_{d=0}^{h-1}(2d+1) + \sum_{d=h}^{2h-1}(4h-1-2d) = 2h^2 = e^2/2$, und für $e = 2h+1$: $(h+1)^2 + h^2 = (e^2 + 1)/2$; zusammen $N_{\mathrm{all}}(E) = \frac{e^2 + (e \bmod 2)}{2}$.
+   - Einsetzen in $\mathrm{AP3}(q, r) = N_{\mathrm{all}}(D) - (q - e)$ ergibt:
+     $$\mathrm{AP3}(q, q - e) = q^2 - 3 q e + \left(3 e^2 + \mathbf{1}_{2 \mid q}(e \bmod 2) - \frac{e^2 + (e \bmod 2)}{2}\right) - q + e = q^2 - 3 q e + \kappa(q, e) - q + e.$$
+3. *(Rohgröße)* $q \cdot n_{\mathrm{lines}} + q \cdot \mathrm{AP3}(q, q-e) = (q^3 + 2 q^2 e) + q(q^2 - 3 q e + \kappa(q, e) - q + e) = 2 q^3 - q^2 e + \kappa(q, e) q - q^2 + q e$.
+4. *(Gesamtzahl $|R_3|$)* Jede der $n_{\mathrm{lines}}$ Geraden wird genau einmal (entweder in Schritt 2 oder Schritt 3) mit $q$ Punkten platziert; jedes Tripel in $U$ wird genau einmal (entweder in einem ungematchten Light-Slot oder auf $z^*$) platziert; zusätzlich werden genau $\mathrm{pad}_{\mathrm{light}}$ Füllpunkte in ungematchten Light-Slots und $\mathrm{exh}$ Zusatzpunkte auf $z^*$ erzeugt. $\square$
+
+**Asymptotik & ehrlicher Abgleich gegen $\frac{19}{10} q^3$, $\frac{49}{27} q^3$ und $2 q^3 - q^2$:**
+Minimiere $2 q^3 - q^2 e + \frac{5}{2} q e^2 - q^2 + q e$ über $e \in \mathbb{Z}$. Der reelle Minimierer liegt bei $e = \frac{q - 1}{5}$; mit $e^* = \left\lfloor \frac{q + 1}{5} \right\rfloor = \frac{q}{5} + \delta$ ($|\delta| \le \frac{1}{2}$) gilt:
+$$m_{\mathrm{raw}}(q, e^*) = \frac{19}{10} q^3 - \frac{4}{5} q^2 + \left(\frac{5}{2} \delta^2 + \delta \pm \frac{1}{2}\right) q = \mathbf{1{,}90\, q^3 - 0{,}80\, q^2 + O(q)}.$$
+**Wichtige Klarstellung (Ehrlichkeitspflicht):**
+- Die führende asymptotische Konstante dieser zyklischen Differenzband-Bauart ist **$\frac{19}{10} = 1{,}90$**, **nicht** $\frac{49}{27} \approx 1{,}8148$! Gegen die elliptische Schranke $2 q^3 - q^2$ spart sie asymptotisch exakt $\frac{1}{10} q^3 - \frac{1}{5} q^2 + O(q)$ Vertreter (ca. $-5{,}0\,\%$).
+- Gegenüber $\frac{49}{27} q^3$ lautet die Differenz:
+  $$m_{\mathrm{raw}}(q, e^*) - \frac{49}{27} q^3 = +\frac{23}{270} q^3 - \frac{4}{5} q^2 + O(q) \approx +0{,}0852\, q^3 - 0{,}80\, q^2.$$
+  Nur für kleine $q \le 9$ drückt der quadratische Term $-\frac{4}{5} q^2$ die Rohsumme auf oder unter $\frac{49}{27} q^3$ (insbesondere bei $q = 9, e = 2$: $m_{\mathrm{raw}}(9, 2) = 1323 = \frac{49}{27} \cdot 9^3$ exakt!). Ab $q = 11$ liegt $m_{\mathrm{det}}(q) / q^3$ strikt über $\frac{49}{27}$ und steigt monoton gegen $\frac{19}{10} = 1{,}90$:
+
+| $q$ | $r^*$ | $r_{\mathrm{det}}$ | $c_{\mathrm{shift}}$ | $m_{\mathrm{raw}}(r_{\mathrm{det}})$ | `unm` | `pad_light` | `exh` | **`m_det`** | `m_det / q^3` | `ell = 2q^3 - q^2` | Gewinn (`ell - m_det`) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `5` | `4` | `4` | `1` | `215` | `1` | `0` | `12` | `227` | `1,81600` | `225` | `-2` |
+| `7` | `6` | `6` | `0` | `609` | `5` | `0` | `22` | **`631`** | `1,83965` | `637` | `+6` |
+| `8` | `6` | `7` | `0` | `928` | `8` | `2` | `15` | **`945`** | `1,84570` | `960` | `+15` |
+| `9` | `7` | `8` | `6` | `1.323` | `9` | `0` | `9` | **`1.332`** | `1,82716` | `1.377` | `+45` |
+| `11` | `9` | `10` | `7` | `2.453` | `16` | `0` | `1` | **`2.454`** | `1,84373` | `2.541` | `+87` |
+| `13` | `10` | `11` | `4` | `4.043` | `23` | `0` | `45` | **`4.088`** | `1,86072` | `4.225` | `+137` |
+| `16` | `13` | `14` | `10` | `7.616` | `31` | `0` | `37` | **`7.653`** | `1,86841` | `7.936` | `+283` |
+| `17` | `14` | `15` | `11` | `9.163` | `37` | `0` | `19` | **`9.182`** | `1,86892` | `9.537` | `+355` |
+| `19` | `15` | `16` | `12` | `12.749` | `36` | `0` | `179` | **`12.928`** | `1,88482` | `13.357` | `+429` |
+| `23` | `18` | `19` | `15` | `22.701` | `48` | `0` | `277` | **`22.978`** | `1,88855` | `23.805` | `+827` |
+| `25` | `20` | `21` | `16` | `29.225` | `65` | `0` | `393` | **`29.618`** | `1,89555` | `30.625` | `+1.007` |
+
+*(Alle `11` Zeilen haben `suff = 0`; zusätzlich wurde `check_m3(full-bg3) = 0` für alle `8` Primzahlpotenzen $q \in \{5, 7, 8, 9, 11, 13, 16, 17\}$ direkt geprüft.)*
+
+---
+
+## 3. Beweis der Vollabdeckung (`suff = 0`) & Markierung aller `[OFFEN / PRUEFPUNKT]`-Stellen
+
+**Satz 3 (Vollabdeckung `suff = 0` für alle Primzahlpotenzen $q \ge 5$ und $1 \le e < (q - 2)/2$).**
+*Für jede Primzahlpotenz $q \ge 5$ und jedes $e = q - r \ge 1$ mit $2 e < q - 2$ (insbesondere für $e^* = \lfloor (q + 1)/5 \rfloor$ ab $q \ge 7$ sowie für $e = 1$ ab $q \ge 5$) terminiert `build_m3_for_params(q, q - e, c_shift)` ohne Fehler und liefert eine duplikatfreie Menge $R_3 \subset \mathbb{F}_q^6$ mit `suff = 0` (also nach Lemma 1 `check_m3(full-bg3) = 0` und nach Satz 1 gültige `CA(|R_3| q^{t-3}; t, q + 3, q)` für alle $3 \le t \le q$).*
+
+**Schrittweiser Beweis:**
+1. **Keine Kollisionen auf den leichten Ebenen (`z = 0..q - 2`):** Jeder Punkt $(x, y, z)$ mit $z \in \{0, \dots, q - 2\}$ wird in Schritt 2 genau einmal emittiert. Insbesondere entstehen auf $z < q - 1$ keine doppelten 6-Tupel, alle $(q - 1) q^2$ Punkte $(x, y, z)$ sind gedeckt, und jedes Light-Symbol $s \in A_L \sqcup B_L \sqcup C_L$ besitzt seine volle horizontale Ebene $z = \mathrm{plane}(u, s)$.
+2. **Kollisionsfreie Platzierung aller restlichen `3P`-Geraden auf $z^*$:** Da Schritt 3 die `3P`-Geraden **zuerst** auf $z^*$ platziert (Zeilen 312, 353–373) und alle `3P`-Geraden paarweise verschiedene Tripel $(a, b, c) \in T$ tragen, ist für jede `3P`-Gerade jede Zeile $y \in \{0, \dots, q - 1\}$ kollisionsfrei (`best_3p is not None`).
+3. **Existenz einer kollisionsfreien Bijektion $\pi$ für jede restliche `1P`-Gerade auf $z^*$ (Hall-Bedingung):**
+   Betrachte o. B. d. A. eine noch zu platzierende Gerade `1P_ab(a, b)` auf einer beliebigen Zeile $y$ von $z^*$. Da $(a, b) \notin \mathrm{proj}_{ab}(T)$, trägt keine zuvor platzierte `3P`-Gerade das Paar $(a, b)$, und keine zuvor platzierte `1P_ab`-Gerade hat dasselbe $(a, b)$. Ein Tripel $(a, b, c)$ kann in Zelle $(x, y)$ von $z^*$ daher **nur** von einer zuvor auf Zeile $y$ platzierten Gerade `1P_ac(a, c)` (höchstens 1 Zelle $x$ pro $c$) oder `1P_bc(b, c)` (höchstens 1 Zelle $x$ pro $c$) stammen. Im bipartiten Graphen `valid_adj` zwischen $X = \mathbb{Z}_q$ und $C = \mathbb{Z}_q$ gilt daher:
+   - Für jedes $c \in C$ fehlen höchstens $2$ Kanten $\implies \deg(c) \ge q - 2$.
+   - Da es für festes $a$ genau $e$ Geraden `1P_ac(a, *)` und für festes $b$ genau $e$ Geraden `1P_bc(b, *)` gibt, fehlen für jedes $x \in X$ höchstens $2 e$ Kanten $\implies \deg(x) \ge q - 2 e$.
+   Für jede nichtleere Teilmenge $S \subset X$ gilt:
+   - Ist $|S| \le q - 2 e$, so ist $|N(S)| \ge q - 2 e \ge |S|$.
+   - Ist $|S| > q - 2 e$, so hat für $2 e < q - 2$ jedes $c \in C$ mindestens $\deg(c) \ge q - 2 > 2 e = q - (q - 2 e) \ge |X \setminus S|$ Nachbarn in $X$, also mindestens einen Nachbarn in $S$, womit $N(S) = C$ ($|N(S)| = q \ge |S|$).
+   Nach dem Heiratssatz von Hall existiert in **jeder** Zeile $y$ ein perfektes Matching (`_max_bijection_gain` findet stets eine gültige Bijektion $\pi$, `best_1p is not None`).
+4. **Kollisionsfreie Platzierung aller restlichen $U$-Punkte auf $z^*$:** Jedes $(a, b, c) \in U$ liegt per Definition nicht in $T$ und hat alle drei Paarprojektionen in $\mathrm{proj}(T)$, wird also von keiner `3P`- und keiner `1P`-Geraden erzeugt. Zudem sind alle Elemente von $U$ paarweise verschieden. Somit ist für jedes $u \in U$ jede Zelle $(x, y)$ von $z^*$ frei von $(a, b, c)$, und die Relokationspässe bewahren die Duplikatfreiheit.
+5. **Kollisionsfreie Auffüllung der Heavy-Defizite (`exh`) auf $z^*$:** In Zelle $(x, y)$ wird in jedem Schritt $i < \max(|m_a|, |m_b|, |m_c|)$ mindestens eine Koordinate aus den fehlenden Symbolen gewählt (z. B. $a = m_a[i]$ mit `cnt_a[y][x][a] == 0`). Da dieses Symbol in Zelle $(x, y)$ bisher **überhaupt nicht** vorkommt, kann das erzeugte Tripel $(a, b, c)$ nicht bereits in `used_pts_z[y][x]` enthalten sein. Damit erzeugt Schritt 3.4 weder Duplikate noch scheitert er, und am Ende hat jedes Heavy-Symbol aus $A_H, B_H, C_H$ alle $q^2$ Zellen $(x, y)$ auf $z^*$.
+6. **Abdeckung (S0)–(S3):**
+   - **(S0) Typ 0:** Auf $z < q - 1$ sind alle $(q - 1) q^2$ Punkte abgedeckt (Schritt 1); auf $z^*$ ist nach Schritt 5 für jedes $(x, y)$ jedes $a \in A_H$ ($|A_H| \ge 1$) mindestens einmal vertreten, also sind alle $q^2$ Punkte auf $z^*$ abgedeckt.
+   - **(S1) Typ 1:** Jedes Light-Symbol besitzt eine volle horizontale Ebene $z < q - 1$; jedes Heavy-Symbol besitzt nach Schritt 5 die volle horizontale Ebene $z^*$.
+   - **(S2) Typ 2:** Jedes Paar in $\mathrm{proj}(T)$ liegt auf einer `3P`-$x$-Geraden; jedes komplementäre Paar liegt auf einer `1P`-$x$-Geraden; jede dieser Geraden wird genau einmal vollständig platziert (Schritte 2–3).
+   - **(S3) Typ 3:** Jedes Tripel $(a, b, c) \in \mathbb{Z}_q^3$ liegt entweder in $T$ (`3P`), hat mindestens eine Paarprojektion außerhalb $\mathrm{proj}(T)$ (und wird dann von der zugehörigen `1P`-Geraden wegen der Bijektivität von $\pi$ exakt gedeckt) oder liegt in $U$ (und wird in Schritt 2 oder Schritt 3.3 platziert). $\square$
+
+### Explizite Liste aller offenen Prüfpunkte (`[OFFEN / PRUEFPUNKT]`)
+
+| ID | Stelle | Was bereits bewiesen / geprüft ist | Was noch offen ist (Ziel für Regel-2d / Verschärfung) |
+| :---: | --- | --- | --- |
+| **`[OFFEN 1]`** | **Größenschranke `m_det(q) < 2 q^3 - q^2` für alle $q \ge 7$** | `m_raw(q, e^*) = 1,90 q^3 - 0,80 q^2 + O(q) < 2 q^3 - q^2` ist für alle $q \ge 7$ bewiesen; numerisch gilt `m_det(q) < 2 q^3 - q^2` für alle `10` geprüften Primzahlpotenzen $q \in \{7, 8, 9, 11, 13, 16, 17, 19, 23, 25\}$ (mit `exh(q) = 1..393 = O(q^2)`). | **Kein analytischer Beweis für `exh(q) + pad_light(q) < (1/10) q^3 - (1/5) q^2` für alle $q \ge 7$!** Die Greedy-Platzierung + 5-Pass-Relokation auf $z^*$ ist deterministisch, aber ihre Restdefizit-Schranke `exh(q) = o(q^3)` ist bisher nur numerisch bis $q = 25$ belegt. |
+| **`[OFFEN 2]`** | **Light-Slot-Füllung (`pad_light = 0`)** | Numerisch ist `pad_light = 0` für $q \in \{5, 7, 9, 11, 13, 16, 17, 19, 23, 25\}$ und `pad_light = 2` nur bei $q = 8$ ($r = 7, e = 1$). | Analytischer Nachweis, dass für $e = e^*$ (oder $e^* - 1$) ab $q \ge 9$ die verbleibenden $U$-Tripel je Light-Symbol stets mindestens `q * (unmatched slots auf Ebene z)` übersteigen (`pad_light = 0`). |
+| **`[OFFEN 3]`** | **Klein-$q$- und Rundungs-Randfälle ($q \in \{5, 7, 8\}$)** | Bei $q = 5$: $2e = 2 \not< q - 2 = 3$, aber `construct_best(5)` läuft sauber durch (`suff = 0, check_m3 = 0`), erreicht aber `m_det = 227 > 225 = ell` (wegen `exh = 12`). Bei $q = 7, 8$ erfüllt $e = 1$ bereits $2e = 2 < q - 2$ und `m_det < ell`. | Bei $q = 5$ greift der Hall-Beweis aus Schritt 3 ($2e < q - 2$) formal erst ab $q \ge 5$ mit $e = 1$ **nicht** (`2 < 3` stimmt für $q = 5, e = 1$ tatsächlich! Korrektur: $2 \cdot 1 = 2 < 5 - 2 = 3$ gilt bereits ab $q = 5$ für $e = 1$; erst für $e = 2$ braucht man $q \ge 7$!). Prüfung der genauen $q \bmod 3$- und $q \bmod 5$-Rundungsfälle in `construct_best` (für $q > 13$ testet `construct_best` nur noch `c_shift = (2q)//3` und `r in {r_opt, r_opt + 1}`). |
+| **`[OFFEN 4]`** | **Unabhängige Prüfung von Satz 1, Satz 2, Satz 3 & §4 (Regel 2d)** | Gate 0 (`phase9_m3_lift.py --gate0`), `check_m3(full-bg3) = 0` für $q \in \{5, 7, 8, 9, 11, 13, 16, 17\}$ sowie Dual-Verify in `/tmp/` für $q = 7, 8, 9, 11, 13$. | Noch keine unabhängige Lesung durch Claude oder ein unbeteiligtes Drittmodell (Regel 2d) und noch keine Literaturprüfung (Regel 2c). |
+
+---
+
+## 4. Abgrenzung gegen die LP-Schranken `46/27` und `49/27` (und Übergang zu AP 3)
+
+### 4.1 Was die LP-Schranken genau beschränken
+
+Betrachte **jede** asymptotische Konstruktion im Modell `M_3(R_3)` auf dem balancierten Light+Heavy-Skelett mit:
+- $|A_L| = |B_L| = |C_L| = \lambda q$, $|A_H| = |B_H| = |C_H| = \mu q$ ($\lambda = \frac{1}{3}, \mu = \frac{2}{3}$, $q - 1$ leichte horizontale Ebenen + $1$ schwere Ebene $z^*$),
+- Typ-2-Paarabdeckung **ausschließlich durch volle $x$-Geraden** (`3P` und `1P`), ergänzt um Einzelpunkte (`0P`).
+
+Normiere alle Geraden-Dichten durch $q^2$ und alle Punktdichten durch $q^3$. Nach Mittelung über die $S_3$-Symmetrie von $(A, B, C)$ genügen $19$ nicht-negative Variablen (jeweils mit ihren Symmetriemultiplizitäten):
+- Auf den leichten Ebenen: `3P`-Geraden $y_3$ (`LLL`, $\times 1$), $y_2$ (`LLH`, $\times 3$), $y_1$ (`LHH`, $\times 3$); `1P`-Geraden $q_{LL}$ (`LL`, $\times 3$), $q_{LH}$ (`LH/HL`, $\times 6$); `0P`-Punkte $u_{L3}$ ($\times 1$), $u_{L2}$ ($\times 3$), $u_{L1}$ ($\times 3$).
+- Auf der schweren Ebene $z^*$: `3P`-Geraden $z_3, z_2, z_1, z_0$ ($\times 1, 3, 3, 1$); `1P`-Geraden $r_{LL}, r_{LH}, r_{HH}$ ($\times 3, 6, 3$); `0P`-Punkte $u_{H3}, u_{H2}, u_{H1}, u_{H0}$ ($\times 1, 3, 3, 1$).
+
+Die notwendigen linearen Bedingungen (selbst unter der **optimistischen Bonferroni-Relaxation 1. Ordnung**, die Überlappungen zwischen `1P_ab`, `1P_ac`, `1P_bc` ignoriert!) lauten:
+1. **(LightMass):** $y_3 + 3 y_2 + 3 y_1 + 3 q_{LL} + 6 q_{LH} + u_{L3} + 3 u_{L2} + 3 u_{L1} \ge 1$ (Typ 0 auf den $q - 1$ leichten Ebenen).
+2. **(HeavyCov):** $z_2 + 2 z_1 + z_0 + \frac{2}{3} r_{LL} + \frac{10}{3} r_{LH} + \frac{8}{3} r_{HH} + u_{H2} + 2 u_{H1} + u_{H0} \ge \frac{2}{3}$ (jedes Heavy-Symbol in $A_H$ braucht eine volle Ebene auf $z^*$; entscheidend: `3*r_HH` liefert nur $\frac{8}{3} r_{HH}$ für $A_H$, weil `1P_bc(H, H)` ein Drittel seiner $x$-Gerade auf $A_L$ verliert!).
+3. **(Paarabdeckung `P_LL`, `P_LH`, `P_HH`):**
+   $$(y_3+z_3) + (y_2+z_2) + (q_{LL}+r_{LL}) \ge \tfrac{1}{9}, \quad (y_2+z_2) + (y_1+z_1) + (q_{LH}+r_{LH}) \ge \tfrac{2}{9}, \quad (y_1+z_1) + z_0 + r_{HH} \ge \tfrac{4}{9}.$$
+4. **(Tripelabdeckung `T_LLL`, `T_LLH`, `T_LHH`, `T_HHH` — Bonferroni 1. Ordnung):**
+   $$(q_{LL}+r_{LL}) + (u_{L3}+u_{H3}) \ge \tfrac{1}{27}, \qquad \tfrac{2}{3}(q_{LL}+r_{LL}) + \tfrac{2}{3}(q_{LH}+r_{LH}) + (u_{L2}+u_{H2}) \ge \tfrac{2}{27},$$
+   $$\tfrac{4}{3}(q_{LH}+r_{LH}) + \tfrac{1}{3} r_{HH} + (u_{L1}+u_{H1}) \ge \tfrac{4}{27}, \qquad 2 r_{HH} + u_{H0} \ge \tfrac{8}{27}.$$
+
+**Satz 4 (Exakte LP-Schranken `46/27` und `49/27` mit expliziten rationalen Dualzertifikaten — exakt in `Fraction`-Arithmetik primal + dual verifiziert).**
+1. **Allgemeines Light+Heavy-`x`-Geraden-LP (`LP1`):** Das exakte Minimum der Gesamtdichte $|R_3|/q^3$ unter (1)–(4) ist **`46/27 ≈ 1,703704`**.
+   *Explizites Dualzertifikat:* Multipliziere die $9$ Ungleichungen `(LightMass, HeavyCov, P_LL, P_LH, P_HH, T_LLL, T_LLH, T_LHH, T_HHH)` mit
+   $$y^* = \left(\tfrac{1}{2},\; \tfrac{3}{4},\; \tfrac{1}{4},\; \tfrac{5}{4},\; \tfrac{1}{4},\; \tfrac{1}{2},\; \tfrac{9}{8},\; \tfrac{3}{4},\; \tfrac{1}{4}\right) \ge 0.$$
+   Für jede der $19$ Variablen liegt die Dualsumme $\le$ ihrer Multiplizität (exakt nachprüfbar), und der Dualwert beträgt:
+   $$\frac{1}{2}\cdot 1 + \frac{3}{4}\cdot\frac{2}{3} + \frac{1}{4}\cdot\frac{1}{9} + \frac{5}{4}\cdot\frac{2}{9} + \frac{1}{4}\cdot\frac{4}{9} + \frac{1}{2}\cdot\frac{1}{27} + \frac{9}{8}\cdot\frac{2}{27} + \frac{3}{4}\cdot\frac{4}{27} + \frac{1}{4}\cdot\frac{8}{27} = \frac{46}{27}.$$
+   *(Ohne Heavy-Plane-`1P` (`r_LL = r_LH = r_HH = 0`) steigt das Minimum auf `16/9 = 48/27 ≈ 1,7778`; mit reinem `x`-Geraden-LP ohne `0P`-Punkte auf `139/81 ≈ 1,7160`.)*
+2. **Schranke `49/27` (ohne `3P`-Geraden in `LLL`/`LLH`):** Erzwingt man zusätzlich $y_3 = z_3 = y_2 = z_2 = 0$ (keine `3P`-Geraden mit $\ge 2$ Light-Symbolen), so steigt das exakte LP-Minimum auf **`49/27 ≈ 1,814815`**.
+   *Explizites 5-Term-Dualzertifikat (sogar unabhängig von `LightMass` und `HeavyCov`!):*
+   $$3\cdot P_{LL} + 2\cdot P_{LH} + 1\cdot P_{HH} + 3\cdot T_{LHH} + \tfrac{1}{2}\cdot T_{HHH} \implies 3\cdot\tfrac{1}{9} + 2\cdot\tfrac{2}{9} + 1\cdot\tfrac{4}{9} + 3\cdot\tfrac{4}{27} + \tfrac{1}{2}\cdot\tfrac{8}{27} = \frac{49}{27}.$$
+   *(Zusätzlich gilt bei $q = 9$ numerisch $m_{\mathrm{raw}}(9, 2) = 1323 = \frac{49}{27} \cdot 9^3$.)*
+
+### 4.2 Hierarchie der Konstanten & warum die LP-Schranken allgemeines `R_3` nicht ausschließen
+
+| Konstante | Wert | Gültigkeitsbereich / Bedeutung |
 | :---: | :---: | --- |
-| **P1** | **`[OFFEN / PRUEFPUNKT]`** | **Analytische Oberschranke für `exh(q)` und `dummy(q)` (Beweis von $m_{\mathrm{det}}(q) < 2q^3 - q^2$ für alle $q \ge 7$):** Satz 3 beweist `suff=0` für *alle* $q \ge 2$, und Satz 2 beweist $m_{\mathrm{raw}}(q, r^*) = \frac{19}{10}q^3 - \frac{4}{5}q^2 + O(q) < 2q^3 - q^2$ für alle $q \ge 5$. Um $m_{\mathrm{det}}(q) < 2q^3 - q^2$ *für alle Primzahlpotenzen $q \ge 7$* rein analytisch (ohne Rechenprüfung) zu beweisen, fehlt noch eine geschlossene obere Schranke $\mathrm{exh}(q) + \mathrm{dummy}(q) < \frac{1}{10}q^3 - \frac{1}{5}q^2$. **Numerisch geprüft** für alle $14$ Primzahlpotenzen $5 \le q \le 31$: stets `dummy = 0` und $\mathrm{exh}(q) \le 0{,}77\,q^2$, sodass $m_{\mathrm{det}}(q) < 2q^3 - q^2$ für alle getesteten $q \in \{7, 8, 9, 11, 13, 16, 17, 19, 23, 25, 27, 29, 31\}$ gilt (nur bei $q = 5$ ist $m_{\mathrm{det}}(5) = 227 > 225$). |
-| **P2** | **`[OFFEN / PRUEFPUNKT]`** | **Grenzfall $q \bmod 3$ und `dummy = 0` bei ungematchten Light-Slots:** Im Light-Plane-Matching (Step 2) entstehen bei großem $q$ ungematchte Light-Slots (`unm = 5..104` für $q = 7..31$). Bisher ist nur empirisch bis $q = 31$ belegt, dass für jeden ungematchten Slot $(z, y)$ noch mindestens $q$ unverbrauchte Tripel in $U$ mit dem festen Symbol der Ebene $z$ vorliegen (`dummy = 0`). Eine explizite untere Schranke auf die Fasergröße $|U \cap \{u = s\}| = \mathrm{AP}_3(q, r) \approx 0{,}5 q^2$ gegenüber höchstens $q$ ungematchten Slots je Symbol ($q \cdot q = q^2$) ist für den Fall hoher Unmatched-Raten noch zu prüfen bzw. durch ein explizites Matching-Lemma abzusichern. |
-| **P3** | **`[OFFEN / PRUEFPUNKT]`** | **Fremdprüfung von Satz 1, 2, 3 (Regel 2d) & Literaturprüfung (Regel 2c):** Die gesamte Kette (Übersetzungssatz 1 → Zählformel 2 → Korrektheit 3 → LP-Schranken 4) wurde vom Erzeuger erstellt und rechnerisch geprüft; eine unabhängige Prüfung durch ein unbeteiligtes Modell (Regel 2d) und eine Literaturprüfung zu 3D-biaffinen `k = q + 3`-Bauten (Regel 2c) stehen aus. |
+| **`45/27 = 5/3`** | `1,6667` | Reines Light+Heavy-Skelett (nur Typ 0 + Typ 1, ohne Typ 2 / Typ 3) |
+| **`46/27`** | `1,7037` | Exaktes `LP1`-Minimum für **alle** balancierten Light+Heavy-`x`-Geraden-Bauarten (unter optimistischer Bonferroni-1.-Ordnung) |
+| **`49/27`** | `1,8148` | Exaktes LP-Minimum ohne `3P` in `LLL`/`LLH` (und numerisch `m_raw(9, 2) = 1323` bei $q = 9$) |
+| **`19/10`** | `1,9000` | Tatsächliche Asymptotik der deterministischen zyklischen Differenzband-Bauart (`scripts/phase9_m3_construct.py`) |
+| **`2`** | `2,0000` | Elliptische Schranke `2 q^3 - q^2` (bisherige Tabellenbasis in `ca-tools` für `q = 7..13, 19`) |
 
----
-
-## 4. Abgrenzung gegen die LP-Schranken `46/27` und `49/27` (Einstieg für AP 3)
-
-Welche Bautypen werden durch die Konstanten **`46/27`** ($\approx 1{,}70370$, bei $q = 9$: $1242$) und **`49/27`** ($\approx 1{,}81481$, bei $q = 9$: $1323$) tatsächlich beschränkt — und wie lassen sie sich prinzipiell unterbieten?
-
-### 4.1 Das asymptotische Light+Heavy-`x`-Geraden-LP
-Betrachte eine beliebige (nicht notwendig zyklische!) Konstruktion in der **Light+Heavy-`x`-Geraden-Familie**:
-- Symmetrische Zerlegung in leichte Symbole ($|A_L|/q = |B_L|/q = |C_L|/q = \ell = \frac{1}{3}$, auf $q - 1$ leichten $z$-Ebenen) und schwere Symbole ($h = 1 - \ell = \frac{2}{3}$, gemeinsam auf einer schweren Ebene $z^*$).
-- Alle $3q^2$ Paare (`LL`: $\frac{1}{3}q^2$, `LH`: $\frac{4}{3}q^2$, `HH`: $\frac{4}{3}q^2$) werden durch volle `x`-Geraden vom Typ `3P` (je $3$ Paare, $0$ asymptotisches Tripel-Volumen) oder Typ `1P` (je $1$ Paar und $q$ Tripel, anteilig $\ell$ bzw. $h$ in der freien Koordinate) abgedeckt; übrige Tripel werden durch Einzelpunkte `0P` gedeckt (Union-Bound auf den $4$ Oktantenklassen `LLL`: $\frac{1}{27}$, `LLH`: $\frac{6}{27}$, `LHH`: $\frac{12}{27}$, `HHH`: $\frac{8}{27}$).
-- Auf den leichten Ebenen liegen insgesamt $\ge q^3$ Punkte (`light_pts >= 1`); auf $z^*$ decken die Punkte über alle drei Koordinaten gemittelt $\ge 3h = 2$ schwere Symbol-Vorkommen je Zelle (`heavy_sym >= 2`).
-
-**Satz 4 (Exakte Dual-Zertifikate für `46/27` und `49/27`).** *In diesem LP gilt:*
-1. **Allgemeine `3P + 1P + 0P`-Familie (inkl. `1P_LH`):** Das exakte Minimum über alle nichtnegativen Dichten $(L_{3*}, L_{1*}, L_{0*}, H_{3*}, H_{1*}, H_{0*})$ ist **$\frac{46}{27} \approx 1{,}703704$**.
-   *Exaktes Dual-Zertifikat* (alle $19$ Variablen erfüllen $(A^\top y)_j \le 1$, Zielfunktionswert $b^\top y = \frac{184}{108} = \frac{46}{27}$):
-   $$y = \Big(\underbrace{\tfrac{1}{12}}_{\text{pair}_{LL}},\; \underbrace{\tfrac{5}{24}}_{\text{pair}_{LH}},\; \underbrace{\tfrac{1}{12}}_{\text{pair}_{HH}},\; \underbrace{\tfrac{1}{2}}_{\text{light\_pts}},\; \underbrace{\tfrac{1}{4}}_{\text{heavy\_sym}},\; \underbrace{\tfrac{1}{2}}_{\text{trip}_{LLL}},\; \underbrace{\tfrac{3}{8}}_{\text{trip}_{LLH}},\; \underbrace{\tfrac{1}{4}}_{\text{trip}_{LHH}},\; \underbrace{\tfrac{1}{4}}_{\text{trip}_{HHH}}\Big).$$
-2. **`1P_LH`-freie Unterfamilie (ohne gemischte `1P_LH`-Geraden):** Schließt man `1P_LH`-Geraden aus (`L_1LH = H_1LH = 0`), steigt das exakte Minimum auf **$\frac{49}{27} \approx 1{,}814815$**.
-   *Exaktes Dual-Zertifikat* (benötigt nicht einmal `light_pts` oder `heavy_sym`; alle $17$ erlaubten Variablen erfüllen $(A^\top y)_j \le 1$, $b^\top y = \frac{3+12+12+6+12+4}{27} = \frac{49}{27}$):
-   $$y = \Big(\underbrace{\tfrac{1}{3}}_{\text{pair}_{LL}},\; \underbrace{\tfrac{1}{3}}_{\text{pair}_{LH}},\; \underbrace{\tfrac{1}{3}}_{\text{pair}_{HH}},\; \underbrace{0}_{\text{light}},\; \underbrace{0}_{\text{heavy}},\; \underbrace{0}_{\text{trip}_{LLL}},\; \underbrace{1}_{\text{trip}_{LLH}},\; \underbrace{1}_{\text{trip}_{LHH}},\; \underbrace{\tfrac{1}{2}}_{\text{trip}_{HHH}}\Big).$$
-3. **Abhängigkeit von $\ell$:** Für jede symmetrische Light+Heavy-Zerlegung mit $3\ell \le 1$ (höchstens $q - 1$ leichte Ebenen) erzwingen bereits `Typ 0` auf den nicht-schweren Ebenen und `Typ 1` auf $z^*$ die triviale Skelett-Schranke $m / q^3 \ge 1 + (1 - \ell) = 2 - \ell \ge \frac{5}{3} = \frac{45}{27}$ (für $\ell < \frac{8}{27}$ bereits $> \frac{46}{27}$).
-
-### 4.2 Reichweite der Schranken & Ausbruchswege (Übergang zu AP 3)
-Die Schranken `46/27` und `49/27` gelten **nicht** für allgemeine Vertreterlisten $R_3 \subseteq \mathbb{F}_q^6$, sondern **ausschließlich** unter zwei starken strukturellen Annahmen:
-1. **Horizontale-Ebenen-Skelett für `Typ 1`:** Jedes Symbol besitzt eine horizontale $z$-Ebene (erzwingt bereits $m \ge \frac{5}{3}q^3 = \frac{45}{27}q^3$). Um unter $\frac{45}{27}$ bzw. $\frac{46}{27}$ zu gelangen, müssten `Typ 1`-Fasern echte nicht-horizontale 3D-Linien-Blocking-Sets sein (z. B. 2D-Baer-Zylinder der Größe $q^2 + q^{3/2}$).
-2. **`x`-Geraden-Skelett für `Typ 2`:** Jedes Symbolpaar wird über eine volle $x$-Gerade abgedeckt. Ersetzt man auf den $q - 1$ leichten Ebenen die `x`-Geraden durch **2D-Baer-Gitter** (sodass ein Paar $(a, b)$ auf Ebene $z_a$ über eine 2D-Baer-Unterebene der Größe $q + \sqrt{q}$ statt einer $x$-Geraden abgedeckt wird), ist das `x`-Geraden-LP (`49/27` und die zyklische `19/10`-Konstruktion) **ausgehebelt** — genau dies untersucht AP 3 in [`M3_BAER_PILOT_REPORT.md`](M3_BAER_PILOT_REPORT.md).
+**Abgrenzung gegen allgemeines `R_3` (Brücke zu AP 3):**
+1. **Ruzsa–Szemerédi-Barriere innerhalb der `3P + 1P + 0P`-Familie:** `LP1` (`46/27`) unterschätzt den wahren `|U|`-Term massiv, weil Bonferroni-1.-Ordnung zulässt, dass `1P`-Geraden disjunkte Tripelmengen überdecken. Für jedes echte partielle lateinische Quadrat $T$ der Dichte $\rho = |T|/q^2 > 0$ erzwingt jedoch der **(6, 3)-Satz von Ruzsa–Szemerédi (1978)** zwingend $|U(T)| = \Omega_\rho(q^3)$ — selbst ohne jede Typ-1-Bedingung (rechnerischer SA-Check bei $q = 9$: bestes allgemeines partielles lateinisches Quadrat erreicht `m_raw = 1318`, nur `-5` unter `1323`, weit über `1242`).
+2. **Was die LP-Schranken *nicht* beschränken:** Weder `46/27` noch `49/27` gilt für allgemeine `R_3 \subset \mathbb{F}_q^6`, die **nicht** auf vollen horizontalen Ebenen (Typ 1) und vollen $x$-Geraden (Typ 2) beruhen. Insbesondere motiviert das den in [`M3_BAER_PILOT_REPORT.md`](M3_BAER_PILOT_REPORT.md) (AP 3) getesteten 3D-Baer-Pilot für Quadratordnungen $q = s^2$, der jedoch für alle vier direkten 3D-Baer-/$\mathbb{F}_s$-Architekturen eigene strukturelle 3D-Obstruktionen (`m = 1485` bei $q = 9$, `8176` bei $q = 16$, asymptotisch $2 q^3 + \Theta(q^{5/2})$) aufzeigt.
