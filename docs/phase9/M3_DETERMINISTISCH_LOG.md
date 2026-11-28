@@ -80,3 +80,38 @@ Warmstart aus den deterministischen Listen (`R3_q8_fullbg3_det_m945.txt`, `R3_q9
 | `25` | `28` | `29.618` (`det`) | `740.450` > `531.437` | `18.511.250` > `14.348.903` | `462.781.250` > `387.420.485` | `< 2q^3-q^2`, über Tabelle (`OA`-Fusion) |
 
 Insgesamt liegen **20 Zellen** (`t = 4..6`, `q = 7, 8, 9, 11, 13, 16, 19`) unter `ca-tools @ ff6cf96` (`6` davon dual-verifiziert in `/tmp/phase9_m3/`, `14` Vorhersage). Keine Außenwirkung; Drittprüfung & Literaturprüfung stehen aus.
+
+## 5. Nachtrag AP 1 (Option A): Dual-Verifikation `q = 11` & `q = 13` (`t = 4`), Bonus `check_m3=0` (`q = 16, 17`) & Abgleich `ca-tools @ b689967`
+
+Datum: 2026-11-28 UTC (Branch `exp/phase9-biaffine-3d`, Basis `0d6e9f5`, PR `#54`). Verifier unverändert (`sha256sum -c verifiers/SHA256SUMS` `3/3 OK`, `git diff main -- verifiers/` leer, `python3 verifiers/test_verifiers.py` `23/23 PASS`). Alle ausgerollten Arrays liegen ausschließlich unter `/tmp/phase9_m3/` (nicht committet).
+
+### 5.1 Dual-Verifikation `q = 11` & `q = 13` (`t = 4`, 2× byte-identisch, POS & NEG)
+
+| `q` | `k` | `m` | Seed (`data/phase9_m3/`, 2× byte-gleich) | Ausgerolltes Array (`/tmp/phase9_m3/`, 2× byte-gleich) | Größe | `ca_verify` POS / NEG | `verify_independent.py` POS / NEG | `ca-tools @ b689967` (`Delta`) | Belegart |
+| :---: | :---: | :---: | --- | --- | :---: | :---: | :---: | :---: | --- |
+| `11` | `14` | `2.454` | `R3_q11_fullbg3_det_m2454.txt` (`f95ed1c305f6cb399f7697c2adedb7e6a2a864e9e7022ef3630240606f956ab5`, `0,712 s`) | `CA(26994; 4, 14, 11)` (`ee039374c0112e3febba1ec98367cc6307642da8f7e45a8fd133734489866767`, Lift `0,540 s` / Repro `0,298 s`) | `790.185 B` (`0,7536 MiB`) | `rc=0 (0,101 s)` / `rc=1 (0,091 s, 81/1001 Lücken)` | `rc=0 (7,362 s)` / `rc=1 (7,406 s, 81/1001 Lücken)` | `27.544 (k=14)` (**`-550`**) | **`Dual-Verify PASS`** (`Regel-2d offen`) |
+| `13` | `16` | `4.088` | `R3_q13_fullbg3_det_m4088.txt` (`fc2ecb6cbab5699670212d37c0ef968c75697dbf4a558f6c31d8867c091b113b`, `1,471 s`) | `CA(53144; 4, 16, 13)` (`548f15db41f34486fc28bea1258691f33ddb717dfeb80d3352935086195acd07`, Lift `1,064 s` / Repro `0,462 s`) | `1.896.856 B` (`1,8090 MiB`) | `rc=0 (0,283 s)` / `rc=1 (0,470 s, 246/1820 Lücken)` | `rc=0 (34,404 s)` / `rc=1 (40,494 s, 246/1820 Lücken)` | `54.925 (k=21)` (**`-1.781`**) | **`Dual-Verify PASS`** (`Regel-2d offen`) |
+
+*(Negativkontrolle jeweils durch Entfernen der letzten Zeile `N -> N - 1`; beide Verifier liefern exakt übereinstimmende Lückenzahlen `81` bzw. `246` und `rc = 1`.)*
+
+### 5.2 Bonus `check_m3=0` (`q = 16` und `q = 17`, ohne CA-Rollout)
+Da `q = 11` (`~16 s`) und `q = 13` (`~78 s`) deutlich unter `2 min` liefen, wurde zusätzlich `check_m3(full-bg3)` für `q = 16` und `q = 17` exakt geprüft:
+- `q = 16`: `r = 14, csh = 10, m = 7.653` (`1,8684 q^3`, `exh = 37`), `suff = 0`, **`check_m3(full-bg3) = 0`** (`construct 0,69 s`, `check_m3 1,73 s`).
+- `q = 17`: `r = 15, csh = 11, m = 9.182` (`1,8689 q^3`, `exh = 19`), `suff = 0`, **`check_m3(full-bg3) = 0`** (`construct 0,86 s`, `check_m3 2,42 s`).
+
+### 5.3 Read-only `ca-tools @ b689967`-Abgleich (`q = 7, 8, 9, 11, 13` [+ `16, 17, 19`], `t = 4, 5, 6`)
+Abgleich ausschließlich lesend gegen `chrispbsmolen/ca-tools @ b68996787557cb79153f2d0ca9640aa821c57e52` (`2026-11-28T02:10:53Z`; `table/ca_frame.csv`, `table/ca_table.csv.gz`, `table/derived.csv`, `0` offene PRs, monotone Schranke über alle Zeilen mit `t' >= t, v' >= v, k' >= k`):
+
+| `q` | `k` | `m_det` (`m_solver`) | `t = 4`: `N_det` (`N_solv`) vs. `b689967` (`Delta_det`) | `t = 5`: `N_det` (`N_solv`) vs. `b689967` (`Delta_det`) | `t = 6`: `N_det` (`N_solv`) vs. `b689967` (`Delta_det`) | Belegart je Stärke (`t=4 / t=5 / t=6`) |
+| :---: | :---: | :---: | :---: | :---: | :---: | --- |
+| `7` | `10` | `631` (`620`) | `4.417` (`4.340`) < `4.459` (`-42` / `-119`) | `30.919` (`30.380`) < `31.213` (`-294` / `-833`) | `216.433` (`212.660`) < `218.491` (`-2.058` / `-5.831`) | `det`: `check_m3=0` / `check_m3=0` / `check_m3=0` (`solv m=620`: `Dual-Verify PASS` `t=4,5,6`) |
+| `8` | `11` | `945` (`930`) | `7.560` (`7.440`) < `7.680` (`-120` / `-240`; lokal `CA_7056`) | `60.480` (`59.520`) < `61.440` (`-960` / `-1.920`) | `483.840` (`476.160`) < `491.520` (`-7.680` / `-15.360`) | `det`: `check_m3=0` (`solv m=930`: `Dual-Verify PASS` `t=4,5`, `check_m3=0` `t=6`) |
+| `9` | `12` | `1.332` (`1.324`) | `11.988` (`11.916`) < `12.393` (`-405` / `-477`) | `107.892` (`107.244`) < `111.537` (`-3.645` / `-4.293`) | `971.028` (`965.196`) < `1.003.833` (`-32.805` / `-38.637`) | `det`: `check_m3=0` (`solv m=1324`: `Dual-Verify PASS` `t=4`, `check_m3=0` `t=5,6`) |
+| `11` | `14` | **`2.454`** | **`26.994` < `27.544`** (**`-550`**) | `296.934` < `307.461` (`-10.527`) | `3.266.274` < `3.528.481` (`-262.207`) | **`Dual-Verify PASS` (`t=4`)** / `check_m3=0` (`t=5,6`) |
+| `13` | `16` | **`4.088`** | **`53.144` < `54.925`** (**`-1.781`**) | `690.872` < `714.025` (`-23.153`) | `8.981.336` < `9.651.421` (`-670.085`) | **`Dual-Verify PASS` (`t=4`)** / `check_m3=0` (`t=5,6`) |
+| `16` | `19` | `7.653` | `122.448` > `113.866` (`+8.582`) | `1.959.168` < `2.031.616` (`-72.448`) | `31.346.688` < `33.554.416` (`-2.207.728`) | `check_m3=0` (`t=4..6`; `t=5,6` kleiner, Vorhersage) |
+| `17` | `20` | `9.182` | `156.094` > `130.317` (`+25.777`) | `2.653.598` > `2.476.095` (`+177.503`) | `45.111.166` < `47.045.877` (`-1.934.711`) | `check_m3=0` (`t=4..6`; `t=6` kleiner, Vorhersage) |
+| `19` | `22` | `12.928` | `245.632` < `253.783` (`-8.151`) | `4.667.008` < `4.945.339` (`-278.331`) | `88.673.152` < `94.091.743` (`-5.418.591`) | `suff=0` (`t=4..6`; Vorhersage) |
+
+Alle `15/15` Zielzellen für `q in {7, 8, 9, 11, 13}, t in {4, 5, 6}` (plus `6` weitere Zellen bei `q = 16, 17, 19`, insgesamt **`21` Zellen**) liegen strikt unter `ca-tools @ b689967` (`8` davon in `/tmp/phase9_m3/` vollständig dual-verifiziert: `q=7 t=4,5,6`, `q=8 t=4,5`, `q=9 t=4`, `q=11 t=4`, `q=13 t=4`; `Regel-2d offen`, keine Ablage in `results/`, keine Außenwirkung).
+
