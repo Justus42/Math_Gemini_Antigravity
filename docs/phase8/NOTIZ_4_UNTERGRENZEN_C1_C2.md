@@ -72,7 +72,7 @@ Für jedes `a \in H_A` fixieren wir auf `d(a)` je einen Basisvertreter pro Punkt
    $$|R| + \Delta_A \ge p^2 + p F - S.$$
    Addition mit `|R| - \Delta_A \ge p h_a + (p - h_a)\mathrm{bl}` aus `(1)` eliminiert `\Delta_A` und liefert `|R| \ge e_{3a}`; symmetrisch mit `\Delta_B` folgt `|R| \ge e_{3b}`.
 
-6. **Schranken `e_{5a}, e_{5b}` (Kopplung über Blokhuis–Brouwer / Bartoli–Héger–Kiss–Takáts Lemma 3.12):** Zerlege `\Delta_B = \Delta_B^{(H)} + \Delta_B^{(N)}` nach `a \in H_A` bzw. `a \notin H_A`; in `(2)` werden nur Vertreter mit `a \in H_A` benötigt, also `\Delta_A + \Delta_B^{(H)} \ge h_a h_b - S`.
+6. **Schranken `e_{5a}, e_{5b}` (Kopplung über Blokhuis–Brouwer / Bartoli–Héger–Kiss–Takáts Result 3.11):** Zerlege `\Delta_B = \Delta_B^{(H)} + \Delta_B^{(N)}` nach `a \in H_A` bzw. `a \notin H_A`; in `(2)` werden nur Vertreter mit `a \in H_A` benötigt, also `\Delta_A + \Delta_B^{(H)} \ge h_a h_b - S`.
    Für jedes `a \notin H_A` sei `k_a` die Zahl der Waagerechten `d \in D_B`, die `A_a` meidet. Dann trifft `A_a` mindestens `u_B - k_a` Waagerechte, also gilt nach Blokhuis–Brouwer (1986) / Lemma J
    $$|R_a| \ge |A_a| \ge p + (u_B - k_a) - 1 = p + u_B - 1 - k_a.$$
    (Auch im Randfall `u_B = k_a = 0` gilt `|A_a| \ge p > p - 1`.) Auf jeder gemiedenen Waagerechten `d \in D_B` wähle ein `b_d \in B(d)`; das Paar `(a, b_d)` muss außerhalb von `d = d(b_d)` liegen und zählt in `\Delta_B^{(N)}`. Folglich `\Delta_B^{(N)} \ge \sum_{a \notin H_A} k_a`, und damit
@@ -120,7 +120,7 @@ Sei `E_{\mathrm{akt}} := |R| - q^2` der Überschuss über `q^2`. Wie in Satz C.1
    Insbesondere `E_{\mathrm{akt}} \ge c_{1X}` und symmetrisch `E_{\mathrm{akt}} \ge c_{1Y}`.
 3. **Kopplung über `h_A` disjunkte volle Waagerechte (`c_{2X}`):** Wähle aus jeder Waagerechten `d \in D_A` ein festes Symbol `a_d \in H_A` mit `d(a_d) = d` (insgesamt `h_A` Symbole). Für jedes `b`-Symbol `b \in \{0, \dots, q-1\}` sei `r_b` die Anzahl der Waagerechten `d \in D_A`, die `B_b` meidet.
    - Einerseits muss jedes Paar `(a_d, b)` mit gemiedenem `d` außerhalb von `d = d(a_d)` auftreten und liefert einen Extravertreter von `a_d`; verschiedene `(a_d, b)` liefern verschiedene Vertreter, also `\sum_{b=0}^{q-1} r_b \le \Delta_A`.
-   - Andererseits trifft `B_b` mindestens `h_A - r_b` Waagerechte. Nach Blokhuis–Brouwer (1986) / Bartoli–Héger–Kiss–Takáts (2017) Lemma 3.12 (Lemma J) folgt `(|R_b| - q) + r_b \ge h_A - 1` (gilt auch für `h_A = 0` trivial wegen `|R_b| \ge q > q - 1`).
+   - Andererseits trifft `B_b` mindestens `h_A - r_b` Waagerechte. Nach Blokhuis–Brouwer (1986) / Bartoli–Héger–Kiss–Takáts (2017) Result 3.11 (Lemma J) folgt `(|R_b| - q) + r_b \ge h_A - 1` (gilt auch für `h_A = 0` trivial wegen `|R_b| \ge q > q - 1`).
    - Summieren über **alle** `q` Symbole `b` liefert `E_{\mathrm{akt}} + \Delta_A \ge (h_A - 1)q`.
    - Summieren von `|R_b| - q \ge n` (Bruen) für `b \notin H_B` und `(|R_b| - q) + r_b \ge h_A - 1` für `b \in H_B` liefert `E_{\mathrm{akt}} + \Delta_A \ge (q - k_B)n + (h_A - 1)k_B`.
    - Zusammen also `E_{\mathrm{akt}} + \Delta_A \ge c_{2X}`. Addition mit `(3)` (`E_{\mathrm{akt}} - \Delta_A \ge c_{1X}`) kürzt `\Delta_A` heraus und gibt `2 E_{\mathrm{akt}} \ge c_{1X} + c_{2X}`, also `E_{\mathrm{akt}} \ge e_X`. Symmetrisch folgt `E_{\mathrm{akt}} \ge e_Y`. `\square`
@@ -192,4 +192,4 @@ In allen Fällen ist `E \ge q n - \frac{9}{8} q` (Fall 1: `q n - q \ge q n - \fr
 2. R. E. Jamison (1977): *Covering finite fields with cosets of subspaces*, J. Combin. Theory Ser. A 22, 253–266; A. E. Brouwer, A. Schrijver (1978): *The blocking number of an affine space*, J. Combin. Theory Ser. A 24, 251–253.
 3. A. Blokhuis, A. E. Brouwer (1986): *Blocking sets in Desarguesian projective planes*, Bull. London Math. Soc. 18(2), 132–134.
 4. A. Blokhuis (1994): *On the size of a blocking set in `PG(2, p)`*, Combinatorica 14(1), 111–114.
-5. D. Bartoli, T. Héger, G. Kiss, M. Takáts (2017): *On the metric dimension of affine planes, biaffine planes and generalized quadrangles*, arXiv:1706.06583, Lemma 3.12 (erschienen in *Australas. J. Combin.* 72 (2018), 226–248).
+5. D. Bartoli, T. Héger, G. Kiss, M. Takáts (2017): *On the metric dimension of affine planes, biaffine planes and generalized quadrangles*, arXiv:1706.06583, Result 3.11 und Lemma 3.12 (erschienen in *Australas. J. Combin.* 72 (2018), 226–248).
