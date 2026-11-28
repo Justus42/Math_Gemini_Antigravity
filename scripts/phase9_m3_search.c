@@ -2,7 +2,7 @@
  * Phase 9: Fast O(1)-incremental C solver for the Biaffine 3D Model M_3(R_3) (k = q + 3).
  *
  * Supports:
- *   - Prime powers q in {3, 4, 5, 7, 8, 9} with GF(q) tables matching GeneralGF(q)
+ *   - Prime powers q in {3, 4, 5, 7, 8, 9, 11, 13} with GF(q) tables matching GeneralGF(q)
  *     in scripts/gen_general_tqv.py.
  *   - Modes: tspec (3 <= t <= q) and full-bg3 (all q^2 directions D_1 and q^2 normals N_2).
  *   - Exact incremental counting for Typ 0, Typ 1, Typ 2, Typ 3 with cached per-row projections.
@@ -24,10 +24,10 @@
 #include <string.h>
 #include <time.h>
 
-#define MAX_Q 9
+#define MAX_Q 13
 #define MAX_Q2 (MAX_Q * MAX_Q)
 #define MAX_Q3 (MAX_Q * MAX_Q * MAX_Q)
-#define MAX_M 1536
+#define MAX_M 4200
 #define MAX_D MAX_Q2
 #define MAX_N MAX_Q2
 #define MAX_INTER (MAX_Q3 + 3 * MAX_D * MAX_Q * MAX_Q2 + 3 * MAX_N * MAX_Q2 * MAX_Q + MAX_Q3)
@@ -94,7 +94,7 @@ typedef struct {
 static int gf_init(GF *gf, int q) {
     memset(gf, 0, sizeof(*gf));
     gf->q = q;
-    if (q == 3 || q == 5 || q == 7) {
+    if (q == 3 || q == 5 || q == 7 || q == 11 || q == 13) {
         for (int a = 0; a < q; a++) {
             for (int b = 0; b < q; b++) {
                 gf->add[a][b] = (uint8_t)((a + b) % q);
@@ -1017,6 +1017,8 @@ static int run_self_test(void) {
         {5, MODE_TSPEC, 4, 180, 2000, INIT_BASE},
         {5, MODE_FULL_BG3, 4, 200, 2000, INIT_HEAVY},
         {7, MODE_FULL_BG3, 4, 636, 400, INIT_HEAVY},
+        {11, MODE_FULL_BG3, 4, 2454, 200, INIT_HEAVY},
+        {13, MODE_FULL_BG3, 4, 4088, 200, INIT_HEAVY},
     };
     int n_cases = (int)(sizeof(cases) / sizeof(cases[0]));
     State *S = calloc(1, sizeof(State));
