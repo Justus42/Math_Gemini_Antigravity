@@ -156,7 +156,7 @@ Betrachte den bipartiten Graphen $G = (H_a, \mathbb{F}_q; E)$ mit Kante $(a, p) 
 - $\deg_G(a) = q \ge h_b$ für alle $a \in H_a \setminus S$;
 - $\deg_G(a_e) \ge |A_0(e)| = \frac{q+1}{2} \gt \frac{q-1}{2} - j \ge h_b$ für alle $e \in S$.
 
-Also hat $G$ Minimalgrad $\delta(G) \ge h_b$. Spalte jeden Knoten $x \in H_a \cup \mathbb{F}_q$ in einen Hauptknoten $x_0$ vom Grad exakt $h_b$ und weitere Restknoten vom Grad $\le h_b$ auf (die inzidenten Kanten von $x$ werden beliebig partitioniert). Der entstehende bipartite Graph $G'$ hat Maximalgrad $\Delta(G') = h_b$. Nach dem Kantenfärbungssatz von König (1916) besitzt $G'$ eine zulässige Kantenfärbung $c: E(G') \to H_b$ mit $h_b$ Farben.
+Also hat $G$ Minimalgrad $\delta(G) \ge h_b$. Spalte jeden Knoten $x \in H_a \cup \mathbb{F}_q$ in einen Hauptknoten $x_0$ vom Grad exakt $h_b$ und weitere Restknoten vom Grad $\le h_b$ auf (die inzidenten Kanten von $x$ werden beliebig partitioniert). Der entstehende bipartite Graph $G'$ hat Maximalgrad $\Delta(G') = h_b$. Nach dem Kantenfärbungssatz von König (D. Kőnig, „Über Graphen und ihre Anwendung auf Determinantentheorie und Mengenlehre“, *Math. Ann.* 77 (1916), 453–465; Original nicht gelesen, Aussage sekundär geprüft, siehe `docs/LITERATURE_CHECK_PHASE8.md` §3) besitzt $G'$ eine zulässige Kantenfärbung $c: E(G') \to H_b$ mit $h_b$ Farben.
 
 Lege auf $d = 0$ für jede Kante $(a, p) \in E(G)$ den Vertreter $(p, 0, a, c(a, p))$ ab.
 - Da jeder Hauptknoten $p_0$ Grad $h_b$ hat und alle $h_b$ inzidenten Kanten verschiedene Farben tragen, kommt am Punkt $(p, 0)$ jedes $b \in H_b$ mindestens einmal vor.
